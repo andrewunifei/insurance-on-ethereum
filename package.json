@@ -1,0 +1,32 @@
+{
+  "name": "insurance-on-ethereum",
+  "version": "1.0.0",
+  "description": "Crop Insurance on Ethereum Blockchain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrewunifei/insurance-on-ethereum.git"
+  },
+  "keywords": [
+    "Ethereum",
+    "Insurance",
+    "Blockchain",
+    "Automation"
+  ],
+  "author": "Andrew E O",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andrewunifei/insurance-on-ethereum/issues"
+  },
+  "homepage": "https://github.com/andrewunifei/insurance-on-ethereum#readme",
+  "devDependencies": {
+    "@chainlink/contracts": "0.8.0",
+    "hardhat": "2.19.4"
+  },
+  "dependencies": {
+    "@chainlink/env-enc": "1.0.5"
+  }
+}
