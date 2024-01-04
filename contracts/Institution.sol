@@ -64,7 +64,7 @@ contract Institution{
         require(_reparationValue <= address(this).balance, "Sem fundos suficiente para financiar o contrato");
 
         contracts[_farmer].push(address(new AutomatedFunctionsConsumer{
-            value: _reparationValue ether
+            value: _reparationValue
         }(
             _deployer,
             _farmer,

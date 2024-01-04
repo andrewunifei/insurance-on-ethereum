@@ -1,4 +1,4 @@
-const { ethers } = require("Hardhat")
+const { ethers } = require("hardhat")
 
 async function createAPI(deployer){
     // Compile

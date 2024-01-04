@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import {Functions, FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol";
+import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol";
+import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 import {Upkeep} from "./Upkeep.sol";
@@ -28,7 +29,7 @@ interface IAutomationRegistryConsumer {
  * @notice Se os dados estão fora dos índices pré-definidos a função [INSERIR NOME DA FUNÇÃO] é disparada
  */
 contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
-  using Functions for Functions.Request;
+  using FunctionsRequest for FunctionsRequest.Request;
 
   bytes public requestCBOR; // Concise Binary Object Representation para transferência de dados
   bytes32 public latestRequestId;
@@ -44,22 +45,44 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
 
   // Configuracao da automacao
   IAutomationRegistryConsumer public immutable registry;
-  Upkeep public s_upkeep;
+  Upkeep public i_upkeep;
   uint256 upkeepID;
+  bytes public request;
+  uint32 public gasLimit;
+  bytes32 public donID;
+  bytes32 public s_lastRequestId;
+  bytes public s_lastResponse;
+  bytes public s_lastError;
+  uint256 public s_upkeepCounter;
+  uint256 public s_requestCounter;
+  uint256 public s_responseCounter;
 
   address public institution;
   address public farmer;
   address public upkeepContract;
 
+  error UnexpectedRequestID(bytes32 requestId);
+
+  event Response(bytes32 indexed requestId, bytes response, bytes err);
+  event RequestRevertedWithErrorMsg(string reason);
+  event RequestRevertedWithoutErrorMsg(bytes data);
+
   // Valores para regras de negócio
   uint256 reparationValue;
-  uint256 humidityLimit;
+  int256 humidityLimit;
   uint256 public sampleMaxSize;
   string[] public sampleStorage;
   string private computationJS; // calculo da computacao do indice
 
   // Variável para armazenar a média das amostras
   uint256 private mean;
+
+  // Erro retornado se um agente não permitido chamar performUpkeep
+  error NotAllowedCaller(
+        address caller,
+        address owner,
+        address automationRegistry
+    );
 
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
   event upkeepRegistered(uint256 indexed upkeepID);
@@ -77,7 +100,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Construtor do contrato
    *
    * @param _humidityLimit O índice limite de comparação
-   * @param oracle O contrato do oráculo interface do Chainlink Functions
+   * @param router O contrato do oráculo interface do Chainlink Functions
    * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos (DON) para cobranças de requisições
    * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
    * @param _updateInterval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
@@ -86,7 +109,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     address _deployer,
     address _farmer,
     int256 _humidityLimit,
-    address oracle,
+    address router,
     uint64 _subscriptionId,
     uint32 _fulfillGasLimit,
     uint256 _updateInterval,
@@ -97,7 +120,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     // Se for necessário mudar também é preciso importar as bibliotecas desses tipo de dados
     address sepoliaLINKAddress, // Aqui para LinkTokenInterface
     address sepoliaRegistrarAddress // Aqui para AutomationRegistrarInterface
-  ) FunctionsClient(oracle) ConfirmedOwner(_deployer) public payable {
+  ) FunctionsClient(router) ConfirmedOwner(_deployer) public payable {
     institution = msg.sender;
     farmer = _farmer;
     humidityLimit = _humidityLimit; 
@@ -106,8 +129,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     updateInterval = _updateInterval;
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
-    registry = _registry;
-    i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress);
+    registry = _registry; // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS
+    i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS
 
     lastUpkeepTimeStamp = block.timestamp;
   }
@@ -116,14 +139,14 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Registrando um novo upkeep
    */
 
-  function registerUpkeep(params) public {
-    upkeepID = i_upkeep.register(params);
+  // function registerUpkeep(params) public {
+  //   upkeepID = i_upkeep.register(params);
 
-    emit upkeepRegistered(upkeepID);
-  }
+  //   emit upkeepRegistered(upkeepID);
+  // }
 
   /**
-   * @notice Gera um novo objeto Functions.Request codificado em CBOR
+   * @notice Gera um novo objeto FunctionsRequest.Request codificado em CBOR
    * @notice O modificador `pure` permite que o objeto CBOR seja gerado fora da blockchain, dessa forma a função se torna mais economica
    * 
    * @param source Código fonte em JavaScript para requisição
@@ -132,30 +155,30 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    */
   function generateRequest(
     string calldata source,
-    bytes calldata secrets,
+    bytes calldata secrets, 
     string[] calldata args
   ) public pure returns (bytes memory) {
-    Functions.Request memory req;
-    req.initializeRequest(Functions.Location.Inline, Functions.CodeLanguage.JavaScript, source);
+    FunctionsRequest.Request memory req;
+    req.initializeRequest(FunctionsRequest.Location.Inline, FunctionsRequest.CodeLanguage.JavaScript, source);
     if (secrets.length > 0) {
-      req.addRemoteSecrets(secrets);
+      req.addSecretsReference(secrets);
     }
 
     if (args.length > 0) {
-      req.addArgs(args);
+      req.setArgs(args);
     }
 
     return req.encodeCBOR();
   }
 
   /**
-   * @notice Muda o estado do contrato para armazenar o objeto Functions.Request codificado em CBOR
+   * @notice Muda o estado do contrato para armazenar o objeto FunctionsRequest.Request codificado em CBOR
    * @notice Essas informações são enviados para a `performUpkeep` quando esta é chamada
    * 
    * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos para cobranças de requisições
    * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
    * @param _updateInterval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
-   * @param newRequestCBOR Bytes representando o objeto Functions.Request codificado em CBOR
+   * @param newRequestCBOR Bytes representando o objeto FunctionsRequest.Request codificado em CBOR
    */
   function setRequest(
     uint64 _subscriptionId,
@@ -185,26 +208,56 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     lastUpkeepTimeStamp = block.timestamp;
     upkeepCounter = upkeepCounter + 1;
 
-    // se a quantidade de amostras não é o suficiente, coleta nova amostra 
+    // Se a quantidade de amostras não é o suficiente, coleta nova amostra:
     if(sampleMaxSize > sampleStorage.length){
-      bytes32 requestId = s_oracle.sendRequest(subscriptionId, requestCBOR, fulfillGasLimit);
-
-      s_pendingRequests[requestId] = s_oracle.getRegistry();
-      emit RequestSent(requestId);
-      latestRequestId = requestId;
+      s_upkeepCounter = s_upkeepCounter + 1;
+      try 
+        i_router.sendRequest(
+          subscriptionId, 
+          requestCBOR,
+          FunctionsRequest.REQUEST_DATA_VERSION,
+          gasLimit,
+          donID
+        )
+      returns (bytes32 requestId) {
+        s_lastRequestId = requestId;
+        s_requestCounter = s_requestCounter + 1;
+        emit RequestSent(requestId);
+      } catch Error(string memory reason) {
+        emit RequestRevertedWithErrorMsg(reason);
+      } catch (bytes memory data) {
+        emit RequestRevertedWithoutErrorMsg(data);
+      }
     }
-    else{ // se a quantidade de amostras é o suficiente entao:
+    // Se a quantidade de amostras é o suficiente:
+    else{ 
       require(upkeepID != 0, "Upkeep not registered");
 
       controlFlag = 1;
 
-      bytes memory encodedCBOR = generateRequest(computationJS, "0x", sampleStorage);
-  
-      bytes32 requestId = s_oracle.sendRequest(subscriptionId, encodedCBOR, fulfillGasLimit);
+      FunctionsRequest.Request memory req;
+      req.initializeRequest(FunctionsRequest.Location.Inline, FunctionsRequest.CodeLanguage.JavaScript, computationJS);
+      req.setArgs(sampleStorage);
+      bytes memory encodedCBOR = req.encodeCBOR();
 
-      s_pendingRequests[requestId] = s_oracle.getRegistry();
-      emit RequestSent(requestId);
-      latestRequestId = requestId;
+      s_upkeepCounter = s_upkeepCounter + 1;
+      try 
+        i_router.sendRequest(
+          subscriptionId, 
+          requestCBOR,
+          FunctionsRequest.REQUEST_DATA_VERSION,
+          gasLimit,
+          donID
+        )
+      returns (bytes32 requestId) {
+        s_lastRequestId = requestId;
+        s_requestCounter = s_requestCounter + 1;
+        emit RequestSent(requestId);
+      } catch Error(string memory reason) {
+        emit RequestRevertedWithErrorMsg(reason);
+      } catch (bytes memory data) {
+        emit RequestRevertedWithoutErrorMsg(data);
+      }
 
       registry.pauseUpkeep(upkeepID);
     }

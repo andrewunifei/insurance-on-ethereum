@@ -24,6 +24,7 @@
   "homepage": "https://github.com/andrewunifei/insurance-on-ethereum#readme",
   "devDependencies": {
     "@chainlink/contracts": "0.8.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "hardhat": "2.19.4"
   },
   "dependencies": {

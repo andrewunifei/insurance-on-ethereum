@@ -25,7 +25,7 @@ contract InsuranceAPI {
     function createInstitution(string memory _institutionName) external {
         institutions[msg.sender].push(address(new Institution(
             msg.sender,
-            _institutionName,
+            _institutionName
         )));
         // usedAddresses.push(msg.sender);
     }

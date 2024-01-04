@@ -1,7 +1,7 @@
-const { ethers } = require("Hardhat")
+const { ethers } = require("hardhat")
 const { networks } = require("../networks")
 const { setAutoRequest } = require("../tasks/Functions-client/setAutoRequest")
-const insuranceAPI = require("./insuranceAPI")
+const insuranceAPI = require("./API")
 const institutionAPI = require("./institution")
 const insuranceContractAPI = require("./insuranceContract")
 const upkeepAPI = require("./upkeep")
@@ -10,20 +10,22 @@ const farmerAddress = '0x1bE776c435Fb6243E3D8b22744f6e58f62A8B41E'
 const sepoliaLINKAddress = '0x779877A7B0D9E8603169DdbD7836e478b4624789'
 const sepoliaRegistrarAddress = '0x9a811502d843E5a03913d5A2cfb646c11463467A'
 
-async function setAuto(subid, insuranceContractAddr, gaslimit, interval){
-    const subid = 741
+// ** TODO: Implementar a lógica de setAutoRequest em controller.js **
+//
+// async function setAuto(subid, insuranceContractAddr, gaslimit, interval){
+//     const subid = 741
 
-    params = {
-        simulate: false,
-        configpath: `${__dirname}/../Functions-request-config.js`,
-        contract: insuranceContractAddr,
-        subid,
-        gaslimit,
-        interval
-    }
+//     params = {
+//         simulate: false,
+//         configpath: `${__dirname}/../Functions-request-config.js`,
+//         contract: insuranceContractAddr,
+//         subid,
+//         gaslimit,
+//         interval
+//     }
 
-    await setAutoRequest(insuranceContractAddr, params)
-}
+//     await setAutoRequest(insuranceContractAddr, params)
+// }
 
 function setUpkeepParams(params){
     return {
@@ -97,15 +99,17 @@ async function createInsuranceContract(API, index, args){ // <--- Passar o parâ
     await receipt.wait(1)
 }
 
-async function subscribeInstitutionToFunctions(API, index){
-    const institutionAddress = await API.getInstitution(index)
+// ** TODO: Implementar a lógica de functions-sub-create em outro arquivo **
+//
+// async function subscribeInstitutionToFunctions(API, index){
+//     const institutionAddress = await API.getInstitution(index)
 
-    subid = await run("functions-sub-create", {amount: String(1), contract: institutionAddress})
-    console.log(`ID da subscrição: ${subid}`)
-}
+//     subid = await run("functions-sub-create", {amount: String(1), contract: institutionAddress})
+//     console.log(`ID da subscrição: ${subid}`)
+// }
 
 if (require.main === module) {
-    main();
+    createInstitution();
 }
 
 // Upkeep address atual no Sepolia: 0xD1D9a8E041e3A83dd8E2E7C3740D8EbfBA1027ec

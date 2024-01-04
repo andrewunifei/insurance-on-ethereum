@@ -1,7 +1,7 @@
-//require("@nomicfoundation/hardhat-toolbox")
-require("hardhat-contract-sizer")
-require("@openzeppelin/hardhat-upgrades")
-require("./tasks")
+require("@nomicfoundation/hardhat-toolbox")
+//require("hardhat-contract-sizer")
+//require("@openzeppelin/hardhat-upgrades")
+// require("./tasks")
 require("@chainlink/env-enc").config()
 const { networks } = require("./networks")
 
@@ -20,6 +20,14 @@ module.exports = {
   defaultNetwork: "hardhat",
   solidity: {
     compilers: [
+      {
+        version: "0.9.0",
+        settings: SOLC_SETTINGS,
+      },
+      {
+        version: "0.8.19",
+        settings: SOLC_SETTINGS,
+      },
       {
         version: "0.8.7",
         settings: SOLC_SETTINGS,
