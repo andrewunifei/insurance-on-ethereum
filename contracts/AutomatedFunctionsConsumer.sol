@@ -69,7 +69,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
 
   // Valores para regras de negócio
   uint256 reparationValue;
-  int256 humidityLimit;
+  uint256 humidityLimit;
   uint256 public sampleMaxSize;
   string[] public sampleStorage;
   string private computationJS; // calculo da computacao do indice
@@ -108,7 +108,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   constructor(
     address _deployer,
     address _farmer,
-    int256 _humidityLimit,
+    uint256 _humidityLimit,
     address router,
     uint64 _subscriptionId,
     uint32 _fulfillGasLimit,
@@ -120,7 +120,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     // Se for necessário mudar também é preciso importar as bibliotecas desses tipo de dados
     address sepoliaLINKAddress, // Aqui para LinkTokenInterface
     address sepoliaRegistrarAddress // Aqui para AutomationRegistrarInterface
-  ) FunctionsClient(router) ConfirmedOwner(_deployer) public payable {
+  ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
     institution = msg.sender;
     farmer = _farmer;
     humidityLimit = _humidityLimit; 
@@ -263,7 +263,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     }
   }
 
-  function verifyIndex(uint256 mean) internal {
+  function verifyIndex() internal {
     if(mean < humidityLimit){
       // Transfere para a conta do agricultor
       (bool sent, /* bytes memory data */) = payable(farmer).call{value: address(this).balance}("");
@@ -289,7 +289,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     responseCounter = responseCounter + 1;
 
     if(controlFlag == 0){
-      string memory responseAsString = string(bytes32(response));
+      string memory responseAsString = string(response); // Isso aqui era: string(bytes32(response))
 
       // Armazena no array as amostras de dados
       sampleStorage.push(responseAsString);
@@ -299,7 +299,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
       // Essa computação do índice deve ser com base na literatura científica
       mean = uint256(bytes32(response)); // remover
 
-      verifyIndex(mean); // remover
+      verifyIndex(); // remover
     }
 
     emit OCRResponse(requestId, response, err);
