@@ -1,5 +1,5 @@
 const { ethers } = require("hardhat")
-const { addClientConsumerToSubscription } = require("../tasks/Functions-billing/add")
+// const { addClientConsumerToSubscription } = require("../tasks/Functions-billing/add")
 
 async function getInsuranceContract(institution, id){
     // Stored in institution

@@ -8,6 +8,7 @@ import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/autom
 import {Upkeep} from "./Upkeep.sol";
 import "hardhat/console.sol"; // Comentar essa linha 
 
+// Mover isso para um arquivo próprio
 /** 
  * @notice Interface para interagir com upkeep criado para automação
  */ 
@@ -135,6 +136,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     lastUpkeepTimeStamp = block.timestamp;
   }
 
+  // Se eu não me engano eu movi a lógica da criação do upkeep para dentro do contrato
+  // porque eu quero que o contrato seja capaz de controlar a upkeep (pausar por exemplo)
+  // não sei se é possível fazer isso se a upkeep é criada usando JavaScript
   /**
    * @notice Registrando um novo upkeep
    */

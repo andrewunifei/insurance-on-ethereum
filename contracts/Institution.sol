@@ -50,7 +50,7 @@ contract Institution{
     function createInsuranceContract(
         address _deployer,
         address _farmer,
-        int256 _humidityLimit,
+        uint256 _humidityLimit,
         string memory _lat,
         string memory _lon,
         address oracle,
@@ -58,7 +58,10 @@ contract Institution{
         uint32 _fulfillGasLimit,
         uint256 _updateInterval,
         uint256 _sampleMaxSize,
-        uint256 _reparationValue
+        uint256 _reparationValue,
+        IAutomationRegistryConsumer _registry,
+        address _sepoliaLINKAddress,
+        address _sepoliaRegistrarAddress
     ) external {
         require(whitelist[_farmer], "Endereco nao esta na lista branca");
         require(_reparationValue <= address(this).balance, "Sem fundos suficiente para financiar o contrato");
@@ -74,7 +77,10 @@ contract Institution{
             _fulfillGasLimit,
             _updateInterval,
             _sampleMaxSize,
-            _reparationValue
+            _reparationValue,
+            _registry,
+            _sepoliaLINKAddress,
+            _sepoliaRegistrarAddress
         )));
     }
 

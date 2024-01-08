@@ -1,4 +1,4 @@
-const { ethers } = require("Hardhat")
+const { ethers } = require("hardhat")
 
 async function whitelistFarmer(institution, farmerAddress){
     receipt = await institution.whitelistAddr(farmerAddress)
@@ -13,7 +13,6 @@ async function blacklistFarmer(institution, farmerAddress){
 }
 
 module.exports = {
-    createChainlinkFunctionsSub,
     whitelistFarmer,
     blacklistFarmer,
 }

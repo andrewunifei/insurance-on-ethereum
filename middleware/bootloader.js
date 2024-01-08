@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat")
 const { networks } = require("../networks")
-const { setAutoRequest } = require("../tasks/Functions-client/setAutoRequest")
+// const { setAutoRequest } = require("../tasks/Functions-client/setAutoRequest")
 const insuranceAPI = require("./API")
 const institutionAPI = require("./institution")
 const insuranceContractAPI = require("./insuranceContract")
@@ -58,17 +58,8 @@ function setInsuranceContractParms(params){
     }
 }
 
-async function deployAPI(){
-    const [ deployer ] = await ethers.getSigners()
-    const id = 0
-
-    const API = insuranceAPI.createAPI(deployer)
-
-    return API
-}
-
-async function createInstitution(){
-    const receipt = await insuranceAPI.createInstitution('Nome Instituicao')
+async function createInstitution(API){
+    const receipt = await API.createInstitution('Nome Instituicao')
     console.log(`\nWaiting 1 block for transaction ${receipt.hash} to be confirmed...`)
     await receipt.wait(1)
     console.log(receipt) // Analisar depois para fazer verificacao de erro e recuperar informacoes de endereco
@@ -94,9 +85,25 @@ async function createInsuranceContract(API, index, args){ // <--- Passar o parâ
         args.interval,
         args.sampleMaxSize,
         args.reparationValue,
-        args.registryAddress
+        args.registryAddress,
+        args.sepoliaLINKAddress,
+        args.sepoliaRegistrarAddress
     )
     await receipt.wait(1)
+}
+
+async function deployAPI() {
+    const [ deployer ] = await ethers.getSigners()
+    const API = await insuranceAPI.createAPI(deployer)
+
+    return API
+}
+
+async function getDeployedAPI() {
+    APIContractAddress = '0xf0E47610a2BFd78874a947f85BE7C29CB12E1555'
+    const API = await insuranceAPI.getAPI(APIContractAddress)
+    
+    return API
 }
 
 // ** TODO: Implementar a lógica de functions-sub-create em outro arquivo **
@@ -109,7 +116,16 @@ async function createInsuranceContract(API, index, args){ // <--- Passar o parâ
 // }
 
 if (require.main === module) {
-    createInstitution();
+    // flag = 1 --> deploy
+    // flag = 0 --> attach
+    flag = 0
+
+    if(flag){
+        deployAPI()
+    }
+    else {
+        getDeployedAPI()
+    }
 }
 
 // Upkeep address atual no Sepolia: 0xD1D9a8E041e3A83dd8E2E7C3740D8EbfBA1027ec
