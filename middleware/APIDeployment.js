@@ -16,11 +16,11 @@ async function createAPI(deployer){
     return APIContract
 }
 
-async function getAPI(APIContractAddress){
+async function getAPI(APIAddress){
     // Get contract already deployed
     const APIContractFactory = await ethers.getContractFactory("InsuranceAPI")
     const APIContract = await APIContractFactory.attach(
-        APIContractAddress // Sepolia
+        APIAddress // Sepolia
     )
 
     return APIContract

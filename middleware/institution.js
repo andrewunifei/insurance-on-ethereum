@@ -14,5 +14,5 @@ async function blacklistFarmer(institution, farmerAddress){
 
 module.exports = {
     whitelistFarmer,
-    blacklistFarmer,
+    blacklistFarmer
 }

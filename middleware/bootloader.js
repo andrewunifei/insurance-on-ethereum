@@ -1,8 +1,8 @@
 const { ethers } = require("hardhat")
 const { networks } = require("../networks")
 // const { setAutoRequest } = require("../tasks/Functions-client/setAutoRequest")
-const insuranceAPI = require("./API")
-const institutionAPI = require("./institution")
+const APIDeployment = require("./APIDeployment")
+// const institutionAPI = require("./institution")
 const insuranceContractAPI = require("./insuranceContract")
 const upkeepAPI = require("./upkeep")
 
@@ -58,13 +58,6 @@ function setInsuranceContractParms(params){
     }
 }
 
-async function createInstitution(API){
-    const receipt = await API.createInstitution('Nome Instituicao')
-    console.log(`\nWaiting 1 block for transaction ${receipt.hash} to be confirmed...`)
-    await receipt.wait(1)
-    console.log(receipt) // Analisar depois para fazer verificacao de erro e recuperar informacoes de endereco
-}
-
 async function createInsuranceContract(API, index, args){ // <--- Passar o parâmetro "args" para essa função
     let subid
 
@@ -92,16 +85,43 @@ async function createInsuranceContract(API, index, args){ // <--- Passar o parâ
     await receipt.wait(1)
 }
 
+async function createInstitution(API) {
+    infos = {
+        name: 'Nome da Instituicao'
+        // ... Pesquisar na literatura o que são informações relevantes para identificar uma instituição
+    }
+
+    const tx = await API.createInstitution(
+        infos.name
+    )
+
+    console.log(`\nWaiting 1 block for transaction ${tx.hash} to be confirmed...`)
+    receipt = await tx.wait(1)
+    // receipt.logs --> Log do evento emitido pela API ao criar a instituição
+
+    return receipt
+}
+
+async function getInstitution(API, index) {
+    // ** TODO: Implementar uma busca da instituição de forma mais inteligente **
+    // A instituição dentro do mapeamento na API deve ser buscada de uma maneira mais inteligente
+    // Isto é, com index não está bom o suficiente
+    const institutionAddress = await API.getInstitution(index)
+    const institutionFactory = await ethers.getContractFactory("Institution")
+    const institutionContract = await institutionFactory.attach(institutionAddress)
+
+    return institutionContract
+}
+
 async function deployAPI() {
     const [ deployer ] = await ethers.getSigners()
-    const API = await insuranceAPI.createAPI(deployer)
+    const API = await APIDeployment.createAPI(deployer)
 
     return API
 }
 
-async function getDeployedAPI() {
-    APIContractAddress = '0xf0E47610a2BFd78874a947f85BE7C29CB12E1555'
-    const API = await insuranceAPI.getAPI(APIContractAddress)
+async function getDeployedAPI(APIAddress) {
+    const API = await APIDeployment.getAPI(APIAddress)
     
     return API
 }
@@ -115,20 +135,46 @@ async function getDeployedAPI() {
 //     console.log(`ID da subscrição: ${subid}`)
 // }
 
-if (require.main === module) {
-    // flag = 1 --> deploy
-    // flag = 0 --> attach
-    flag = 0
+(async () => {
+    if (require.main === module) {
+        // flag = 1 --> Deploy
+        // flag = 0 --> Attach
+        APIflag = 0
+        APIAddress = '0x8092e926a018bFabf87210906e26E051938f3DFf'
+        institutionFlag = 0
+        institutionIndex = 0
+        
+        try {
+            if(APIflag) {
+                API = await deployAPI()
+            }
+            else {
+                API = await getDeployedAPI(APIAddress)
+            }
+        }
+        catch(e) {
+            throw new Error(e)
+        }
 
-    if(flag){
-        deployAPI()
+        try {
+            if(institutionFlag) {
+                institution = await createInstitution(API)
+            }
+            else {
+                institution = await getInstitution(API, institutionIndex)
+            }
+        }
+        catch(e) {
+            throw new Error(e)
+        }
     }
-    else {
-        getDeployedAPI()
-    }
-}
+})()
+
+
+// Last institution deployed: 0x4a7c34fC0154192F88dd42275eF21b04f528A4F4
 
 // Upkeep address atual no Sepolia: 0xD1D9a8E041e3A83dd8E2E7C3740D8EbfBA1027ec
 // Insurance Contract para ser automatizado: 0x120993E01C33a1621AaF9ae79A7925Eb75492227
 // Upkeep address com LINK: 0x0CbA96BB715DE4D0152EA69258F198433C4Eeefc
 // insuranceAPI address: 0xDB7293E35E14FeaE30A4BAb8b360c9d2Db4e6c02
+
