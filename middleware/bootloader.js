@@ -1,13 +1,12 @@
 const { ethers } = require("hardhat")
 const { networks } = require("../networks")
-// const { setAutoRequest } = require("../tasks/Functions-client/setAutoRequest")
 const APIDeployment = require("./APIDeployment")
-// const institutionAPI = require("./institution")
+const chainlinkFunctions = require("./ChainlinkFunctions")
+
 const insuranceContractAPI = require("./insuranceContract")
 const upkeepAPI = require("./upkeep")
 
 const farmerAddress = '0x1bE776c435Fb6243E3D8b22744f6e58f62A8B41E'
-const sepoliaLINKAddress = '0x779877A7B0D9E8603169DdbD7836e478b4624789'
 const sepoliaRegistrarAddress = '0x9a811502d843E5a03913d5A2cfb646c11463467A'
 
 // ** TODO: Implementar a lógica de setAutoRequest em controller.js **
@@ -58,11 +57,8 @@ function setInsuranceContractParms(params){
     }
 }
 
-async function createInsuranceContract(API, index, args){ // <--- Passar o parâmetro "args" para essa função
+async function createInsuranceContract(API, institution, args){ // <--- Passar o parâmetro "args" para essa função
     let subid
-
-    const institutionAddress = await API.getInstitution(index)
-    const institution = await ethers.getContractAt("Institution", institutionAddress)
 
     console.log(`Endereço da instituição: ${institution.address}`)
 
@@ -85,14 +81,16 @@ async function createInsuranceContract(API, index, args){ // <--- Passar o parâ
     await receipt.wait(1)
 }
 
-async function createInstitution(API) {
-    infos = {
-        name: 'Nome da Instituicao'
-        // ... Pesquisar na literatura o que são informações relevantes para identificar uma instituição
-    }
-
+/**
+ * Cria uma instituição a partir do contrato InsuranceAPI
+ * O endereço da instituição na rede Ethereum é armazenado em uma estrutura de dados no InsuranceAPI
+ * @param {BaseContract} API 
+ * @param {Object} info Informações para identificar a instituição
+ * @returns {Object}
+ */
+async function createInstitution(API, info) {
     const tx = await API.createInstitution(
-        infos.name
+        info.name
     )
 
     console.log(`\nWaiting 1 block for transaction ${tx.hash} to be confirmed...`)
@@ -108,61 +106,78 @@ async function getInstitution(API, index) {
     // Isto é, com index não está bom o suficiente
     const institutionAddress = await API.getInstitution(index)
     const institutionFactory = await ethers.getContractFactory("Institution")
-    const institutionContract = await institutionFactory.attach(institutionAddress)
+    const institutionContract = institutionFactory.attach(institutionAddress)
 
     return institutionContract
 }
 
-async function deployAPI() {
-    const [ deployer ] = await ethers.getSigners()
-    const API = await APIDeployment.createAPI(deployer)
-
-    return API
-}
-
-async function getDeployedAPI(APIAddress) {
-    const API = await APIDeployment.getAPI(APIAddress)
-    
-    return API
-}
-
-// ** TODO: Implementar a lógica de functions-sub-create em outro arquivo **
-//
-// async function subscribeInstitutionToFunctions(API, index){
-//     const institutionAddress = await API.getInstitution(index)
-
-//     subid = await run("functions-sub-create", {amount: String(1), contract: institutionAddress})
-//     console.log(`ID da subscrição: ${subid}`)
-// }
-
 (async () => {
     if (require.main === module) {
+        const [ deployer ] = await ethers.getSigners()
+        const sepoliaLinkTokenAddress = '0x779877A7B0D9E8603169DdbD7836e478b4624789'
+        const sepoliaRouterAddress = '0xb83E47C2bC239B3bf370bc41e1459A34b41238D0'
+
         // flag = 1 --> Deploy
         // flag = 0 --> Attach
-        APIflag = 0
-        APIAddress = '0x8092e926a018bFabf87210906e26E051938f3DFf'
-        institutionFlag = 0
-        institutionIndex = 0
+        const APIflag = 0
+        const APIAddress = '0x8092e926a018bFabf87210906e26E051938f3DFf' // Atual
+
+        const institutionFlag = 0
+        const institutionIndex = 0
+        const managerFlag = 0
+        const subscriptionFlag = 0
+        const fundSubscriptionFlag = 0
+
+        let info = {
+            name: 'Nome da Instituicao'
+            // ... Pesquisar na literatura informações relevantes para identificar uma instituição
+        }
+        let institution
+        let subscriptionId
+        let juelsAmount
+        let manager
         
         try {
             if(APIflag) {
-                API = await deployAPI()
+                API = await APIDeployment.createAPI(deployer)
             }
             else {
-                API = await getDeployedAPI(APIAddress)
+                API = await APIDeployment.getAPI(APIAddress)
             }
-        }
-        catch(e) {
-            throw new Error(e)
-        }
 
-        try {
             if(institutionFlag) {
-                receipt = await createInstitution(API)
+                receipt = await createInstitution(API, info)
                 console.log(receipt)
             }
             else {
                 institution = await getInstitution(API, institutionIndex)
+            }
+
+            if(managerFlag) {
+                manager = await chainlinkFunctions.createManager(
+                    deployer,
+                    sepoliaLinkTokenAddress,
+                    sepoliaRouterAddress
+                )
+            }
+
+            if(subscriptionFlag) {
+                subscriptionId = await manager.createSubscription(consumerAddress)
+            }
+ 
+            if(fundSubscriptionFlag) { 
+                /*
+                    Typescript --> const juelsAmount:  BigInt | string = BigInt(2) * BigInt(10**18)
+
+                    Note that all values are denominated in Juels.
+                    1,000,000,000,000,000,000 (1e18) Juels are equal to 1 LINK.
+                    Do not use the JavaScript 'number' type for calculations with Juels
+                    as the maximum safe JavaScript integer is only 2^54 - 1.
+                */
+                receipt = await manager.fundSubscription({
+                    subscriptionId, 
+                    juelsAmount
+                })
             }
         }
         catch(e) {
@@ -171,11 +186,11 @@ async function getDeployedAPI(APIAddress) {
     }
 })()
 
-
 // Last institution deployed: 0x4a7c34fC0154192F88dd42275eF21b04f528A4F4
+
+// --------------------------------------------------------------------------------------
 
 // Upkeep address atual no Sepolia: 0xD1D9a8E041e3A83dd8E2E7C3740D8EbfBA1027ec
 // Insurance Contract para ser automatizado: 0x120993E01C33a1621AaF9ae79A7925Eb75492227
 // Upkeep address com LINK: 0x0CbA96BB715DE4D0152EA69258F198433C4Eeefc
 // insuranceAPI address: 0xDB7293E35E14FeaE30A4BAb8b360c9d2Db4e6c02
-
