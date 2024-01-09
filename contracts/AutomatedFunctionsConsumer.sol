@@ -110,17 +110,15 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     address _deployer,
     address _farmer,
     uint256 _humidityLimit,
-    address router,
-    uint64 _subscriptionId,
-    uint32 _fulfillGasLimit,
-    uint256 _updateInterval,
     uint256 _sampleMaxSize,
     uint256 _reparationValue,
+    uint256 _updateInterval,
+    address router,
+    uint64 _subscriptionId,
     IAutomationRegistryConsumer _registry,
-    
-    // Se for necessário mudar também é preciso importar as bibliotecas desses tipo de dados
     address sepoliaLINKAddress, // Aqui para LinkTokenInterface
     address sepoliaRegistrarAddress // Aqui para AutomationRegistrarInterface
+    uint32 _fulfillGasLimit,
   ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
     institution = msg.sender;
     farmer = _farmer;
@@ -130,8 +128,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     updateInterval = _updateInterval;
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
-    registry = _registry; // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS
-    i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS
+    registry = _registry; // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer aqui no contrato mesmo
+    i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer aqui no contrato mesmo
 
     lastUpkeepTimeStamp = block.timestamp;
   }

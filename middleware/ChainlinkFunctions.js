@@ -1,5 +1,4 @@
-const { networks } = require("../../networks")
-const { subscriptionManager, SubscriptionManager } = require("@chainlink/functions-toolkit");
+const { SubscriptionManager } = require("@chainlink/functions-toolkit");
 
 async function createManager(signer, linkTokenAddress, routerAddress) {
     const manager = new SubscriptionManager(

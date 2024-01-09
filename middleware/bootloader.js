@@ -3,9 +3,6 @@ const { networks } = require("../networks")
 const APIDeployment = require("./APIDeployment")
 const chainlinkFunctions = require("./ChainlinkFunctions")
 
-const insuranceContractAPI = require("./insuranceContract")
-const upkeepAPI = require("./upkeep")
-
 const farmerAddress = '0x1bE776c435Fb6243E3D8b22744f6e58f62A8B41E'
 const sepoliaRegistrarAddress = '0x9a811502d843E5a03913d5A2cfb646c11463467A'
 
@@ -57,33 +54,46 @@ function setInsuranceContractParms(params){
     }
 }
 
-async function createInsuranceContract(API, institution, args){ // <--- Passar o parâmetro "args" para essa função
-    let subid
-
-    console.log(`Endereço da instituição: ${institution.address}`)
-
-    receipt = await institution.createInsuranceContract(
+/**
+ * Cria um contrato de seguro a partir do contrato Institution
+ * O endereço do contrato de seguro na rede Ethereum é armazenado na em uma lista na Institution
+ * @param {BaseContract} institution 
+ * @param {Object} args 
+ * @returns 
+ */
+async function createInsuranceContract(institution, args){
+    const tx = await institution.createInsuranceContract(
+        // Relacionados com regras de negócio
         args.deployer,
         args.farmer,
         args.humidityLimit,
-        args.lat, // Passar pela lista args do Código Fonte da Requisição
-        args.lon, // Passar pela lista args do Código Fonte da Requisição
-        args.oracle,
-        args.subid,
-        args.gaslimit,
-        args.interval,
+        // args.lat, // Passar pela lista args do Código Fonte da Requisição
+        // args.lon, // Passar pela lista args do Código Fonte da Requisição
         args.sampleMaxSize,
         args.reparationValue,
+        args.interval, // Também tem relação com Chainlink Automation
+
+        // Relacionados com Chainlink Functions
+        args.router, // sepoliaRouterAddress
+        args.subscriptionId,
+
+        // Relacionados com Chainlink Automation e Upkeep
         args.registryAddress,
         args.sepoliaLINKAddress,
-        args.sepoliaRegistrarAddress
+        args.sepoliaRegistrarAddress,
+
+        // Relacionado com a rede Ethereum 
+        args.gaslimit
     )
-    await receipt.wait(1)
+
+    const receipt = tx.await(1)
+    
+    return receipt
 }
 
 /**
  * Cria uma instituição a partir do contrato InsuranceAPI
- * O endereço da instituição na rede Ethereum é armazenado em uma estrutura de dados no InsuranceAPI
+ * O endereço da instituição na rede Ethereum é armazenado em uma lista no InsuranceAPI
  * @param {BaseContract} API 
  * @param {Object} info Informações para identificar a instituição
  * @returns {Object}
@@ -94,7 +104,7 @@ async function createInstitution(API, info) {
     )
 
     console.log(`\nWaiting 1 block for transaction ${tx.hash} to be confirmed...`)
-    receipt = await tx.wait(1)
+    const receipt = await tx.wait(1)
     // receipt.logs --> Log do evento emitido pela API ao criar a instituição
 
     return receipt
