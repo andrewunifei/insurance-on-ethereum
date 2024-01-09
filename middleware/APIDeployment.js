@@ -5,7 +5,8 @@ const bytecode = APIArtifact.bytecode
 
 /**
  * Implanta o contrato InsuranceAPI.sol na rede Ethereum
- * @param {HardhatEthersSigner} deployer - A carteira que irá implantar o contrato
+ * @param {HardhatEthersSigner} deployer
+ * @returns {BaseContract}
  */
 async function createAPI(deployer){
     const APIContractFactory = new ethers.ContractFactory(abi, bytecode, deployer)
@@ -18,6 +19,7 @@ async function createAPI(deployer){
 /**
  * Retorna um contrato InsuranceAPI.sol já implantado na rede Ethereum
  * @param {string} APIAddress - O endereço do contrato na rede Ethereum
+ * @returns {BaseContract}
  */
 async function getAPI(APIAddress){
     const APIContractFactory = await ethers.getContractFactory("InsuranceAPI")

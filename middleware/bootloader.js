@@ -59,7 +59,7 @@ function setInsuranceContractParms(params){
  * O endereço do contrato de seguro na rede Ethereum é armazenado na em uma lista na Institution
  * @param {BaseContract} institution 
  * @param {Object} args 
- * @returns 
+ * @returns {Object}
  */
 async function createInsuranceContract(institution, args){
     const tx = await institution.createInsuranceContract(
