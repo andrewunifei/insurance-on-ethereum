@@ -158,7 +158,8 @@ async function getDeployedAPI(APIAddress) {
 
         try {
             if(institutionFlag) {
-                institution = await createInstitution(API)
+                receipt = await createInstitution(API)
+                console.log(receipt)
             }
             else {
                 institution = await getInstitution(API, institutionIndex)
