@@ -1,10 +1,15 @@
 const { ethers } = require("hardhat")
 const { networks } = require("../networks")
 const APIDeployment = require("./APIDeployment")
-const chainlinkFunctions = require("./ChainlinkFunctions")
+const chainlinkFunctions = require("./chainlinkFunctions")
 
-const farmerAddress = '0x1bE776c435Fb6243E3D8b22744f6e58f62A8B41E'
 const sepoliaRegistrarAddress = '0x9a811502d843E5a03913d5A2cfb646c11463467A'
+const sepoliaRegistryAddress = '0x86EFBD0b6736Bed994962f9797049422A3A8E8Ad'
+const sepoliaLinkTokenAddress = '0x779877A7B0D9E8603169DdbD7836e478b4624789'
+const sepoliaRouterAddress = '0xb83E47C2bC239B3bf370bc41e1459A34b41238D0'
+
+// Caso tenha problmeas com sepoliaRouterAddress, antes nós tínhamos:
+// oracle: networks["ethereumSepolia"]["functionsOracleProxy"],
 
 // ** TODO: Implementar a lógica de setAutoRequest em controller.js **
 //
@@ -36,24 +41,6 @@ function setUpkeepParams(params){
     }
 }
 
-function setInsuranceContractParms(params){
-    return {
-        deployer: params.deployerAddress,
-        farmer: params.farmerAddress,
-        humidityLimit: params.humidityLimit,
-        lat: params.lat, //"44.34", // Passar pela lista args do Código Fonte da Requisição
-        lon: params.lon,//"10.99", // Passar pela lista args do Código Fonte da Requisição
-        //oracle: networks[network.name]["functionsOracleProxy"],
-        oracle: networks["ethereumSepolia"]["functionsOracleProxy"],
-        subid: params.subid,
-        gaslimit: params.gatlimit,
-        interval: params.interval,
-        sampleMaxSize: params.sampleMaxSize,
-        reparationValue: params.reparationValue,
-        registryAddress: params.registryAddress
-    }
-}
-
 /**
  * Cria um contrato de seguro a partir do contrato Institution
  * O endereço do contrato de seguro na rede Ethereum é armazenado na em uma lista na Institution
@@ -79,8 +66,8 @@ async function createInsuranceContract(institution, args){
 
         // Relacionados com Chainlink Automation e Upkeep
         args.registryAddress,
-        args.sepoliaLINKAddress,
-        args.sepoliaRegistrarAddress,
+        args.LinkTokenAddress,
+        args.RegistrarAddress,
 
         // Relacionado com a rede Ethereum 
         args.gaslimit
@@ -96,7 +83,7 @@ async function createInsuranceContract(institution, args){
  * O endereço da instituição na rede Ethereum é armazenado em uma lista no InsuranceAPI
  * @param {BaseContract} API 
  * @param {Object} info Informações para identificar a instituição
- * @returns {Object}
+ * @returns {ContractTransactionReceipt}
  */
 async function createInstitution(API, info) {
     const tx = await API.createInstitution(
@@ -121,48 +108,82 @@ async function getInstitution(API, index) {
     return institutionContract
 }
 
+async function generateSigner() {
+    // Initialize ethers signer and provider to interact with the contracts onchain
+    const privateKey = process.env.PRIVATE_KEY;
+    if(!privateKey) {
+        throw new Error("private key not provided - check your environment variables");
+    }
+
+    const rpcUrl = process.env.ETHEREUM_SEPOLIA_RPC_URL;
+
+    if(!rpcUrl) {
+        throw new Error(`rpcUrl not provided  - check your environment variables`);
+    }
+
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+
+    const signer = new ethers.Wallet(privateKey, provider);
+
+    return signer;
+}
+
 (async () => {
     if (require.main === module) {
         const [ deployer ] = await ethers.getSigners()
-        const sepoliaLinkTokenAddress = '0x779877A7B0D9E8603169DdbD7836e478b4624789'
-        const sepoliaRouterAddress = '0xb83E47C2bC239B3bf370bc41e1459A34b41238D0'
+        console.log(deployer.provider)
+        //const deployer = await generateSigner()
 
-        // flag = 1 --> Deploy
-        // flag = 0 --> Attach
         const APIflag = 0
-        const APIAddress = '0x8092e926a018bFabf87210906e26E051938f3DFf' // Atual
-
         const institutionFlag = 0
-        const institutionIndex = 0
-        const managerFlag = 0
-        const subscriptionFlag = 0
-        const fundSubscriptionFlag = 0
+        const institutionIndex = 1
+        const managerFlag = 1
+        const subscriptionFlag = 1
+        const fundSubscriptionFlag = 1
+        const insuranceFlag = 1
 
+        const APIAddress = '0x65a702A8b59Df0ED47388567B93FF71322F25BE4' // Atual
+
+        let API
+        let institution
         let info = {
             name: 'Nome da Instituicao'
             // ... Pesquisar na literatura informações relevantes para identificar uma instituição
         }
-        let institution
         let subscriptionId
-        let juelsAmount
+        let juelsAmount = String(BigInt(10**18)) // 1 LINK
         let manager
-        
+        let args
+        let institutionAddr
+    
         try {
             if(APIflag) {
                 API = await APIDeployment.createAPI(deployer)
+                console.log(`API address: ${API.target}`)
             }
             else {
                 API = await APIDeployment.getAPI(APIAddress)
             }
+        }
+        catch(e) {
+            throw new Error(e)
+        }
 
+        try {
             if(institutionFlag) {
-                receipt = await createInstitution(API, info)
-                console.log(receipt)
+                const receipt = await createInstitution(API, info)
+                console.log(receipt.logs)
             }
             else {
-                institution = await getInstitution(API, institutionIndex)
+                //institution = await getInstitution(API, institutionIndex)
+                institutionAddr = '0x39c5877498A94781Aff6772aFEBa05C3a6FF10C6'
             }
+        }
+        catch(e) {
+            throw new Error(e)
+        }
 
+        try {
             if(managerFlag) {
                 manager = await chainlinkFunctions.createManager(
                     deployer,
@@ -170,9 +191,14 @@ async function getInstitution(API, index) {
                     sepoliaRouterAddress
                 )
             }
+        }
+        catch(e) {
+            throw new Error(e)
+        }
 
+        try {
             if(subscriptionFlag) {
-                subscriptionId = await manager.createSubscription(consumerAddress)
+                subscriptionId = await manager.createSubscription(institutionAddr)
             }
  
             if(fundSubscriptionFlag) { 
@@ -193,6 +219,35 @@ async function getInstitution(API, index) {
         catch(e) {
             throw new Error(e)
         }
+
+        try {
+            if(insuranceFlag) {
+                args = {
+                    deployer: institution,
+                    farmer: deployer, // Para fins de teste
+                    humidityLimit: 50,
+                    sampleMaxSize: 1,
+                    reparationValue: 1,
+                    interval: 10,
+                    router: sepoliaRouterAddress,
+                    subscriptionId,
+                    registryAddress: sepoliaRegistryAddress,
+                    linkTokenAddress: sepoliaLinkTokenAddress,
+                    registrarAddress: sepoliaRegistrarAddress,
+                    gaslimit: 300000
+                }
+
+                const txWhiteList = await institution.whitelistAddr(deployer)
+                await txWhiteList.wait(1)
+                const txInsuranceCreation = await createInsuranceContract(institution, args)
+                const receiptInsuranceCreation = txInsuranceCreation.wait(1)
+
+                console.log(`Insurance Contract address: ${receiptInsuranceCreation.logs}`)
+            }
+        }
+        catch(e) {
+            throw new Error(e)
+        }
     }
 })()
 
@@ -204,3 +259,5 @@ async function getInstitution(API, index) {
 // Insurance Contract para ser automatizado: 0x120993E01C33a1621AaF9ae79A7925Eb75492227
 // Upkeep address com LINK: 0x0CbA96BB715DE4D0152EA69258F198433C4Eeefc
 // insuranceAPI address: 0xDB7293E35E14FeaE30A4BAb8b360c9d2Db4e6c02
+
+// const farmerAddress = '0x1bE776c435Fb6243E3D8b22744f6e58f62A8B41E'

@@ -8,11 +8,11 @@ const { SubscriptionManager } = require("@chainlink/functions-toolkit");
  * @returns {SubscriptionManager}
  */
 async function createManager(signer, linkTokenAddress, routerAddress) {
-    const manager = new SubscriptionManager(
+    const manager = new SubscriptionManager({
         signer,
         linkTokenAddress, 
         routerAddress
-    )
+    })
 
     await manager.initialize()
 

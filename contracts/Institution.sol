@@ -13,7 +13,9 @@ contract Institution{
     string public id;
     mapping (string => string) info;
     mapping (address => bool) public whitelist;
-    mapping (address => address[]) public contracts;
+    mapping (address => AutomatedFunctionsConsumer[]) public contracts; // Antes era mapping address => address[]
+
+    event InsuranceContractCreated(address insuranceContractAddress);
 
     modifier owner {
         if(msg.sender != i_owner) {
@@ -42,7 +44,7 @@ contract Institution{
         whitelist[_farmerAddr] = false;
     }
 
-    function getInsurance(uint256 _index) view public returns (address){
+    function getInsurance(uint256 _index) view public returns (AutomatedFunctionsConsumer){
         return contracts[msg.sender][_index];
     }
 
@@ -51,37 +53,40 @@ contract Institution{
         address _deployer,
         address _farmer,
         uint256 _humidityLimit,
-        string memory _lat,
-        string memory _lon,
-        address oracle,
-        uint64 _subscriptionId,
-        uint32 _fulfillGasLimit,
-        uint256 _updateInterval,
         uint256 _sampleMaxSize,
         uint256 _reparationValue,
+        uint256 _updateInterval,
+        // string memory _lat,
+        // string memory _lon,
+        address router,
         IAutomationRegistryConsumer _registry,
         address _sepoliaLINKAddress,
-        address _sepoliaRegistrarAddress
+        address _sepoliaRegistrarAddress,
+        uint64 _subscriptionId,
+        uint32 _fulfillGasLimit    
     ) external {
         require(whitelist[_farmer], "Endereco nao esta na lista branca");
-        require(_reparationValue <= address(this).balance, "Sem fundos suficiente para financiar o contrato");
+        // require(_reparationValue <= address(this).balance, "Sem fundos suficiente para financiar o contrato");
 
-        contracts[_farmer].push(address(new AutomatedFunctionsConsumer{
+        AutomatedFunctionsConsumer c = new AutomatedFunctionsConsumer{
             value: _reparationValue
         }(
             _deployer,
             _farmer,
             _humidityLimit,
-            oracle,
-            _subscriptionId,
-            _fulfillGasLimit,
-            _updateInterval,
             _sampleMaxSize,
             _reparationValue,
+            _updateInterval,
+            router,
+            _subscriptionId,
             _registry,
             _sepoliaLINKAddress,
-            _sepoliaRegistrarAddress
-        )));
+            _sepoliaRegistrarAddress,
+            _fulfillGasLimit            
+        );
+        contracts[_farmer].push(c);
+
+        emit InsuranceContractCreated(address(c));
     }
 
     // Sacar o balanço do contrato
