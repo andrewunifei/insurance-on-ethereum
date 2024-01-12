@@ -73,10 +73,8 @@ async function createInsuranceContract(institution, args){
         // Relacionado com a rede Ethereum 
         args.gaslimit
     )
-
-    const receipt = tx.await(1)
     
-    return receipt
+    return tx
 }
 
 /**
@@ -140,11 +138,15 @@ async function generateSigner() {
         const deployer = await generateSigner()
 
         const APIflag = 0
+
         const institutionFlag = 0
         const institutionIndex = 1
+
         const managerFlag = 1
-        const subscriptionFlag = 1
-        const fundSubscriptionFlag = 1
+
+        const subscriptionFlag = 0
+        const fundSubscriptionFlag = 0
+
         const insuranceFlag = 1
 
         const APIAddress = '0x65a702A8b59Df0ED47388567B93FF71322F25BE4' // Atual
@@ -207,6 +209,9 @@ async function generateSigner() {
                 
                 console.log(`Chainlink Functions subscription ID: ${subscriptionId}`)
             }
+            else {
+                subscriptionId = 1894
+            }
  
             if(fundSubscriptionFlag) { 
                 /*
@@ -221,8 +226,6 @@ async function generateSigner() {
                     subscriptionId, 
                     juelsAmount
                 })
-
-                console.log(receipt)
             }
         }
         catch(e) {
@@ -237,29 +240,30 @@ async function generateSigner() {
 
                 console.log(name)
 
-                // args = {
-                //     deployer: institution,
-                //     farmer: deployer, // Para fins de teste
-                //     humidityLimit: 50,
-                //     sampleMaxSize: 1,
-                //     reparationValue: 1,
-                //     interval: 10,
-                //     router: sepoliaRouterAddress,
-                //     subscriptionId,
-                //     registryAddress: sepoliaRegistryAddress,
-                //     linkTokenAddress: sepoliaLinkTokenAddress,
-                //     registrarAddress: sepoliaRegistrarAddress,
-                //     gaslimit: 300000
-                // }
-
-                // const txWhiteList = await institution.whitelistAddr(deployer)
+                // const txWhiteList = await institution.whitelistAddr(deployer.address)
                 // await txWhiteList.wait(1)
                 // console.log('Farmer added to whitelist')
 
-                // const txInsuranceCreation = await createInsuranceContract(institution, args)
-                // const receiptInsuranceCreation = txInsuranceCreation.wait(1)
+                args = {
+                    deployer: institution.address,
+                    farmer: deployer.address, // Para fins de teste
+                    humidityLimit: 50,
+                    sampleMaxSize: 1,
+                    reparationValue: 1,
+                    interval: 10,
+                    router: sepoliaRouterAddress,
+                    subscriptionId,
+                    registryAddress: sepoliaRegistryAddress,
+                    linkTokenAddress: sepoliaLinkTokenAddress,
+                    registrarAddress: sepoliaRegistrarAddress,
+                    gaslimit: 300000
+                }
 
-                // console.log(`Insurance Contract address: ${receiptInsuranceCreation.logs}`)
+                const txInsuranceCreation = await createInsuranceContract(institution, args)
+                const receiptInsuranceCreation = txInsuranceCreation.wait(1)
+
+                console.log(`Insurance Contract address: ${receiptInsuranceCreation.logs}`)
+            
             }
         }
         catch(e) {
