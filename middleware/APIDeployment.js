@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat")
+const ethers = require("ethers")
 const APIArtifact = require("../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json")
 const abi = APIArtifact.abi
 const bytecode = APIArtifact.bytecode
@@ -11,7 +11,8 @@ const bytecode = APIArtifact.bytecode
 async function createAPI(deployer){
     const APIContractFactory = new ethers.ContractFactory(abi, bytecode, deployer)
     const APIContract = await APIContractFactory.deploy(deployer.address)
-    APIContract.waitForDeployment()
+    //APIContract.waitForDeployment() -- Substituir provalvemente
+    APIContract.deployTransaction.wait(1)
 
     return APIContract
 }
@@ -21,8 +22,8 @@ async function createAPI(deployer){
  * @param {string} APIAddress - O endereço do contrato na rede Ethereum
  * @returns {BaseContract}
  */
-async function getAPI(APIAddress){
-    const APIContractFactory = await ethers.getContractFactory("InsuranceAPI")
+async function getAPI(APIAddress, deployer){
+    const APIContractFactory = new ethers.ContractFactory(abi, bytecode, deployer)
     const APIContract = await APIContractFactory.attach(APIAddress)
 
     return APIContract

@@ -1,7 +1,8 @@
-const { ethers } = require("hardhat")
+const ethers = require("ethers")
 const { networks } = require("../networks")
 const APIDeployment = require("./APIDeployment")
 const chainlinkFunctions = require("./chainlinkFunctions")
+const institutionArtifacts = require("../build/artifacts/contracts/Institution.sol/Institution.json")
 
 const sepoliaRegistrarAddress = '0x9a811502d843E5a03913d5A2cfb646c11463467A'
 const sepoliaRegistryAddress = '0x86EFBD0b6736Bed994962f9797049422A3A8E8Ad'
@@ -97,12 +98,17 @@ async function createInstitution(API, info) {
     return receipt
 }
 
-async function getInstitution(API, index) {
+async function getInstitution(institutionAddress, deployer) {
     // ** TODO: Implementar uma busca da instituição de forma mais inteligente **
     // A instituição dentro do mapeamento na API deve ser buscada de uma maneira mais inteligente
     // Isto é, com index não está bom o suficiente
-    const institutionAddress = await API.getInstitution(index)
-    const institutionFactory = await ethers.getContractFactory("Institution")
+    //const institutionAddress = await API.getInstitution(index)
+
+    const institutionFactory = new ethers.ContractFactory(
+        institutionArtifacts.abi,
+        institutionArtifacts.bytecode,
+        deployer
+    )
     const institutionContract = institutionFactory.attach(institutionAddress)
 
     return institutionContract
@@ -121,7 +127,7 @@ async function generateSigner() {
         throw new Error(`rpcUrl not provided  - check your environment variables`);
     }
 
-    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
     const signer = new ethers.Wallet(privateKey, provider);
 
@@ -130,9 +136,8 @@ async function generateSigner() {
 
 (async () => {
     if (require.main === module) {
-        const [ deployer ] = await ethers.getSigners()
-        console.log(deployer.provider)
-        //const deployer = await generateSigner()
+        //const [ deployer ] = await ethers.getSigners()
+        const deployer = await generateSigner()
 
         const APIflag = 0
         const institutionFlag = 0
@@ -162,7 +167,7 @@ async function generateSigner() {
                 console.log(`API address: ${API.target}`)
             }
             else {
-                API = await APIDeployment.getAPI(APIAddress)
+                API = await APIDeployment.getAPI(APIAddress, deployer)
             }
         }
         catch(e) {
@@ -175,8 +180,8 @@ async function generateSigner() {
                 console.log(receipt.logs)
             }
             else {
-                //institution = await getInstitution(API, institutionIndex)
-                institutionAddr = '0x39c5877498A94781Aff6772aFEBa05C3a6FF10C6'
+                institution = await getInstitution('0x39c5877498A94781Aff6772aFEBa05C3a6FF10C6', deployer)
+                //institutionAddr = '0x39c5877498A94781Aff6772aFEBa05C3a6FF10C6'
             }
         }
         catch(e) {
@@ -199,6 +204,8 @@ async function generateSigner() {
         try {
             if(subscriptionFlag) {
                 subscriptionId = await manager.createSubscription(institutionAddr)
+                
+                console.log(`Chainlink Functions subscription ID: ${subscriptionId}`)
             }
  
             if(fundSubscriptionFlag) { 
@@ -214,6 +221,8 @@ async function generateSigner() {
                     subscriptionId, 
                     juelsAmount
                 })
+
+                console.log(receipt)
             }
         }
         catch(e) {
@@ -222,27 +231,35 @@ async function generateSigner() {
 
         try {
             if(insuranceFlag) {
-                args = {
-                    deployer: institution,
-                    farmer: deployer, // Para fins de teste
-                    humidityLimit: 50,
-                    sampleMaxSize: 1,
-                    reparationValue: 1,
-                    interval: 10,
-                    router: sepoliaRouterAddress,
-                    subscriptionId,
-                    registryAddress: sepoliaRegistryAddress,
-                    linkTokenAddress: sepoliaLinkTokenAddress,
-                    registrarAddress: sepoliaRegistrarAddress,
-                    gaslimit: 300000
-                }
+                // TODO: Debugar comentários abaixo
 
-                const txWhiteList = await institution.whitelistAddr(deployer)
-                await txWhiteList.wait(1)
-                const txInsuranceCreation = await createInsuranceContract(institution, args)
-                const receiptInsuranceCreation = txInsuranceCreation.wait(1)
+                const name = await institution.institutionName()
 
-                console.log(`Insurance Contract address: ${receiptInsuranceCreation.logs}`)
+                console.log(name)
+
+                // args = {
+                //     deployer: institution,
+                //     farmer: deployer, // Para fins de teste
+                //     humidityLimit: 50,
+                //     sampleMaxSize: 1,
+                //     reparationValue: 1,
+                //     interval: 10,
+                //     router: sepoliaRouterAddress,
+                //     subscriptionId,
+                //     registryAddress: sepoliaRegistryAddress,
+                //     linkTokenAddress: sepoliaLinkTokenAddress,
+                //     registrarAddress: sepoliaRegistrarAddress,
+                //     gaslimit: 300000
+                // }
+
+                // const txWhiteList = await institution.whitelistAddr(deployer)
+                // await txWhiteList.wait(1)
+                // console.log('Farmer added to whitelist')
+
+                // const txInsuranceCreation = await createInsuranceContract(institution, args)
+                // const receiptInsuranceCreation = txInsuranceCreation.wait(1)
+
+                // console.log(`Insurance Contract address: ${receiptInsuranceCreation.logs}`)
             }
         }
         catch(e) {

@@ -24,11 +24,11 @@
   "homepage": "https://github.com/andrewunifei/insurance-on-ethereum#readme",
   "devDependencies": {
     "@chainlink/contracts": "0.8.0",
-    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "hardhat": "2.19.4"
+    "hardhat": "2.14.0",
+    "dotenv": "^16.3.1"
   },
   "dependencies": {
-    "@chainlink/env-enc": "1.0.5",
-    "@chainlink/functions-toolkit": "^0.2.8"
+    "@chainlink/functions-toolkit": "0.2.8",
+    "ethers": "5.7.2"
   }
 }
