@@ -59,10 +59,10 @@ contract Institution{
         // string memory _lat,
         // string memory _lon,
         address router,
-        IAutomationRegistryConsumer _registry,
+        uint64 _subscriptionId,
+        address _registry, //Era: IAutomationRegistryConsumer _registry
         address _sepoliaLINKAddress,
         address _sepoliaRegistrarAddress,
-        uint64 _subscriptionId,
         uint32 _fulfillGasLimit    
     ) external {
         require(whitelist[_farmer], "Endereco nao esta na lista branca");

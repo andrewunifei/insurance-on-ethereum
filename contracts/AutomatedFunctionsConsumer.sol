@@ -115,7 +115,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     uint256 _updateInterval,
     address router,
     uint64 _subscriptionId,
-    IAutomationRegistryConsumer _registry,
+    address _registry,
     address sepoliaLINKAddress, // Aqui para LinkTokenInterface
     address sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
     uint32 _fulfillGasLimit
@@ -128,7 +128,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     updateInterval = _updateInterval;
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
-    registry = _registry; // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
+    registry = IAutomationRegistryConsumer(_registry); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
     i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
 
     lastUpkeepTimeStamp = block.timestamp;
@@ -246,7 +246,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
       try 
         i_router.sendRequest(
           subscriptionId, 
-          requestCBOR,
+          encodedCBOR,
           FunctionsRequest.REQUEST_DATA_VERSION,
           gasLimit,
           donID
