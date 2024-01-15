@@ -4,7 +4,7 @@
 // Price feeds addresses: https://docs.chain.link/data-feeds/price-feeds/addresses
 // Chain IDs: https://chainlist.org/?testnets=true
 
-require("@chainlink/env-enc").config()
+require('dotenv').config()
 
 const DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS = 2
 const SHARED_DON_PUBLIC_KEY =

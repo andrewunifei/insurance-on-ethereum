@@ -1,4 +1,4 @@
-const { ethers } = require("hardhat")
+const ethers = require("ethers")
 
 async function whitelistFarmer(institution, farmerAddress){
     receipt = await institution.whitelistAddr(farmerAddress)

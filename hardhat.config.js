@@ -1,8 +1,8 @@
-require("@nomicfoundation/hardhat-toolbox")
+//require("@nomicfoundation/hardhat-toolbox")
 //require("hardhat-contract-sizer")
 //require("@openzeppelin/hardhat-upgrades")
 // require("./tasks")
-require("@chainlink/env-enc").config()
+require('dotenv').config()
 const { networks } = require("./networks")
 
 // Enable gas reporting (optional)
