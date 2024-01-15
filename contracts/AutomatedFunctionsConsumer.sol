@@ -120,7 +120,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     address sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
     uint32 _fulfillGasLimit
   ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
-    institution = msg.sender;
+    institution = _deployer;
     farmer = _farmer;
     humidityLimit = _humidityLimit; 
     subscriptionId = _subscriptionId;

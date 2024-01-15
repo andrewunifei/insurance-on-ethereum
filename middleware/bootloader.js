@@ -50,64 +50,29 @@ function setUpkeepParams(params){
  * @returns {Object}
  */
 async function createInsuranceContract(institution, args){
-
-    // // Relacionados com regras de negócio
-    // args.deployer,
-    // args.farmer,
-    // args.humidityLimit,
-    // // args.lat, // Passar pela lista args do Código Fonte da Requisição
-    // // args.lon, // Passar pela lista args do Código Fonte da Requisição
-    // args.sampleMaxSize,
-    // args.reparationValue,
-    // args.interval, // Também tem relação com Chainlink Automation
-
-    // // Relacionados com Chainlink Functions
-    // args.router, // sepoliaRouterAddress
-    // args.subscriptionId,
-
-    // // Relacionados com Chainlink Automation e Upkeep
-    // args.registryAddress,
-    // args.LinkTokenAddress,
-    // args.RegistrarAddress,
-
-    // // Relacionado com a rede Ethereum 
-    // args.gaslimit
-
-    console.log(args)
-
-    /*
-    'createInsuranceContract(
-        address,
-        address,
-        uint256,
-        uint256,
-        uint256,
-        uint256,
-        address,
-        uint64,
-        address,
-        address,
-        address,
-        uint32
-    )': [Function (anonymous)],
-    */
-
     const tx = await institution.createInsuranceContract(
+        // Relacionados com regras de negócio
         args.deployer,
         args.farmer,
         args.humidityLimit,
+        // args.lat, // Passar pela lista args do Código Fonte da Requisição
+        // args.lon, // Passar pela lista args do Código Fonte da Requisição
         args.sampleMaxSize,
         args.reparationValue,
-        args.interval,
-        args.router,
+        args.interval, // Também tem relação com Chainlink Automation
+
+        // Relacionados com Chainlink Functions
+        args.router, // sepoliaRouterAddress
         args.subscriptionId,
+
+        // Relacionados com Chainlink Automation e Upkeep
         args.registryAddress,
-        args.LinkTokenAddress,
-        args.RegistrarAddress,
+        args.linkTokenAddress,
+        args.registrarAddress,
+
+        // Relacionado com a rede Ethereum 
         args.gaslimit
     )
-
-    console.log('out')
 
     return tx
 }
@@ -164,16 +129,18 @@ async function generateSigner() {
 
     const signer = new ethers.Wallet(privateKey, provider);
 
-    return signer;
+    return [signer, provider];
 }
 
 (async () => {
     if (require.main === module) {
         //const [ deployer ] = await ethers.getSigners()
-        const deployer = await generateSigner()
-
-        //const APIAddress = '0x65a702A8b59Df0ED47388567B93FF71322F25BE4' // Antigo
-        const APIAddress = '0xB88b56107d445857c3029157053dE0f7F8f32aF0' // Novo
+        const result = await generateSigner()
+        const deployer = result[0]
+        const provider = result[1]
+        
+        //const APIAddress = '0xddc075C2d3837bE7b90f6c167ee796E3fE93c492' // Antigo
+        const APIAddress = '0x74Ce03A9655585754F50627F13359cc2F40D8FFB' // Novo
         const APIflag = 0
         const institutionFlag = 0
         const insuranceFlag = 1
@@ -197,7 +164,7 @@ async function generateSigner() {
         try {
             if(APIflag) {
                 API = await APIDeployment.createAPI(deployer)
-                console.log(`API: ${API}`)
+                console.log(API)
             }
             else {
                 API = await APIDeployment.getAPI(APIAddress, deployer)
@@ -218,9 +185,10 @@ async function generateSigner() {
                 // Isso é imprescindível para usar as funções da instituição depois da criação
             }
             else {
-                const institutionAddr = '0x2ea9e1c5035e7689abb8cfdf1ab771175cec8462'
+                // Endereço artigo: '0xa1625102c2b39f146e59513dc90e72f3bf380b2f'
+                const institutionAddr = '0x73d571dec95e9d52cd54e14267c74f51bf7f037b'
                 institution = await getInstitution(institutionAddr, deployer)
-                // Artigo: '0xd7404c521f66fb7e0944ebfd9fbd87e1b62d490a'
+                
             }
         }
         catch(e) {
@@ -272,36 +240,41 @@ async function generateSigner() {
 
         try {
             if(insuranceFlag) {
-                // TODO: Debugar comentários abaixo
+                // Enviar Ether para contrato através do Deployer 
+                // const tx = await deployer.sendTransaction(
+                //     {
+                //         to: institution.address,
+                //         value: ethers.utils.parseEther("0.2")
+                //     }
+                // )
 
-                const name = await institution.institutionName()
-
-                console.log(name)
-                console.log(institution.address)
-
+                // Coloca o endereço o fazendeiro na lista branca
                 // const txWhiteList = await institution.whitelistAddr(deployer.address)
                 // await txWhiteList.wait(1)
                 // console.log('Farmer added to whitelist')
 
+                const balance = await provider.getBalance(institution.address);
+                console.log(balance)
+
                 args = {
                     deployer: institution.address,
                     farmer: deployer.address, // Para fins de teste
-                    humidityLimit: ethers.utils.hexZeroPad(ethers.utils.hexlify(50), 256),
-                    sampleMaxSize: ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 256),
-                    reparationValue: ethers.utils.hexZeroPad(ethers.utils.hexlify(0), 256),
-                    interval: ethers.utils.hexZeroPad(ethers.utils.hexlify(10), 256),
+                    humidityLimit: 50,
+                    sampleMaxSize: 1,
+                    reparationValue: ethers.utils.parseEther("0"), // eth --> wei
+                    interval: 1,
                     router: sepoliaRouterAddress,
-                    subscriptionId: ethers.utils.hexZeroPad(ethers.utils.hexlify(subscriptionId), 64),
+                    subscriptionId,
                     registryAddress: sepoliaRegistryAddress,
                     linkTokenAddress: sepoliaLinkTokenAddress,
                     registrarAddress: sepoliaRegistrarAddress,
-                    gaslimit: ethers.utils.hexZeroPad(ethers.utils.hexlify(300000), 32)
+                    gaslimit: 300000
                 }
 
                 const txInsuranceCreation = await createInsuranceContract(institution, args)
-                const receiptInsuranceCreation = txInsuranceCreation.wait(1)
+                const receiptInsuranceCreation = await txInsuranceCreation.wait(1)
 
-                console.log(`Insurance Contract address: ${receiptInsuranceCreation.logs}`)
+                console.log(receiptInsuranceCreation.logs)
             
             }
         }
