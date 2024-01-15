@@ -1,6 +1,7 @@
 const ethers = require("ethers")
 const { networks } = require("../networks")
-const APIDeployment = require("./APIDeployment")
+const APIManager = require("./APIManager")
+const institutionManager = require("./institutionManager")
 const chainlinkFunctions = require("./chainlinkFunctions")
 const institutionArtifacts = require("../build/artifacts/contracts/Institution.sol/Institution.json")
 
@@ -42,65 +43,12 @@ function setUpkeepParams(params){
     }
 }
 
-/**
- * Cria um contrato de seguro a partir do contrato Institution
- * O endereço do contrato de seguro na rede Ethereum é armazenado na em uma lista na Institution
- * @param {BaseContract} institution 
- * @param {Object} args 
- * @returns {Object}
- */
-async function createInsuranceContract(institution, args){
-    const tx = await institution.createInsuranceContract(
-        // Relacionados com regras de negócio
-        args.deployer,
-        args.farmer,
-        args.humidityLimit,
-        // args.lat, // Passar pela lista args do Código Fonte da Requisição
-        // args.lon, // Passar pela lista args do Código Fonte da Requisição
-        args.sampleMaxSize,
-        args.reparationValue,
-        args.interval, // Também tem relação com Chainlink Automation
-
-        // Relacionados com Chainlink Functions
-        args.router, // sepoliaRouterAddress
-        args.subscriptionId,
-
-        // Relacionados com Chainlink Automation e Upkeep
-        args.registryAddress,
-        args.linkTokenAddress,
-        args.registrarAddress,
-
-        // Relacionado com a rede Ethereum 
-        args.gaslimit
-    )
-
-    return tx
-}
-
-/**
- * Cria uma instituição a partir do contrato InsuranceAPI
- * O endereço da instituição na rede Ethereum é armazenado em uma lista no InsuranceAPI
- * @param {BaseContract} API 
- * @param {Object} info Informações para identificar a instituição
- * @returns {ContractTransactionReceipt}
- */
-async function createInstitution(API, info) {
-    const tx = await API.createInstitution(
-        info.name
-    )
-
-    console.log(`\nWaiting 1 block for transaction ${tx.hash} to be confirmed...`)
-    const receipt = await tx.wait(1)
-    // receipt.logs --> Log do evento emitido pela API ao criar a instituição
-
-    return receipt
-}
-
 async function getInstitution(institutionAddress, deployer) {
     // ** TODO: Implementar uma busca da instituição de forma mais inteligente **
     // A instituição dentro do mapeamento na API deve ser buscada de uma maneira mais inteligente
     // Isto é, com index não está bom o suficiente
-    //const institutionAddress = await API.getInstitution(index)
+    // const institutionAddress = await API.getInstitution(index)
+    // COM ENDEREÇO TALVEZ FUNCIONE MELHOR
 
     const institutionFactory = new ethers.ContractFactory(
         institutionArtifacts.abi,
@@ -112,34 +60,34 @@ async function getInstitution(institutionAddress, deployer) {
     return institutionContract
 }
 
-async function generateSigner() {
-    // Initialize ethers signer and provider to interact with the contracts onchain
+/**
+ * Cria uma instância do provedor para comunicar com a blockchain
+ * Cria um assinante na rede ethereum
+ * @returns {Object}
+ */
+async function getSignerAndProvider() {
     const privateKey = process.env.PRIVATE_KEY;
     if(!privateKey) {
-        throw new Error("private key not provided - check your environment variables");
+        throw new Error("Private key not provided - check your environment variables");
     }
 
-    const rpcUrl = process.env.ETHEREUM_SEPOLIA_RPC_URL;
-
-    if(!rpcUrl) {
-        throw new Error(`rpcUrl not provided  - check your environment variables`);
+    const RPCURL = process.env.ETHEREUM_SEPOLIA_RPC_URL;
+    if(!RPCURL) {
+        throw new Error(`RPCURL not provided  - check your environment variables`);
     }
 
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-
+    const provider = new ethers.providers.JsonRpcProvider(RPCURL);
     const signer = new ethers.Wallet(privateKey, provider);
 
-    return [signer, provider];
+    return {signer, provider};
 }
 
 (async () => {
     if (require.main === module) {
-        //const [ deployer ] = await ethers.getSigners()
-        const result = await generateSigner()
-        const deployer = result[0]
-        const provider = result[1]
+        const result = await getSignerAndProvider()
+        const deployer = result.signer
+        const provider = result.provider
         
-        //const APIAddress = '0xddc075C2d3837bE7b90f6c167ee796E3fE93c492' // Antigo
         const APIAddress = '0x74Ce03A9655585754F50627F13359cc2F40D8FFB' // Novo
         const APIflag = 0
         const institutionFlag = 0
@@ -163,11 +111,11 @@ async function generateSigner() {
     
         try {
             if(APIflag) {
-                API = await APIDeployment.createAPI(deployer)
+                API = await APIManager.createAPI(deployer)
                 console.log(API)
             }
             else {
-                API = await APIDeployment.getAPI(APIAddress, deployer)
+                API = await APIManager.getAPI(APIAddress, deployer)
             }
         }
         catch(e) {
@@ -176,16 +124,15 @@ async function generateSigner() {
 
         try {
             if(institutionFlag) {
-                const receipt = await createInstitution(API, info)
-                console.log('Institution receipt.logs:')
+                const receipt = await APIManager.createInstitution(API, info)
                 console.log(receipt.logs)
+
                 return
                 // ** TODO: Trata o receipt.logs para extrair o endereço da instituição
                 // E popular a variável: institution = await getInstitution(institutionAddr) 
                 // Isso é imprescindível para usar as funções da instituição depois da criação
             }
             else {
-                // Endereço artigo: '0xa1625102c2b39f146e59513dc90e72f3bf380b2f'
                 const institutionAddr = '0x73d571dec95e9d52cd54e14267c74f51bf7f037b'
                 institution = await getInstitution(institutionAddr, deployer)
                 
@@ -244,11 +191,11 @@ async function generateSigner() {
                 // const tx = await deployer.sendTransaction(
                 //     {
                 //         to: institution.address,
-                //         value: ethers.utils.parseEther("0.2")
+                //         value: ethers.utils.parseEther("0") // eth --> wei
                 //     }
                 // )
 
-                // Coloca o endereço o fazendeiro na lista branca
+                // Coloca o endereço do fazendeiro na lista branca
                 // const txWhiteList = await institution.whitelistAddr(deployer.address)
                 // await txWhiteList.wait(1)
                 // console.log('Farmer added to whitelist')
@@ -271,10 +218,9 @@ async function generateSigner() {
                     gaslimit: 300000
                 }
 
-                const txInsuranceCreation = await createInsuranceContract(institution, args)
-                const receiptInsuranceCreation = await txInsuranceCreation.wait(1)
+                const receipt = await institutionManager.createInsuranceContract(institution, args)
 
-                console.log(receiptInsuranceCreation.logs)
+                console.log(receipt.logs)
             }
             else { 
                 console.log('Insurance contract address: 0xA63052DBaDc8997940C61FE740f35B253842bFF4')
@@ -285,14 +231,3 @@ async function generateSigner() {
         }
     }
 })()
-
-// Last institution deployed: 0x4a7c34fC0154192F88dd42275eF21b04f528A4F4
-
-// --------------------------------------------------------------------------------------
-
-// Upkeep address atual no Sepolia: 0xD1D9a8E041e3A83dd8E2E7C3740D8EbfBA1027ec
-// Insurance Contract para ser automatizado: 0x120993E01C33a1621AaF9ae79A7925Eb75492227
-// Upkeep address com LINK: 0x0CbA96BB715DE4D0152EA69258F198433C4Eeefc
-// insuranceAPI address: 0xDB7293E35E14FeaE30A4BAb8b360c9d2Db4e6c02
-
-// const farmerAddress = '0x1bE776c435Fb6243E3D8b22744f6e58f62A8B41E'
