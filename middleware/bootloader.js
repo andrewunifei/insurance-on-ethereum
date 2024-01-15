@@ -48,7 +48,7 @@ async function getInstitution(institutionAddress, deployer) {
     // A instituição dentro do mapeamento na API deve ser buscada de uma maneira mais inteligente
     // Isto é, com index não está bom o suficiente
     // const institutionAddress = await API.getInstitution(index)
-    // COM ENDEREÇO TALVEZ FUNCIONE MELHOR
+    // COM BUSCA POR ENDEREÇO TALVEZ FUNCIONE MELHOR
 
     const institutionFactory = new ethers.ContractFactory(
         institutionArtifacts.abi,
