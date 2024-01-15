@@ -143,7 +143,7 @@ async function generateSigner() {
         const APIAddress = '0x74Ce03A9655585754F50627F13359cc2F40D8FFB' // Novo
         const APIflag = 0
         const institutionFlag = 0
-        const insuranceFlag = 1
+        const insuranceFlag = 0
 
         // Chainlink Functions
         const subscriptionFlag = 0
@@ -275,7 +275,9 @@ async function generateSigner() {
                 const receiptInsuranceCreation = await txInsuranceCreation.wait(1)
 
                 console.log(receiptInsuranceCreation.logs)
-            
+            }
+            else { 
+                console.log('Insurance contract address: 0xA63052DBaDc8997940C61FE740f35B253842bFF4')
             }
         }
         catch(e) {
