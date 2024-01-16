@@ -148,50 +148,27 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   // }
 
   /**
-   * @notice Gera um novo objeto FunctionsRequest.Request codificado em CBOR
-   * @notice O modificador `pure` permite que o objeto CBOR seja gerado fora da blockchain, dessa forma a função se torna mais economica
-   * 
-   * @param source Código fonte em JavaScript para requisição
-   * @param secrets Informações sensíveis que serão escondidas da blockchain durante a transação
-   * @param args Lista de string com argumentos que podem ser acessados no código fonte
-   */
-  function generateRequest(
-    string calldata source,
-    bytes calldata secrets, 
-    string[] calldata args
-  ) public pure returns (bytes memory) {
-    FunctionsRequest.Request memory req;
-    req.initializeRequest(FunctionsRequest.Location.Inline, FunctionsRequest.CodeLanguage.JavaScript, source);
-    if (secrets.length > 0) {
-      req.addSecretsReference(secrets);
-    }
-
-    if (args.length > 0) {
-      req.setArgs(args);
-    }
-
-    return req.encodeCBOR();
-  }
-
-  /**
    * @notice Muda o estado do contrato para armazenar o objeto FunctionsRequest.Request codificado em CBOR
    * @notice Essas informações são enviados para a `performUpkeep` quando esta é chamada
    * 
+   * @param newRequestCBOR Bytes representando o objeto FunctionsRequest.Request codificado em CBOR
    * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos para cobranças de requisições
    * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
+   * @param _donID Novo ID do job
    * @param _updateInterval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
-   * @param newRequestCBOR Bytes representando o objeto FunctionsRequest.Request codificado em CBOR
    */
   function setRequest(
+    bytes calldata newRequestCBOR,
     uint64 _subscriptionId,
     uint32 _fulfillGasLimit,
-    uint256 _updateInterval,
-    bytes calldata newRequestCBOR
+    bytes32 _donID,
+    uint256 _updateInterval
   ) external onlyOwner {
-    updateInterval = _updateInterval;
+    requestCBOR = newRequestCBOR;
     subscriptionId = _subscriptionId;
     fulfillGasLimit = _fulfillGasLimit;
-    requestCBOR = newRequestCBOR;
+    donID = _donID;
+    updateInterval = _updateInterval;
   }
 
   /**

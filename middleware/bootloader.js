@@ -1,34 +1,9 @@
 const ethers = require("ethers")
-const { networks } = require("../networks")
+const blockchain = require("./blockchain")
 const APIManager = require("./APIManager")
 const institutionManager = require("./institutionManager")
 const chainlinkFunctions = require("./chainlinkFunctions")
 const institutionArtifacts = require("../build/artifacts/contracts/Institution.sol/Institution.json")
-
-const sepoliaRegistrarAddress = '0x9a811502d843E5a03913d5A2cfb646c11463467A'
-const sepoliaRegistryAddress = '0x86EFBD0b6736Bed994962f9797049422A3A8E8Ad'
-const sepoliaLinkTokenAddress = '0x779877A7B0D9E8603169DdbD7836e478b4624789'
-const sepoliaRouterAddress = '0xb83E47C2bC239B3bf370bc41e1459A34b41238D0'
-
-// Caso tenha problmeas com sepoliaRouterAddress, antes nós tínhamos:
-// oracle: networks["ethereumSepolia"]["functionsOracleProxy"],
-
-// ** TODO: Implementar a lógica de setAutoRequest em controller.js **
-//
-// async function setAuto(subid, insuranceContractAddr, gaslimit, interval){
-//     const subid = 741
-
-//     params = {
-//         simulate: false,
-//         configpath: `${__dirname}/../Functions-request-config.js`,
-//         contract: insuranceContractAddr,
-//         subid,
-//         gaslimit,
-//         interval
-//     }
-
-//     await setAutoRequest(insuranceContractAddr, params)
-// }
 
 function setUpkeepParams(params){
     return {
@@ -60,31 +35,9 @@ async function getInstitution(institutionAddress, deployer) {
     return institutionContract
 }
 
-/**
- * Cria uma instância do provedor para comunicar com a blockchain
- * Cria um assinante na rede ethereum
- * @returns {Object}
- */
-async function getSignerAndProvider() {
-    const privateKey = process.env.PRIVATE_KEY;
-    if(!privateKey) {
-        throw new Error("Private key not provided - check your environment variables");
-    }
-
-    const RPCURL = process.env.ETHEREUM_SEPOLIA_RPC_URL;
-    if(!RPCURL) {
-        throw new Error(`RPCURL not provided  - check your environment variables`);
-    }
-
-    const provider = new ethers.providers.JsonRpcProvider(RPCURL);
-    const signer = new ethers.Wallet(privateKey, provider);
-
-    return {signer, provider};
-}
-
 (async () => {
     if (require.main === module) {
-        const result = await getSignerAndProvider()
+        const result = await blockchain.interaction()
         const deployer = result.signer
         const provider = result.provider
         
@@ -145,8 +98,8 @@ async function getSignerAndProvider() {
         try {
             manager = await chainlinkFunctions.createManager(
                 deployer,
-                sepoliaLinkTokenAddress,
-                sepoliaRouterAddress
+                blockchain.sepoliaChainlink.LinkTokenAddress,
+                blockchain.sepoliaChainlink.routerAddress
             )
         }
         catch(e) {
@@ -161,7 +114,6 @@ async function getSignerAndProvider() {
             }
             else {
                 subscriptionId = 1895
-                // Antigo: 1894 
             }
  
             if(fundSubscriptionFlag) { 
@@ -210,11 +162,11 @@ async function getSignerAndProvider() {
                     sampleMaxSize: 1,
                     reparationValue: ethers.utils.parseEther("0"), // eth --> wei
                     interval: 1,
-                    router: sepoliaRouterAddress,
+                    router: blockchain.sepoliaChainlink.routerAddress,
                     subscriptionId,
-                    registryAddress: sepoliaRegistryAddress,
-                    linkTokenAddress: sepoliaLinkTokenAddress,
-                    registrarAddress: sepoliaRegistrarAddress,
+                    registryAddress: blockchain.sepoliaChainlink.registryAddress,
+                    linkTokenAddress: blockchain.sepoliaChainlink.linkTokenAddress,
+                    registrarAddress: blockchain.sepoliaChainlink.registrarAddress,
                     gaslimit: 300000
                 }
 
