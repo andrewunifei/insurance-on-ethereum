@@ -13,11 +13,10 @@ const {
     CodeLanguage,
 } = require("@chainlink/functions-toolkit")
 
-const insuranceContractAddress = '0xA63052DBaDc8997940C61FE740f35B253842bFF4'
+const insuranceContractAddress = ''
 const subscriptionId = 0
 
-async function setDonHostedSecrets() {
-    const secrets = { apiKey: process.env.OPEN_WEATHER_API_KEY }
+async function setDonHostedSecrets(secrets, parameters) {
     const donId = 'fun-ethereum-sepolia-1'
 
     // DON-Hosted Secrets
@@ -35,7 +34,7 @@ async function setDonHostedSecrets() {
     const secretsManager = new SecretsManager(
         {
             signer,
-            functionsRouterAddress: blockchain.sepoliaChainlink.routerAddress,
+            functionsRouterAddress: blockchain.sepolia.chainlinkRouterAddress,
             donId
         }
     )
@@ -74,9 +73,11 @@ async function setRequest() {
     const { signer } = await blockchain.interaction()
 
     const computation = '../rules/computation.js'
-    const args = ["44.34", "10.99", '']
-    const donHostedEncryptedSecretsReference = await setDonHostedSecrets()
+    const args = ["44.34", "10.99"]
     const gasLimit = 300000
+
+    const secrets = { apiKey: process.env.OPEN_WEATHER_API_KEY }
+    const donHostedEncryptedSecretsReference = await setDonHostedSecrets(secrets)
 
     const insuranceContract = new ethers.Contract(
         insuranceContractAddress,
@@ -103,5 +104,5 @@ async function setRequest() {
         ethers.utils.formatBytes32String(donId)
     )
 
-    console.log(`\n✅ Automated Functions request settings updated! Transaction hash ${transaction.hash} - Check the explorer ${explorerUrl}/tx/${transaction.hash}`);
+    console.log(`\n✅ Automated Functions request settings updated! Transaction hash ${tx.hash} - Check the explorer ${explorerUrl}/tx/${tx.hash}`);
 }

@@ -4,7 +4,7 @@ if(secrets.apiKey == "") {
 
 let dataStructure = []
 const url = `https://api.openweathermap.org/data/2.5/weather?lat=${args[0]}&lon=${args[1]}&appid=${secrets.apiKey}`
-// Agregar o resultado de múltiplas APIS para aumentar a descentralização
+// Agregar o resultado de múltiplas APIs para aumentar a descentralização
 
 const response = await Functions.makeHttpRequest({url})
 

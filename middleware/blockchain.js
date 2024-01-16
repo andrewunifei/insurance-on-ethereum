@@ -3,11 +3,11 @@
 /**
  * Objeto com endereços relevantes de contratos Chainlink
  */
-const sepoliaChainlink = {
-    registrarAddress: '0x9a811502d843E5a03913d5A2cfb646c11463467A',
-    registryAddress: '0x86EFBD0b6736Bed994962f9797049422A3A8E8Ad',
-    linkTokenAddress: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
-    routerAddress: '0xb83E47C2bC239B3bf370bc41e1459A34b41238D0'
+const sepolia = {
+    chainlinkRegistrarAddress: '0x9a811502d843E5a03913d5A2cfb646c11463467A',
+    chainlinkRegistryAddress: '0x86EFBD0b6736Bed994962f9797049422A3A8E8Ad',
+    chainlinkLinkTokenAddress: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
+    chainlinkRouterAddress: '0xb83E47C2bC239B3bf370bc41e1459A34b41238D0'
 }
 
 const sepoliaExplorerURL = 'https://sepolia.etherscan.io/'
@@ -35,7 +35,7 @@ async function interaction() {
 }
 
 module.exports = {
-    sepoliaChainlink,
+    sepolia,
     sepoliaExplorerURL,
     interaction
 }

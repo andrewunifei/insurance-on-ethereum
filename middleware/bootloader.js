@@ -98,8 +98,8 @@ async function getInstitution(institutionAddress, deployer) {
         try {
             manager = await chainlinkFunctions.createManager(
                 deployer,
-                blockchain.sepoliaChainlink.LinkTokenAddress,
-                blockchain.sepoliaChainlink.routerAddress
+                blockchain.sepolia.chainlinkLinkTokenAddress,
+                blockchain.sepolia.chainlinkRouterAddress
             )
         }
         catch(e) {
@@ -162,11 +162,11 @@ async function getInstitution(institutionAddress, deployer) {
                     sampleMaxSize: 1,
                     reparationValue: ethers.utils.parseEther("0"), // eth --> wei
                     interval: 1,
-                    router: blockchain.sepoliaChainlink.routerAddress,
+                    router: blockchain.sepolia.chainlinkRouterAddress,
                     subscriptionId,
-                    registryAddress: blockchain.sepoliaChainlink.registryAddress,
-                    linkTokenAddress: blockchain.sepoliaChainlink.linkTokenAddress,
-                    registrarAddress: blockchain.sepoliaChainlink.registrarAddress,
+                    registryAddress: blockchain.sepolia.chainlinkRegistryAddress,
+                    linkTokenAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
+                    registrarAddress: blockchain.sepolia.chainlinkRegistrarAddress,
                     gaslimit: 300000
                 }
 
