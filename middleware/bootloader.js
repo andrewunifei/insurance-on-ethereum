@@ -62,7 +62,7 @@ async function getInstitution(institutionAddress, deployer) {
 
 /**
  * Cria uma instância do provedor para comunicar com a blockchain
- * Cria um assinante na rede ethereum
+ * Cria um assinante na rede Ethereum
  * @returns {Object}
  */
 async function getSignerAndProvider() {
