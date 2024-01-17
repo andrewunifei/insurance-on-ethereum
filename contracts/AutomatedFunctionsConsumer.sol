@@ -22,6 +22,21 @@ interface IAutomationRegistryConsumer {
   function withdrawFunds(uint256 id, address to) external;
 }
 
+interface UpkeepInterface {
+  function register(RegistrationParams calldata params) external returns (uint256);
+}
+
+struct RegistrationParams {
+    string name;
+    bytes encryptedEmail;
+    address upkeepContract;
+    uint32 gasLimit;
+    address adminAddress;
+    bytes checkData;
+    bytes offchainConfig;
+    uint96 amount;
+}
+
 /**
  * @title Automated Functions Consumer
  * 
@@ -47,7 +62,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   // Configuracao da automacao
   IAutomationRegistryConsumer public immutable registry;
   Upkeep public i_upkeep;
-  uint256 upkeepID;
+  uint256 upkeepId;
   bytes public request;
   uint32 public gasLimit;
   bytes32 public donID;
@@ -86,7 +101,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     );
 
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
-  event upkeepRegistered(uint256 indexed upkeepID);
+  event upkeepRegistered(uint256 upkeepId);
 
   /**
    * @notice Reverte se chamado por qualquer um menos o repositório de automação.
@@ -141,11 +156,11 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Registrando um novo upkeep
    */
 
-  // function registerUpkeep(params) public {
-  //   upkeepID = i_upkeep.register(params);
+  function registerUpkeep(RegistrationParams calldata params) public {
+    upkeepId = UpkeepInterface(address(i_upkeep)).register(params);
 
-  //   emit upkeepRegistered(upkeepID);
-  // }
+    emit upkeepRegistered(upkeepId);
+  }
 
   /**
    * @notice Muda o estado do contrato para armazenar o objeto FunctionsRequest.Request codificado em CBOR
@@ -210,7 +225,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     }
     // Se a quantidade de amostras é o suficiente:
     else{ 
-      require(upkeepID != 0, "Upkeep not registered");
+      require(upkeepId != 0, "Upkeep not registered");
 
       controlFlag = 1;
 
@@ -238,7 +253,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
         emit RequestRevertedWithoutErrorMsg(data);
       }
 
-      registry.pauseUpkeep(upkeepID);
+      registry.pauseUpkeep(upkeepId);
     }
   }
 

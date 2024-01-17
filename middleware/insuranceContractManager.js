@@ -3,15 +3,14 @@ const insuranceArtifacts = require("../build/artifacts/contracts/InsuranceAPI.so
 
 // const { addClientConsumerToSubscription } = require("../tasks/Functions-billing/add")
 
-async function getInsuranceContract(institution, id, deployer){
+async function getInsuranceContract(insuranceContractAddr){
     // Stored in institution
-    const insuranceContractAddr = await institution.getInsurance(id);
     const insuranceFactory = new ethers.ContractFactory(
         insuranceArtifacts.abi,
         insuranceArtifacts.bytecode,
         deployer
     )
-    const insuranceContract = await insuranceFactory.attach(insuranceContractAddr);
+    const insuranceContract = insuranceFactory.attach(insuranceContractAddr);
     console.log(`Endereço do seguro: ${insuranceContract.address}`)
 
     return insuranceContract

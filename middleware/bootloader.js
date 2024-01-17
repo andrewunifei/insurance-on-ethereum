@@ -4,6 +4,7 @@ const APIManager = require("./APIManager")
 const institutionManager = require("./institutionManager")
 const chainlinkFunctions = require("./chainlinkFunctions")
 const institutionArtifacts = require("../build/artifacts/contracts/Institution.sol/Institution.json")
+const insuranceContractManager = require("./insuranceContractManager")
 
 function setUpkeepParams(params){
     return {
@@ -44,7 +45,7 @@ async function getInstitution(institutionAddress, deployer) {
         const APIAddress = '0x74Ce03A9655585754F50627F13359cc2F40D8FFB' // Novo
         const APIflag = 0
         const institutionFlag = 0
-        const insuranceFlag = 0
+        const insuranceFlag = 1
 
         // Chainlink Functions
         const subscriptionFlag = 0
@@ -61,6 +62,7 @@ async function getInstitution(institutionAddress, deployer) {
         let manager
         let args
         let institutionAddr
+        let insuranceContractAddress
     
         try {
             if(APIflag) {
@@ -172,10 +174,35 @@ async function getInstitution(institutionAddress, deployer) {
 
                 const receipt = await institutionManager.createInsuranceContract(institution, args)
 
+                // ** TODO: Tratar o receipt.logs **
                 console.log(receipt.logs)
+
+                return
             }
             else { 
+                insuranceContractAddress = ''
                 console.log('Insurance contract address: 0xA63052DBaDc8997940C61FE740f35B253842bFF4')
+            }
+
+            try {
+                if(upkeepFlag) {
+                    upkeepParams = {
+                        name: 'upkeep-teste',
+                        encryptedEmail: ethers.utils.hexlify([]),
+                        upkeepContract: insuranceContractAddress,
+                        gasLimit: 300000,
+                        adminAddress: deployer, // Pode ser a instituição (talvez)
+                        checkData: ethers.utils.hexlify([]),
+                        offchainConfig: ethers.utils.hexlify([]),
+                        amount: ethers.utils.parseEther(String(5)) // LINK Token
+                    }
+
+                    insuranceContract = insuranceContractManager.getInsuranceContract(
+                        insuranceContractAddress
+                    )
+
+                    tx = await insuranceContract.registerUpkeep(upkeepParams)
+                }
             }
         }
         catch(e) {

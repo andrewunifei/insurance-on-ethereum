@@ -34,15 +34,15 @@ contract Upkeep {
         i_registrar = registrar;
     }
 
-    function register(RegistrationParams memory params) public returns (uint256) {
+    function register(RegistrationParams calldata params) external returns (uint256) {
         LinkTokenInterface(i_link).approve(i_registrar, params.amount);
 
-        uint256 upkeepID = AutomationRegistrarInterface(i_registrar).registerUpkeep(params);
+        uint256 upkeepId = AutomationRegistrarInterface(i_registrar).registerUpkeep(params);
 
-        if (upkeepID != 0) {
-            activeUpkeeps[msg.sender].push(upkeepID);
+        if (upkeepId != 0) {
+            activeUpkeeps[msg.sender].push(upkeepId);
 
-            return upkeepID;
+            return upkeepId;
         } else {
             revert("auto-approve disabled");
         }
