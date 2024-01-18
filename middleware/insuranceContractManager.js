@@ -1,15 +1,11 @@
 const ethers = require("ethers")
-const insuranceArtifacts = require("../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json")
+const insuranceArtifacts = require("../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json")
+const abi = insuranceArtifacts.abi
+const bytecode = insuranceArtifacts.bytecode
 
-// const { addClientConsumerToSubscription } = require("../tasks/Functions-billing/add")
-
-async function getInsuranceContract(insuranceContractAddr){
+async function getInsuranceContract(insuranceContractAddr, deployer){
     // Stored in institution
-    const insuranceFactory = new ethers.ContractFactory(
-        insuranceArtifacts.abi,
-        insuranceArtifacts.bytecode,
-        deployer
-    )
+    const insuranceFactory = new ethers.ContractFactory(abi, bytecode, deployer)
     const insuranceContract = insuranceFactory.attach(insuranceContractAddr);
     console.log(`Endereço do seguro: ${insuranceContract.address}`)
 
@@ -17,7 +13,7 @@ async function getInsuranceContract(insuranceContractAddr){
 }
 
 // TODO: Fix this function
-async function addInsuranceToSub(subid, insuranceContractAddr){
+async function addInsuranceToSub(manager, subid, insuranceContractAddr){
     await addClientConsumerToSubscription(subid, insuranceContractAddr)
     console.log(`Contrato de seguro ${insuranceContractAddr} adicionado a subscrição ${subid} com sucesso.`)
 }

@@ -32,7 +32,9 @@ struct RegistrationParams {
     address upkeepContract;
     uint32 gasLimit;
     address adminAddress;
+    uint8 triggerType;
     bytes checkData;
+    bytes triggerConfig;
     bytes offchainConfig;
     uint96 amount;
 }
@@ -102,6 +104,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
 
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
   event upkeepRegistered(uint256 upkeepId);
+  event upkeepCreated(address upkeepAddress);
 
   /**
    * @notice Reverte se chamado por qualquer um menos o repositório de automação.
@@ -145,7 +148,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     reparationValue = _reparationValue;
     registry = IAutomationRegistryConsumer(_registry); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
     i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
-
+    emit upkeepCreated(address(i_upkeep));
     lastUpkeepTimeStamp = block.timestamp;
   }
 

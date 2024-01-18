@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/AutomatedFunctionsConsumer.sol": {
-      "lastModificationDate": 1705512525917,
-      "contentHash": "6fcde10e7971ffd4c6b47154f6ecea19",
+      "lastModificationDate": 1705583342880,
+      "contentHash": "6bdb3c6bd5d736d14b0584954ef78c8e",
       "sourceName": "contracts/AutomatedFunctionsConsumer.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -42,12 +42,13 @@
       ],
       "artifacts": [
         "AutomatedFunctionsConsumer",
-        "IAutomationRegistryConsumer"
+        "IAutomationRegistryConsumer",
+        "UpkeepInterface"
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/Upkeep.sol": {
-      "lastModificationDate": 1705512221149,
-      "contentHash": "06f8484488e8a9877a1d3a18062e251a",
+      "lastModificationDate": 1705583347176,
+      "contentHash": "f0cfd9bf90386bb80a1274c60b034656",
       "sourceName": "contracts/Upkeep.sol",
       "solcConfig": {
         "version": "0.8.19",

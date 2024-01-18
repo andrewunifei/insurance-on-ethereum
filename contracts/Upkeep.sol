@@ -10,7 +10,9 @@ struct RegistrationParams {
     address upkeepContract;
     uint32 gasLimit;
     address adminAddress;
+    uint8 triggerType;
     bytes checkData;
+    bytes triggerConfig;
     bytes offchainConfig;
     uint96 amount;
 }

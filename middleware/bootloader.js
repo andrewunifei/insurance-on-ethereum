@@ -6,6 +6,10 @@ const chainlinkFunctions = require("./chainlinkFunctions")
 const institutionArtifacts = require("../build/artifacts/contracts/Institution.sol/Institution.json")
 const insuranceContractManager = require("./insuranceContractManager")
 
+const upkeepArtifact = require('../build/artifacts/contracts/Upkeep.sol/Upkeep.json')
+const abi = upkeepArtifact.abi
+const bytecode = upkeepArtifact.bytecode
+
 function setUpkeepParams(params){
     return {
         name: params.name,
@@ -45,11 +49,15 @@ async function getInstitution(institutionAddress, deployer) {
         const APIAddress = '0x74Ce03A9655585754F50627F13359cc2F40D8FFB' // Novo
         const APIflag = 0
         const institutionFlag = 0
-        const insuranceFlag = 1
+        const insuranceFlag = 0
 
         // Chainlink Functions
         const subscriptionFlag = 0
         const fundSubscriptionFlag = 0
+        const addToSubFlag = 0
+
+        // Chainlink Automation 
+        const upkeepFlag = 1
 
         let API
         let institution
@@ -60,7 +68,6 @@ async function getInstitution(institutionAddress, deployer) {
         let subscriptionId
         let juelsAmount = String(BigInt(10**18)) // 1 LINK
         let manager
-        let args
         let institutionAddr
         let insuranceContractAddress
     
@@ -157,7 +164,7 @@ async function getInstitution(institutionAddress, deployer) {
                 const balance = await provider.getBalance(institution.address);
                 console.log(balance)
 
-                args = {
+                const args = {
                     deployer: institution.address,
                     farmer: deployer.address, // Para fins de teste
                     humidityLimit: 50,
@@ -175,34 +182,74 @@ async function getInstitution(institutionAddress, deployer) {
                 const receipt = await institutionManager.createInsuranceContract(institution, args)
 
                 // ** TODO: Tratar o receipt.logs **
-                console.log(receipt.logs)
+                console.log(receipt.events)
 
                 return
             }
             else { 
-                insuranceContractAddress = ''
-                console.log('Insurance contract address: 0xA63052DBaDc8997940C61FE740f35B253842bFF4')
+                insuranceContractAddress = '0xb70eE5899c2Fe65256587686918879a4c030bbf9'
+
+                console.log('Current Insurance Contract Address: 0xb70eE5899c2Fe65256587686918879a4c030bbf9')
+                
+                // Antigo insuraneContractAddress = 0x3dc8420f89f74997a1345a6f80627ea6e5b670ae
+            }
+
+            try {
+                if(addToSubFlag) {
+                    const tx = await manager.addConsumer(
+                        {
+                            subscriptionId,
+                            consumerAddress: insuranceContractAddress
+                        }
+                    )
+
+                    console.log('Consumer added to subscription')
+                }
+            }
+            catch(e) {
+                throw new Error(e)
             }
 
             try {
                 if(upkeepFlag) {
-                    upkeepParams = {
+                    const upkeepParams = {
                         name: 'upkeep-teste',
                         encryptedEmail: ethers.utils.hexlify([]),
                         upkeepContract: insuranceContractAddress,
                         gasLimit: 300000,
-                        adminAddress: deployer, // Pode ser a instituição (talvez)
+                        adminAddress: deployer.address, // Pode ser a instituição (talvez)
+                        triggerType: 0,
                         checkData: ethers.utils.hexlify([]),
+                        triggerConfig: ethers.utils.hexlify([]),
                         offchainConfig: ethers.utils.hexlify([]),
                         amount: ethers.utils.parseEther(String(5)) // LINK Token
                     }
 
-                    insuranceContract = insuranceContractManager.getInsuranceContract(
-                        insuranceContractAddress
+                    let insuranceContract = await insuranceContractManager.getInsuranceContract(
+                        insuranceContractAddress, deployer
                     )
 
-                    tx = await insuranceContract.registerUpkeep(upkeepParams)
+                    const upkeepAddr = await insuranceContract.i_upkeep()
+
+                    const upkeepFactory = new ethers.ContractFactory(
+                        abi,
+                        bytecode,
+                        deployer 
+                    )
+                    const upkeep = upkeepFactory.attach(upkeepAddr)
+
+                    const tx = await upkeep.register(upkeepParams)
+                    
+                    console.log(tx)
+
+                    // const tx = await insuranceContract.registerUpkeep(upkeepParams)
+                    // const receipt = tx.wait(1)
+
+                    // console.log(receipt.logs)
                 }
+            }
+            catch(e) {
+                throw new Error(e)
             }
         }
         catch(e) {
