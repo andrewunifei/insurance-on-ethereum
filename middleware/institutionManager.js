@@ -35,8 +35,8 @@ async function createInsuranceContract(institution, args){
  */
 async function whitelistFarmer(institution, farmerAddress){
     const tx = await institution.whitelistAddr(farmerAddress)
-    const receipt = await tx.wait(1)
     console.log(`\nAdding to white list: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
+    const receipt = await tx.wait(1)
     console.log(`\nFarmer ${farmerAddress} added to white list of institution ${institution.address}`)
 
     return receipt
@@ -50,8 +50,8 @@ async function whitelistFarmer(institution, farmerAddress){
  */
 async function blacklistFarmer(institution, farmerAddress){
     const tx = await institution.blacklistAddr(farmerAddress)
-    const receipt = await tx.wait(1)
     console.log(`\nRemoving from white list: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
+    const receipt = await tx.wait(1)
     console.log(`\nFarmer ${farmerAddress} removed from white list of institution ${institution.address}`)
 
     return receipt
