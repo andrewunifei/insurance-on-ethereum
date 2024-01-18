@@ -3,12 +3,15 @@ const blockchain = require("./blockchain")
 const APIManager = require("./APIManager")
 const institutionManager = require("./institutionManager")
 const chainlinkFunctions = require("./chainlinkFunctions")
-const institutionArtifacts = require("../build/artifacts/contracts/Institution.sol/Institution.json")
 const insuranceContractManager = require("./insuranceContractManager")
+
+const institutionArtifacts = require("../build/artifacts/contracts/Institution.sol/Institution.json")
 
 const upkeepArtifact = require('../build/artifacts/contracts/Upkeep.sol/Upkeep.json')
 const abi = upkeepArtifact.abi
 const bytecode = upkeepArtifact.bytecode
+
+const LINKArtifacts = require("../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json")
 
 function setUpkeepParams(params){
     return {
@@ -222,30 +225,68 @@ async function getInstitution(institutionAddress, deployer) {
                         checkData: ethers.utils.hexlify([]),
                         triggerConfig: ethers.utils.hexlify([]),
                         offchainConfig: ethers.utils.hexlify([]),
-                        amount: ethers.utils.parseEther(String(5)) // LINK Token
+                        amount: ethers.utils.parseEther(String(5)) // LINK --> Juels
                     }
 
                     let insuranceContract = await insuranceContractManager.getInsuranceContract(
                         insuranceContractAddress, deployer
                     )
 
-                    const upkeepAddr = await insuranceContract.i_upkeep()
+                    // const upkeepAddr = await insuranceContract.i_upkeep()
+
+                    // const upkeepFactory = new ethers.ContractFactory(
+                    //     abi,
+                    //     bytecode,
+                    //     deployer 
+                    // )
+                    // const upkeep = upkeepFactory.attach(upkeepAddr)
+
+                    // const tx = await upkeep.register(upkeepParams)
+                    
+                    // console.log(tx)
+
+                    // const tx = await insuranceContract.registerUpkeep(upkeepParams)
+                    // const receipt = tx.wait(1)
+
+                    // console.log(receipt.logs)
+
+                    const LINKFactory = new ethers.ContractFactory(
+                        LINKArtifacts.abi,
+                        LINKArtifacts.bytecode,
+                        deployer
+                    )
+                    const LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress)
 
                     const upkeepFactory = new ethers.ContractFactory(
                         abi,
                         bytecode,
                         deployer 
                     )
-                    const upkeep = upkeepFactory.attach(upkeepAddr)
+
+                    // const upkeep = await upkeepFactory.deploy(
+                    //     blockchain.sepolia.chainlinkLinkTokenAddress,
+                    //     blockchain.sepolia.chainlinkRegistrarAddress,
+                    //     ethers.utils.parseEther(String(10)) // LINK --> Juels
+                    // )
+                    // upkeep.deployTransaction.wait(1)
+
+                    const upkeepAddress = '0x28CA1Ad8B5b5AF4E9ccc57543f914CA032f95e05'
+                    const upkeep = upkeepFactory.attach(upkeepAddress)
+
+                    // console.log(`Upkeep address: ${upkeep.address}`)
+
+                    // const approveTx = await LINK.approve(upkeep.address, ethers.utils.parseEther(String(10)))
+                    // const approveReceipt = await approveTx.wait(1)
+                    // console.log(approveReceipt)
+
+                    // const tx = await upkeep.fund()
+                    // const receipt = await tx.wait(1)
+                    // console.log(receipt)
 
                     const tx = await upkeep.register(upkeepParams)
-                    
-                    console.log(tx)
+                    const receipt = await tx.wait(1)
 
-                    // const tx = await insuranceContract.registerUpkeep(upkeepParams)
-                    // const receipt = tx.wait(1)
-
-                    // console.log(receipt.logs)
+                    console.log(receipt)
                 }
             }
             catch(e) {

@@ -147,10 +147,15 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
     registry = IAutomationRegistryConsumer(_registry); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
-    i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
-    emit upkeepCreated(address(i_upkeep));
+    // i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
+    // emit upkeepCreated(address(i_upkeep));
     lastUpkeepTimeStamp = block.timestamp;
   }
+
+  // ** TODO: function createUpkeep() public returns (uint256)**
+  //
+  // 
+  //
 
   // Se eu não me engano eu movi a lógica da criação do upkeep para dentro do contrato
   // porque eu quero que o contrato seja capaz de controlar a upkeep (pausar por exemplo)
@@ -159,11 +164,11 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Registrando um novo upkeep
    */
 
-  function registerUpkeep(RegistrationParams calldata params) public {
-    upkeepId = UpkeepInterface(address(i_upkeep)).register(params);
+  // function registerUpkeep(RegistrationParams calldata params) public {
+  //   upkeepId = UpkeepInterface(address(i_upkeep)).register(params);
 
-    emit upkeepRegistered(upkeepId);
-  }
+  //   emit upkeepRegistered(upkeepId);
+  // }
 
   /**
    * @notice Muda o estado do contrato para armazenar o objeto FunctionsRequest.Request codificado em CBOR
