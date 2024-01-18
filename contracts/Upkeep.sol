@@ -2,7 +2,6 @@
 pragma solidity ^0.8.7;
 
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
-import "hardhat/console.sol"; // Comentar essa linha 
 
 struct RegistrationParams {
     string name;
@@ -10,7 +9,9 @@ struct RegistrationParams {
     address upkeepContract;
     uint32 gasLimit;
     address adminAddress;
+    uint8 triggerType;
     bytes checkData;
+    bytes triggerConfig;
     bytes offchainConfig;
     uint96 amount;
 }
@@ -25,24 +26,31 @@ contract Upkeep {
     address public immutable i_link;
     address public immutable i_registrar;
     mapping (address => uint256[]) activeUpkeeps;
+    uint96 public i_amount;
 
     constructor(
         address link,
-        address registrar
+        address registrar,
+        uint96 amount
     ) {
         i_link = link;
         i_registrar = registrar;
+        i_amount = amount;
     }
 
-    function register(RegistrationParams memory params) public returns (uint256) {
+    function fund() public {
+        LinkTokenInterface(i_link).transferFrom(msg.sender, address(this), i_amount);
+    } 
+
+    function register(RegistrationParams calldata params) external returns (uint256) {
         LinkTokenInterface(i_link).approve(i_registrar, params.amount);
 
-        uint256 upkeepID = AutomationRegistrarInterface(i_registrar).registerUpkeep(params);
+        uint256 upkeepId = AutomationRegistrarInterface(i_registrar).registerUpkeep(params);
 
-        if (upkeepID != 0) {
-            activeUpkeeps[msg.sender].push(upkeepID);
+        if (upkeepId != 0) {
+            activeUpkeeps[msg.sender].push(upkeepId);
 
-            return upkeepID;
+            return upkeepId;
         } else {
             revert("auto-approve disabled");
         }

@@ -22,6 +22,23 @@ interface IAutomationRegistryConsumer {
   function withdrawFunds(uint256 id, address to) external;
 }
 
+interface UpkeepInterface {
+  function register(RegistrationParams calldata params) external returns (uint256);
+}
+
+struct RegistrationParams {
+    string name;
+    bytes encryptedEmail;
+    address upkeepContract;
+    uint32 gasLimit;
+    address adminAddress;
+    uint8 triggerType;
+    bytes checkData;
+    bytes triggerConfig;
+    bytes offchainConfig;
+    uint96 amount;
+}
+
 /**
  * @title Automated Functions Consumer
  * 
@@ -47,7 +64,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   // Configuracao da automacao
   IAutomationRegistryConsumer public immutable registry;
   Upkeep public i_upkeep;
-  uint256 upkeepID;
+  uint256 upkeepId;
   bytes public request;
   uint32 public gasLimit;
   bytes32 public donID;
@@ -86,7 +103,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     );
 
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
-  event upkeepRegistered(uint256 indexed upkeepID);
+  event upkeepRegistered(uint256 upkeepId);
+  event upkeepCreated(address upkeepAddress);
 
   /**
    * @notice Reverte se chamado por qualquer um menos o repositório de automação.
@@ -129,10 +147,15 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
     registry = IAutomationRegistryConsumer(_registry); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
-    i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
-
+    // i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
+    // emit upkeepCreated(address(i_upkeep));
     lastUpkeepTimeStamp = block.timestamp;
   }
+
+  // ** TODO: function createUpkeep() public returns (uint256)**
+  //
+  // 
+  //
 
   // Se eu não me engano eu movi a lógica da criação do upkeep para dentro do contrato
   // porque eu quero que o contrato seja capaz de controlar a upkeep (pausar por exemplo)
@@ -141,57 +164,34 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Registrando um novo upkeep
    */
 
-  // function registerUpkeep(params) public {
-  //   upkeepID = i_upkeep.register(params);
+  // function registerUpkeep(RegistrationParams calldata params) public {
+  //   upkeepId = UpkeepInterface(address(i_upkeep)).register(params);
 
-  //   emit upkeepRegistered(upkeepID);
+  //   emit upkeepRegistered(upkeepId);
   // }
-
-  /**
-   * @notice Gera um novo objeto FunctionsRequest.Request codificado em CBOR
-   * @notice O modificador `pure` permite que o objeto CBOR seja gerado fora da blockchain, dessa forma a função se torna mais economica
-   * 
-   * @param source Código fonte em JavaScript para requisição
-   * @param secrets Informações sensíveis que serão escondidas da blockchain durante a transação
-   * @param args Lista de string com argumentos que podem ser acessados no código fonte
-   */
-  function generateRequest(
-    string calldata source,
-    bytes calldata secrets, 
-    string[] calldata args
-  ) public pure returns (bytes memory) {
-    FunctionsRequest.Request memory req;
-    req.initializeRequest(FunctionsRequest.Location.Inline, FunctionsRequest.CodeLanguage.JavaScript, source);
-    if (secrets.length > 0) {
-      req.addSecretsReference(secrets);
-    }
-
-    if (args.length > 0) {
-      req.setArgs(args);
-    }
-
-    return req.encodeCBOR();
-  }
 
   /**
    * @notice Muda o estado do contrato para armazenar o objeto FunctionsRequest.Request codificado em CBOR
    * @notice Essas informações são enviados para a `performUpkeep` quando esta é chamada
    * 
+   * @param newRequestCBOR Bytes representando o objeto FunctionsRequest.Request codificado em CBOR
    * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos para cobranças de requisições
    * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
+   * @param _donID Novo ID do job
    * @param _updateInterval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
-   * @param newRequestCBOR Bytes representando o objeto FunctionsRequest.Request codificado em CBOR
    */
   function setRequest(
+    bytes calldata newRequestCBOR,
     uint64 _subscriptionId,
     uint32 _fulfillGasLimit,
-    uint256 _updateInterval,
-    bytes calldata newRequestCBOR
+    bytes32 _donID,
+    uint256 _updateInterval
   ) external onlyOwner {
-    updateInterval = _updateInterval;
+    requestCBOR = newRequestCBOR;
     subscriptionId = _subscriptionId;
     fulfillGasLimit = _fulfillGasLimit;
-    requestCBOR = newRequestCBOR;
+    donID = _donID;
+    updateInterval = _updateInterval;
   }
 
   /**
@@ -233,7 +233,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     }
     // Se a quantidade de amostras é o suficiente:
     else{ 
-      require(upkeepID != 0, "Upkeep not registered");
+      require(upkeepId != 0, "Upkeep not registered");
 
       controlFlag = 1;
 
@@ -261,7 +261,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
         emit RequestRevertedWithoutErrorMsg(data);
       }
 
-      registry.pauseUpkeep(upkeepID);
+      registry.pauseUpkeep(upkeepId);
     }
   }
 

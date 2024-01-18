@@ -1,7 +1,7 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "AutomationRegistrarInterface",
-  "sourceName": "contracts/Upkeep.sol",
+  "contractName": "UpkeepInterface",
+  "sourceName": "contracts/AutomatedFunctionsConsumer.sol",
   "abi": [
     {
       "inputs": [
@@ -59,11 +59,11 @@
             }
           ],
           "internalType": "struct RegistrationParams",
-          "name": "requestParams",
+          "name": "params",
           "type": "tuple"
         }
       ],
-      "name": "registerUpkeep",
+      "name": "register",
       "outputs": [
         {
           "internalType": "uint256",
