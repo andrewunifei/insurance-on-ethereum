@@ -66,7 +66,7 @@ async function getInstitution(signer, API, info) {
         institutionAddress = receipt.events[0].args[0]
         const fileToWrite = path.resolve(__dirname, '..', 'institutionAddress.txt')
         await fs.writeFile(fileToWrite, institutionAddress)
-        console.log('\nNew institution created. Its address was saved to institutionAddress.txt')
+        console.log('✅ New institution created! Its address was saved to institutionAddress.txt')
     }
 
     const institution = new ethers.Contract(
@@ -106,7 +106,7 @@ async function getSubscriptionId(manager, institutionAddress) {
         subscriptionId = await manager.createSubscription(institutionAddress)
         const fileToWrite = path.resolve(__dirname, '..', 'subscriptionId.txt')
         await fs.writeFile(fileToWrite, String(subscriptionId))
-        console.log('\nNew Chainlink subscription created.')
+        console.log('✅ New Chainlink subscription created!')
 
         return Number(subscriptionId)
     }
@@ -122,14 +122,24 @@ async function getSubscriptionId(manager, institutionAddress) {
         const API = await getAPI(signer)
         const info = getInfo()
         const institution = await getInstitution(signer, API, info)
+
+        const juelsAmount = String(BigInt(10**18)) // 1 LINK
         const manager = await chainlinkFunctions.createManager(
             signer,
             blockchain.sepolia.chainlinkLinkTokenAddress,
             blockchain.sepolia.chainlinkRouterAddress
         )
         const subscriptionId = await getSubscriptionId(manager)
+        const subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId)
 
-        console.log(subscriptionId)
+        if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
+            console.log('Subscription without funds. Funding...')
+            receipt = await manager.fundSubscription({
+                subscriptionId, 
+                juelsAmount
+            })
+            console.log(`✅ Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}!`)
+        }
 
         return
         
@@ -138,38 +148,13 @@ async function getSubscriptionId(manager, institutionAddress) {
         const insuranceFlag = 0
 
         // Chainlink Functions
-        const fundSubscriptionFlag = 0
         const addToSubFlag = 0
 
         // Chainlink Automation 
         const upkeepFlag = 1
 
-        let juelsAmount = String(BigInt(10**18)) // 1 LINK
         let institutionAddress
         let insuranceContractAddress
-
-        try {
- 
-            if(fundSubscriptionFlag) { 
-                /*
-                    Typescript --> const juelsAmount:  BigInt | string = BigInt(2) * BigInt(10**18)
-
-                    Note that all values are denominated in Juels.
-                    1,000,000,000,000,000,000 (1e18) Juels are equal to 1 LINK.
-                    Do not use the JavaScript 'number' type for calculations with Juels
-                    as the maximum safe JavaScript integer is only 2^54 - 1.
-                */
-                receipt = await manager.fundSubscription({
-                    subscriptionId, 
-                    juelsAmount
-                })
-
-                console.log(`Chainlink Subscription ${subscriptionId} funded.`)
-            }
-        }
-        catch(e) {
-            throw new Error(e)
-        }
 
         try {
             if(insuranceFlag) {
