@@ -16,9 +16,9 @@ const sepolia = {
 const sepoliaExplorerURL = 'https://sepolia.etherscan.io/'
 
 /**
- * Retorna um objeto contendo:
- * Uma instância do provedor para comunicar com a blockchain
- * Um assinante na rede ethereum
+ * Retorna um objeto contendo
+ * uma instância do provedor para comunicar com a blockchain
+ * e um assinante na rede ethereum
  * @returns {Object}
  */
 async function interaction() {

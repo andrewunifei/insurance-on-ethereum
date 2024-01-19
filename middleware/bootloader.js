@@ -1,57 +1,100 @@
-const ethers = require("ethers")
-const blockchain = require("./blockchain")
-const APIManager = require("./APIManager")
-const institutionManager = require("./institutionManager")
-const chainlinkFunctions = require("./chainlinkFunctions")
-const insuranceContractManager = require("./insuranceContractManager")
+const ethers = require('ethers')
+const blockchain = require('./blockchain')
+const chainlinkFunctions = require('./chainlinkFunctions')
 
-const institutionArtifacts = require("../build/artifacts/contracts/Institution.sol/Institution.json")
+const APIManager = require('./APIManager')
+const institutionManager = require('./institutionManager')
+const insuranceContractManager = require('./insuranceContractManager')
 
+const institutionArtifacts = require('../build/artifacts/contracts/Institution.sol/Institution.json')
 const upkeepArtifact = require('../build/artifacts/contracts/Upkeep.sol/Upkeep.json')
-const abi = upkeepArtifact.abi
-const bytecode = upkeepArtifact.bytecode
+const LINKArtifacts = require('../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json')
 
-const LINKArtifacts = require("../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json")
+const path = require('node:path')
+const fs = require('fs').promises;
 
-function setUpkeepParams(params){
-    return {
-        name: params.name,
-        encryptedEmail: ethers.utils.hexlify([]),
-        upkeepContract: params.contractToBeAutomated,
-        gasLimit: params.gaslimit,
-        adminAddress: params.deployerAddress,
-        checkData: ethers.utils.hexlify([]),
-        offchainConfig: ethers.utils.hexlify([]),
-        amount: ethers.utils.parseEther(String(params.amount))
-    }
-}
-
-async function getInstitution(institutionAddress, deployer) {
+async function getInstitution(institutionAddress, signer) {
     // ** TODO: Implementar uma busca da instituição de forma mais inteligente **
     // A instituição dentro do mapeamento na API deve ser buscada de uma maneira mais inteligente
     // Isto é, com index não está bom o suficiente
     // const institutionAddress = await API.getInstitution(index)
     // COM BUSCA POR ENDEREÇO TALVEZ FUNCIONE MELHOR
 
-    const institutionFactory = new ethers.ContractFactory(
+    const institution = new ethers.Contract(
+        institutionAddress,
         institutionArtifacts.abi,
-        institutionArtifacts.bytecode,
-        deployer
+        signer
     )
-    const institutionContract = institutionFactory.attach(institutionAddress)
 
-    return institutionContract
+    return institution
+}
+
+/**
+ * Retona a última API criada
+ * @param {Wallet} signer 
+ * @returns {BaseContract}
+ */
+async function getAPI(signer) {
+    try {
+        const APIAddress = await fs.readFile(path.resolve(__dirname, '..', 'APIAddress.txt'))
+
+        if(APIAddress.length === 0) {
+            throw new Error('APIAddress.txt empty. Please create an API using the \"createAPI\" task.')
+        }
+        else {
+            const API = APIManager.getAPI(APIAddress.toString(), signer)
+
+            return API
+        }
+    }
+    catch(e) {
+        throw new Error(e)
+    }
+}
+
+async function getInstitution(signer, API) {
+    let institutionAddress = ''
+    
+    try {
+        institutionAddress = await fs.readFile(path.resolve(__dirname, '..', 'institutionAddress.txt'))
+    }
+    catch(e) {
+        if(e.code === 'ENOENT') {
+            const fileToWrite = path.resolve(__dirname, '..', 'institutionAddresss.txt')
+            await fs.writeFile(fileToWrite, institutionAddress)
+        }
+        else {
+            throw new Error(e)
+        }
+    }
+
+    if(institutionAddress.length === 0){
+        console.log('institutionAddress.txt empty. Creating a new institution...')
+        const receipt = await APIManager.createInstitution(API, info)
+        institutionAddress = receipt.events.args[0]
+        const fileToWrite = path.resolve(__dirname, '..', 'institutionAddresss.txt')
+        await fs.writeFile(fileToWrite, institutionAddress)
+        console.log('\nNew institution created. Its address was saved to institutionAddress.txt')
+    }
+
+    const institution = await getInstitution(institutionAddress, signer)
+
+    return institution
 }
 
 (async () => {
     if (require.main === module) {
-        const result = await blockchain.interaction()
-        const deployer = result.signer
-        const provider = result.provider
+        const { signer, provider } = await blockchain.interaction()
+
+        const API = await getAPI(signer)
+        const institution = await getInstitution(signer, API)
+
+        console.log(institution)
+
+        return
         
-        const APIAddress = '0x74Ce03A9655585754F50627F13359cc2F40D8FFB' // Novo
-        const APIflag = 0
-        const institutionFlag = 0
+        // Controle de criação de contratos
+        const institutionFlag = 1
         const insuranceFlag = 0
 
         // Chainlink Functions
@@ -62,8 +105,6 @@ async function getInstitution(institutionAddress, deployer) {
         // Chainlink Automation 
         const upkeepFlag = 1
 
-        let API
-        let institution
         let info = {
             name: 'Newest Inst'
             // ... Pesquisar na literatura informações relevantes para identificar uma instituição
@@ -71,35 +112,19 @@ async function getInstitution(institutionAddress, deployer) {
         let subscriptionId
         let juelsAmount = String(BigInt(10**18)) // 1 LINK
         let manager
-        let institutionAddr
+        let institutionAddress
         let insuranceContractAddress
-    
-        try {
-            if(APIflag) {
-                API = await APIManager.createAPI(deployer)
-                console.log(API)
-            }
-            else {
-                API = await APIManager.getAPI(APIAddress, deployer)
-            }
-        }
-        catch(e) {
-            throw new Error(e)
-        }
 
         try {
             if(institutionFlag) {
-                const receipt = await APIManager.createInstitution(API, info)
-                console.log(receipt.logs)
-
                 return
                 // ** TODO: Trata o receipt.logs para extrair o endereço da instituição
                 // E popular a variável: institution = await getInstitution(institutionAddr) 
                 // Isso é imprescindível para usar as funções da instituição depois da criação
             }
             else {
-                const institutionAddr = '0x73d571dec95e9d52cd54e14267c74f51bf7f037b'
-                institution = await getInstitution(institutionAddr, deployer)
+                institutionAddress = '0x73d571dec95e9d52cd54e14267c74f51bf7f037b'
+                institution = await getInstitution(institutionAddress, signer)
                 
             }
         }
@@ -109,7 +134,7 @@ async function getInstitution(institutionAddress, deployer) {
 
         try {
             manager = await chainlinkFunctions.createManager(
-                deployer,
+                signer,
                 blockchain.sepolia.chainlinkLinkTokenAddress,
                 blockchain.sepolia.chainlinkRouterAddress
             )
@@ -120,7 +145,7 @@ async function getInstitution(institutionAddress, deployer) {
 
         try {
             if(subscriptionFlag) {
-                subscriptionId = await manager.createSubscription(institutionAddr)
+                subscriptionId = await manager.createSubscription(institutionAddress)
                 
                 console.log(`Chainlink Functions subscription ID: ${subscriptionId}`)
             }
@@ -151,8 +176,8 @@ async function getInstitution(institutionAddress, deployer) {
 
         try {
             if(insuranceFlag) {
-                // Enviar Ether para contrato através do Deployer 
-                // const tx = await deployer.sendTransaction(
+                // Enviar Ether para contrato através do signer 
+                // const tx = await signer.sendTransaction(
                 //     {
                 //         to: institution.address,
                 //         value: ethers.utils.parseEther("0") // eth --> wei
@@ -160,7 +185,7 @@ async function getInstitution(institutionAddress, deployer) {
                 // )
 
                 // Coloca o endereço do fazendeiro na lista branca
-                // const txWhiteList = await institution.whitelistAddr(deployer.address)
+                // const txWhiteList = await institution.whitelistAddr(signer.address)
                 // await txWhiteList.wait(1)
                 // console.log('Farmer added to whitelist')
 
@@ -168,8 +193,8 @@ async function getInstitution(institutionAddress, deployer) {
                 console.log(balance)
 
                 const args = {
-                    deployer: institution.address,
-                    farmer: deployer.address, // Para fins de teste
+                    signer: institution.address,
+                    farmer: signer.address, // Para fins de teste
                     humidityLimit: 50,
                     sampleMaxSize: 1,
                     reparationValue: ethers.utils.parseEther("0"), // eth --> wei
@@ -206,7 +231,7 @@ async function getInstitution(institutionAddress, deployer) {
                         }
                     )
 
-                    console.log('Consumer added to subscription')
+                    console.log(`Consumer added to subscription at transaction ${tx.hash}.`)
                 }
             }
             catch(e) {
@@ -220,7 +245,7 @@ async function getInstitution(institutionAddress, deployer) {
                         encryptedEmail: ethers.utils.hexlify([]),
                         upkeepContract: insuranceContractAddress,
                         gasLimit: 300000,
-                        adminAddress: deployer.address, // Pode ser a instituição (talvez)
+                        adminAddress: signer.address, // Pode ser a instituição (talvez)
                         triggerType: 0,
                         checkData: ethers.utils.hexlify([]),
                         triggerConfig: ethers.utils.hexlify([]),
@@ -229,7 +254,7 @@ async function getInstitution(institutionAddress, deployer) {
                     }
 
                     let insuranceContract = await insuranceContractManager.getInsuranceContract(
-                        insuranceContractAddress, deployer
+                        insuranceContractAddress, signer
                     )
 
                     // const upkeepAddr = await insuranceContract.i_upkeep()
@@ -237,7 +262,7 @@ async function getInstitution(institutionAddress, deployer) {
                     // const upkeepFactory = new ethers.ContractFactory(
                     //     abi,
                     //     bytecode,
-                    //     deployer 
+                    //     signer 
                     // )
                     // const upkeep = upkeepFactory.attach(upkeepAddr)
 
@@ -253,14 +278,14 @@ async function getInstitution(institutionAddress, deployer) {
                     const LINKFactory = new ethers.ContractFactory(
                         LINKArtifacts.abi,
                         LINKArtifacts.bytecode,
-                        deployer
+                        signer
                     )
                     const LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress)
 
                     const upkeepFactory = new ethers.ContractFactory(
-                        abi,
-                        bytecode,
-                        deployer 
+                        upkeepArtifact.abi,
+                        upkeepArtifact.bytecode,
+                        signer 
                     )
 
                     // const upkeep = await upkeepFactory.deploy(

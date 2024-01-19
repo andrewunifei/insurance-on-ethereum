@@ -1,8 +1,6 @@
 const ethers = require("ethers")
 const blockchain = require("./blockchain")
 const InsuranceArtifact = require("../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json")
-const abi = InsuranceArtifact.abi
-const bytecode = InsuranceArtifact.bytecode
 const {
     SecretsManager,
     simulateScript,
@@ -81,7 +79,7 @@ async function setRequest() {
 
     const insuranceContract = new ethers.Contract(
         insuranceContractAddress,
-        abi, 
+        InsuranceArtifact.abi, 
         signer
     )
 

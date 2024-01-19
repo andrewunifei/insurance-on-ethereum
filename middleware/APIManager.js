@@ -9,25 +9,25 @@ const bytecode = APIArtifact.bytecode
  * @returns {BaseContract}
  */
 async function createAPI(deployer){
-    const APIContractFactory = new ethers.ContractFactory(abi, bytecode, deployer)
-    const APIContract = await APIContractFactory.deploy(deployer.address)
+    const APIFactory = new ethers.ContractFactory(abi, bytecode, deployer)
+    const API = await APIFactory.deploy(deployer.address)
     
-    console.log(`\nAPI creation: waiting 1 block for deployment ${APIContract.hash} to be confirmed...`)
-    APIContract.deployTransaction.wait(1)
+    console.log(`API creation: waiting 1 block for deployment ${API.deployTransaction.hash} to be confirmed...\n`)
+    API.deployTransaction.wait(1)
 
-    return APIContract
+    return API
 }
 
 /**
  * Retorna um contrato InsuranceAPI.sol já implantado na rede Ethereum
- * @param {string} APIAddress - O endereço do contrato na rede Ethereum
+ * @param {string} APIAddress O endereço do contrato na rede Ethereum
  * @returns {BaseContract}
  */
 async function getAPI(APIAddress, deployer){
-    const APIContractFactory = new ethers.ContractFactory(abi, bytecode, deployer)
-    const APIContract = await APIContractFactory.attach(APIAddress)
+    const APIFactory = new ethers.ContractFactory(abi, bytecode, deployer)
+    const API = await APIFactory.attach(APIAddress)
 
-    return APIContract
+    return API
 }
 
 /**
@@ -42,7 +42,7 @@ async function createInstitution(API, info) {
         info.name
     )
 
-    console.log(`\nInstitution creation: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
+    console.log(`Institution creation: waiting 1 block for transaction ${tx.hash} to be confirmed...\n`)
     const receipt = await tx.wait(1)
 
     return receipt
@@ -54,4 +54,5 @@ module.exports = {
     createInstitution
 }
 
-
+// Atual API
+// 0x74Ce03A9655585754F50627F13359cc2F40D8FFB

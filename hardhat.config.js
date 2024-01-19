@@ -1,7 +1,7 @@
 //require("@nomicfoundation/hardhat-toolbox")
 //require("hardhat-contract-sizer")
 //require("@openzeppelin/hardhat-upgrades")
-// require("./tasks")
+require('./tasks')
 require('dotenv').config()
 const { networks } = require("./networks")
 
