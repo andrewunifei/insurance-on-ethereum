@@ -12,6 +12,7 @@ const LINKArtifacts = require('../build/artifacts/@chainlink/contracts/src/v0.8/
 
 const path = require('node:path')
 const fs = require('fs').promises;
+const ora = require('ora')
 
 /**
  * Retona a última API criada
@@ -61,12 +62,12 @@ async function getInstitution(signer, API, info) {
     }
 
     if(institutionAddress.length === 0){
-        console.log('institutionAddress.txt empty. Creating a new institution...')
+        const spinner = ora('institutionAddress.txt empty. Creating a new institution...').start();
         const receipt = await APIManager.createInstitution(API, info)
         institutionAddress = receipt.events[0].args[0]
         const fileToWrite = path.resolve(__dirname, '..', 'institutionAddress.txt')
         await fs.writeFile(fileToWrite, institutionAddress)
-        console.log('✅ New institution created! Its address was saved to institutionAddress.txt')
+        spinner.succeed('New institution created! Its address was saved to institutionAddress.txt')
     }
 
     const institution = new ethers.Contract(
@@ -102,11 +103,11 @@ async function getSubscriptionId(manager, institutionAddress) {
     }
 
     if(subscriptionId.length === 0){
-        console.log('subscriptionId.txt empty. Creating a new subscription...')
+        const spinner = ora('subscriptionId.txt empty. Creating a new subscription...').start();
         subscriptionId = await manager.createSubscription(institutionAddress)
         const fileToWrite = path.resolve(__dirname, '..', 'subscriptionId.txt')
         await fs.writeFile(fileToWrite, String(subscriptionId))
-        console.log('✅ New Chainlink subscription created!')
+        spinner.succeed('New Chainlink subscription created! Its ID was saved to subscriptionId.txt')
 
         return Number(subscriptionId)
     }
@@ -133,18 +134,16 @@ async function getSubscriptionId(manager, institutionAddress) {
         const subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId)
 
         if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
-            console.log('Subscription without funds. Funding...')
+            const spinner = ora('Subscription without funds. Funding...').start();
             receipt = await manager.fundSubscription({
                 subscriptionId, 
                 juelsAmount
             })
-            console.log(`✅ Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}!`)
+            spinner.succeed(`Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}`)
         }
 
         return
         
-        // Controle de criação de contratos
-        const institutionFlag = 1
         const insuranceFlag = 0
 
         // Chainlink Functions

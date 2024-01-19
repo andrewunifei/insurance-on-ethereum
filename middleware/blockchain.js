@@ -1,7 +1,5 @@
 const ethers = require('ethers')
 
-// Logic for communication with the blockchain 
-
 /**
  * Objeto com endereços relevantes de contratos Chainlink
  */
