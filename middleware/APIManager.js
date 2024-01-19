@@ -12,7 +12,7 @@ async function createAPI(deployer){
     const APIFactory = new ethers.ContractFactory(abi, bytecode, deployer)
     const API = await APIFactory.deploy(deployer.address)
     
-    console.log(`API creation: waiting 1 block for deployment ${API.deployTransaction.hash} to be confirmed...\n`)
+    console.log(`API creation: waiting 1 block for deployment ${API.deployTransaction.hash} to be confirmed...`)
     API.deployTransaction.wait(1)
 
     return API
@@ -42,7 +42,7 @@ async function createInstitution(API, info) {
         info.name
     )
 
-    console.log(`Institution creation: waiting 1 block for transaction ${tx.hash} to be confirmed...\n`)
+    console.log(`Institution creation: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
     const receipt = await tx.wait(1)
 
     return receipt

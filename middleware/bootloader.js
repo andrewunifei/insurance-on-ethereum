@@ -13,26 +13,10 @@ const LINKArtifacts = require('../build/artifacts/@chainlink/contracts/src/v0.8/
 const path = require('node:path')
 const fs = require('fs').promises;
 
-async function getInstitution(institutionAddress, signer) {
-    // ** TODO: Implementar uma busca da instituição de forma mais inteligente **
-    // A instituição dentro do mapeamento na API deve ser buscada de uma maneira mais inteligente
-    // Isto é, com index não está bom o suficiente
-    // const institutionAddress = await API.getInstitution(index)
-    // COM BUSCA POR ENDEREÇO TALVEZ FUNCIONE MELHOR
-
-    const institution = new ethers.Contract(
-        institutionAddress,
-        institutionArtifacts.abi,
-        signer
-    )
-
-    return institution
-}
-
 /**
  * Retona a última API criada
- * @param {Wallet} signer 
- * @returns {BaseContract}
+ * @param {ethers.Wallet} signer 
+ * @returns {ethers.BaseContract}
  */
 async function getAPI(signer) {
     try {
@@ -52,15 +36,23 @@ async function getAPI(signer) {
     }
 }
 
-async function getInstitution(signer, API) {
+/**
+ * Retorna a última instituição criada.
+ * Se nenhuma instituição existe, cria e retona uma nova
+ * @param {ethers.Wallet} signer 
+ * @param {ethers.BaseContract} API 
+ * @param {Object} info 
+ * @returns {ethers.BaseContract}
+ */
+async function getInstitution(signer, API, info) {
     let institutionAddress = ''
     
     try {
-        institutionAddress = await fs.readFile(path.resolve(__dirname, '..', 'institutionAddress.txt'))
+        institutionAddress = await fs.readFile(path.join(__dirname, '..', 'institutionAddress.txt'))
     }
     catch(e) {
         if(e.code === 'ENOENT') {
-            const fileToWrite = path.resolve(__dirname, '..', 'institutionAddresss.txt')
+            const fileToWrite = path.resolve(__dirname, '..', 'institutionAddress.txt')
             await fs.writeFile(fileToWrite, institutionAddress)
         }
         else {
@@ -71,15 +63,26 @@ async function getInstitution(signer, API) {
     if(institutionAddress.length === 0){
         console.log('institutionAddress.txt empty. Creating a new institution...')
         const receipt = await APIManager.createInstitution(API, info)
-        institutionAddress = receipt.events.args[0]
-        const fileToWrite = path.resolve(__dirname, '..', 'institutionAddresss.txt')
+        institutionAddress = receipt.events[0].args[0]
+        const fileToWrite = path.resolve(__dirname, '..', 'institutionAddress.txt')
         await fs.writeFile(fileToWrite, institutionAddress)
         console.log('\nNew institution created. Its address was saved to institutionAddress.txt')
     }
 
-    const institution = await getInstitution(institutionAddress, signer)
+    const institution = new ethers.Contract(
+        institutionAddress.toString(),
+        institutionArtifacts.abi,
+        signer
+    )
 
     return institution
+}
+
+function getInfo() {
+    return {
+        name: 'Institution Version X'
+        // ... Pesquisar na literatura informações relevantes para identificar uma instituição
+    }
 }
 
 (async () => {
@@ -87,7 +90,8 @@ async function getInstitution(signer, API) {
         const { signer, provider } = await blockchain.interaction()
 
         const API = await getAPI(signer)
-        const institution = await getInstitution(signer, API)
+        const info = getInfo()
+        const institution = await getInstitution(signer, API, info)
 
         console.log(institution)
 
@@ -105,32 +109,12 @@ async function getInstitution(signer, API) {
         // Chainlink Automation 
         const upkeepFlag = 1
 
-        let info = {
-            name: 'Newest Inst'
-            // ... Pesquisar na literatura informações relevantes para identificar uma instituição
-        }
+
         let subscriptionId
         let juelsAmount = String(BigInt(10**18)) // 1 LINK
         let manager
         let institutionAddress
         let insuranceContractAddress
-
-        try {
-            if(institutionFlag) {
-                return
-                // ** TODO: Trata o receipt.logs para extrair o endereço da instituição
-                // E popular a variável: institution = await getInstitution(institutionAddr) 
-                // Isso é imprescindível para usar as funções da instituição depois da criação
-            }
-            else {
-                institutionAddress = '0x73d571dec95e9d52cd54e14267c74f51bf7f037b'
-                institution = await getInstitution(institutionAddress, signer)
-                
-            }
-        }
-        catch(e) {
-            throw new Error(e)
-        }
 
         try {
             manager = await chainlinkFunctions.createManager(
