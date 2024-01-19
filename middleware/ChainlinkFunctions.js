@@ -1,8 +1,8 @@
-const { SubscriptionManager } = require("@chainlink/functions-toolkit");
+import { SubscriptionManager } from "@chainlink/functions-toolkit";
 
 /**
  * Instancia um objeto para acessar as funcionalidades de Chainlink Functions 
- * @param {HardhatEthersSigner} signer 
+ * @param {ethers.Wallet} signer 
  * @param {string} linkTokenAddress 
  * @param {string} routerAddress 
  * @returns {Promise<SubscriptionManager>}
@@ -21,6 +21,4 @@ async function createManager(signer, linkTokenAddress, routerAddress) {
     return manager
 } 
 
-module.exports = {
-    createManager
-}
+export { createManager }

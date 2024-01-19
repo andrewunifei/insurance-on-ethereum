@@ -1,18 +1,22 @@
-const ethers = require('ethers')
-const blockchain = require('./blockchain')
-const chainlinkFunctions = require('./chainlinkFunctions')
+import * as ethers from 'ethers'
+import * as blockchain from './blockchain.js'
+import * as chainlinkFunctions from './chainlinkFunctions.js'
 
-const APIManager = require('./APIManager')
-const institutionManager = require('./institutionManager')
-const insuranceContractManager = require('./insuranceContractManager')
+import * as APIManager from './APIManager.js'
+import * as institutionManager from './institutionManager.js'
+import * as insuranceContractManager from './insuranceContractManager.js'
 
-const institutionArtifacts = require('../build/artifacts/contracts/Institution.sol/Institution.json')
-const upkeepArtifact = require('../build/artifacts/contracts/Upkeep.sol/Upkeep.json')
-const LINKArtifacts = require('../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json')
+import institutionArtifacts from '../build/artifacts/contracts/Institution.sol/Institution.json' assert { type: 'json' }
+import upkeepArtifact from '../build/artifacts/contracts/Upkeep.sol/Upkeep.json' assert { type: 'json' }
+import LINKArtifacts from '../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json' assert { type: 'json' }
 
-const path = require('node:path')
-const fs = require('fs').promises;
-const ora = require('ora')
+import path from 'path'
+import fs from 'node:fs/promises'
+import ora from 'ora'
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 /**
  * Retona a última API criada
@@ -138,191 +142,192 @@ async function getSubscriptionId(manager, institutionAddress) {
     }
 }
 
-(async () => {
-    if (require.main === module) {
-        const { signer, provider } = await blockchain.interaction()
+const { signer, provider } = await blockchain.interaction()
 
-        const API = await getAPI(signer)
-        const info = getInfo()
-        const institution = await getInstitution(signer, API, info)
+const API = await getAPI(signer)
+console.log(API.address)
 
-        const juelsAmount = String(BigInt(10**18)) // 1 LINK
-        const manager = await chainlinkFunctions.createManager(
-            signer,
-            blockchain.sepolia.chainlinkLinkTokenAddress,
-            blockchain.sepolia.chainlinkRouterAddress
-        )
-        const subscriptionId = await getSubscriptionId(manager)
-        const subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId)
+if(1){
+    console.log('....???')
+}
+// const info = getInfo()
+// const institution = await getInstitution(signer, API, info)
 
-        if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
-            const spinner = ora('Subscription without funds. Funding...').start();
-            receipt = await manager.fundSubscription({
-                subscriptionId, 
-                juelsAmount
-            })
-            spinner.succeed(`Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}`)
-        }
+// const juelsAmount = String(BigInt(10**18)) // 1 LINK
+// const manager = await chainlinkFunctions.createManager(
+//     signer,
+//     blockchain.sepolia.chainlinkLinkTokenAddress,
+//     blockchain.sepolia.chainlinkRouterAddress
+// )
+// const subscriptionId = await getSubscriptionId(manager)
+// const subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId)
 
-        return
+// if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
+//     const spinner = ora('Subscription without funds. Funding...').start();
+//     receipt = await manager.fundSubscription({
+//         subscriptionId, 
+//         juelsAmount
+//     })
+//     spinner.succeed(`Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}`)
+// }
+
+
+
+// const insuranceFlag = 0
+
+// // Chainlink Functions
+// const addToSubFlag = 0
+
+// // Chainlink Automation 
+// const upkeepFlag = 1
+
+// let institutionAddress
+// let insuranceContractAddress
+
+// try {
+//     if(insuranceFlag) {
+//         // Enviar Ether para contrato através do signer 
+//         // const tx = await signer.sendTransaction(
+//         //     {
+//         //         to: institution.address,
+//         //         value: ethers.utils.parseEther("0") // eth --> wei
+//         //     }
+//         // )
+
+//         // Coloca o endereço do fazendeiro na lista branca
+//         // const txWhiteList = await institution.whitelistAddr(signer.address)
+//         // await txWhiteList.wait(1)
+//         // console.log('Farmer added to whitelist')
+
+//         const balance = await provider.getBalance(institution.address);
+//         console.log(balance)
+
+//         const args = {
+//             signer: institution.address,
+//             farmer: signer.address, // Para fins de teste
+//             humidityLimit: 50,
+//             sampleMaxSize: 1,
+//             reparationValue: ethers.utils.parseEther("0"), // eth --> wei
+//             interval: 1,
+//             router: blockchain.sepolia.chainlinkRouterAddress,
+//             subscriptionId,
+//             registryAddress: blockchain.sepolia.chainlinkRegistryAddress,
+//             linkTokenAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
+//             registrarAddress: blockchain.sepolia.chainlinkRegistrarAddress,
+//             gaslimit: 300000
+//         }
+
+//         const receipt = await institutionManager.createInsuranceContract(institution, args)
+
+//         // ** TODO: Tratar o receipt.logs **
+//         console.log(receipt.events)
+
+//         return
+//     }
+//     else { 
+//         insuranceContractAddress = '0xb70eE5899c2Fe65256587686918879a4c030bbf9'
+
+//         console.log('Current Insurance Contract Address: 0xb70eE5899c2Fe65256587686918879a4c030bbf9')
         
-        const insuranceFlag = 0
+//         // Antigo insuraneContractAddress = 0x3dc8420f89f74997a1345a6f80627ea6e5b670ae
+//     }
 
-        // Chainlink Functions
-        const addToSubFlag = 0
+//     try {
+//         if(addToSubFlag) {
+//             const tx = await manager.addConsumer(
+//                 {
+//                     subscriptionId,
+//                     consumerAddress: insuranceContractAddress
+//                 }
+//             )
 
-        // Chainlink Automation 
-        const upkeepFlag = 1
+//             console.log(`Consumer added to subscription at transaction ${tx.hash}.`)
+//         }
+//     }
+//     catch(e) {
+//         throw new Error(e)
+//     }
 
-        let institutionAddress
-        let insuranceContractAddress
+//     try {
+//         if(upkeepFlag) {
+//             const upkeepParams = {
+//                 name: 'upkeep-teste',
+//                 encryptedEmail: ethers.utils.hexlify([]),
+//                 upkeepContract: insuranceContractAddress,
+//                 gasLimit: 300000,
+//                 adminAddress: signer.address, // Pode ser a instituição (talvez)
+//                 triggerType: 0,
+//                 checkData: ethers.utils.hexlify([]),
+//                 triggerConfig: ethers.utils.hexlify([]),
+//                 offchainConfig: ethers.utils.hexlify([]),
+//                 amount: ethers.utils.parseEther(String(5)) // LINK --> Juels
+//             }
 
-        try {
-            if(insuranceFlag) {
-                // Enviar Ether para contrato através do signer 
-                // const tx = await signer.sendTransaction(
-                //     {
-                //         to: institution.address,
-                //         value: ethers.utils.parseEther("0") // eth --> wei
-                //     }
-                // )
+//             let insuranceContract = await insuranceContractManager.getInsuranceContract(
+//                 insuranceContractAddress, signer
+//             )
 
-                // Coloca o endereço do fazendeiro na lista branca
-                // const txWhiteList = await institution.whitelistAddr(signer.address)
-                // await txWhiteList.wait(1)
-                // console.log('Farmer added to whitelist')
+//             // const upkeepAddr = await insuranceContract.i_upkeep()
 
-                const balance = await provider.getBalance(institution.address);
-                console.log(balance)
+//             // const upkeepFactory = new ethers.ContractFactory(
+//             //     abi,
+//             //     bytecode,
+//             //     signer 
+//             // )
+//             // const upkeep = upkeepFactory.attach(upkeepAddr)
 
-                const args = {
-                    signer: institution.address,
-                    farmer: signer.address, // Para fins de teste
-                    humidityLimit: 50,
-                    sampleMaxSize: 1,
-                    reparationValue: ethers.utils.parseEther("0"), // eth --> wei
-                    interval: 1,
-                    router: blockchain.sepolia.chainlinkRouterAddress,
-                    subscriptionId,
-                    registryAddress: blockchain.sepolia.chainlinkRegistryAddress,
-                    linkTokenAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
-                    registrarAddress: blockchain.sepolia.chainlinkRegistrarAddress,
-                    gaslimit: 300000
-                }
+//             // const tx = await upkeep.register(upkeepParams)
+            
+//             // console.log(tx)
 
-                const receipt = await institutionManager.createInsuranceContract(institution, args)
+//             // const tx = await insuranceContract.registerUpkeep(upkeepParams)
+//             // const receipt = tx.wait(1)
 
-                // ** TODO: Tratar o receipt.logs **
-                console.log(receipt.events)
+//             // console.log(receipt.logs)
 
-                return
-            }
-            else { 
-                insuranceContractAddress = '0xb70eE5899c2Fe65256587686918879a4c030bbf9'
+//             const LINKFactory = new ethers.ContractFactory(
+//                 LINKArtifacts.abi,
+//                 LINKArtifacts.bytecode,
+//                 signer
+//             )
+//             const LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress)
 
-                console.log('Current Insurance Contract Address: 0xb70eE5899c2Fe65256587686918879a4c030bbf9')
-                
-                // Antigo insuraneContractAddress = 0x3dc8420f89f74997a1345a6f80627ea6e5b670ae
-            }
+//             const upkeepFactory = new ethers.ContractFactory(
+//                 upkeepArtifact.abi,
+//                 upkeepArtifact.bytecode,
+//                 signer 
+//             )
 
-            try {
-                if(addToSubFlag) {
-                    const tx = await manager.addConsumer(
-                        {
-                            subscriptionId,
-                            consumerAddress: insuranceContractAddress
-                        }
-                    )
+//             // const upkeep = await upkeepFactory.deploy(
+//             //     blockchain.sepolia.chainlinkLinkTokenAddress,
+//             //     blockchain.sepolia.chainlinkRegistrarAddress,
+//             //     ethers.utils.parseEther(String(10)) // LINK --> Juels
+//             // )
+//             // upkeep.deployTransaction.wait(1)
 
-                    console.log(`Consumer added to subscription at transaction ${tx.hash}.`)
-                }
-            }
-            catch(e) {
-                throw new Error(e)
-            }
+//             const upkeepAddress = '0x28CA1Ad8B5b5AF4E9ccc57543f914CA032f95e05'
+//             const upkeep = upkeepFactory.attach(upkeepAddress)
 
-            try {
-                if(upkeepFlag) {
-                    const upkeepParams = {
-                        name: 'upkeep-teste',
-                        encryptedEmail: ethers.utils.hexlify([]),
-                        upkeepContract: insuranceContractAddress,
-                        gasLimit: 300000,
-                        adminAddress: signer.address, // Pode ser a instituição (talvez)
-                        triggerType: 0,
-                        checkData: ethers.utils.hexlify([]),
-                        triggerConfig: ethers.utils.hexlify([]),
-                        offchainConfig: ethers.utils.hexlify([]),
-                        amount: ethers.utils.parseEther(String(5)) // LINK --> Juels
-                    }
+//             // console.log(`Upkeep address: ${upkeep.address}`)
 
-                    let insuranceContract = await insuranceContractManager.getInsuranceContract(
-                        insuranceContractAddress, signer
-                    )
+//             // const approveTx = await LINK.approve(upkeep.address, ethers.utils.parseEther(String(10)))
+//             // const approveReceipt = await approveTx.wait(1)
+//             // console.log(approveReceipt)
 
-                    // const upkeepAddr = await insuranceContract.i_upkeep()
+//             // const tx = await upkeep.fund()
+//             // const receipt = await tx.wait(1)
+//             // console.log(receipt)
 
-                    // const upkeepFactory = new ethers.ContractFactory(
-                    //     abi,
-                    //     bytecode,
-                    //     signer 
-                    // )
-                    // const upkeep = upkeepFactory.attach(upkeepAddr)
+//             const tx = await upkeep.register(upkeepParams)
+//             const receipt = await tx.wait(1)
 
-                    // const tx = await upkeep.register(upkeepParams)
-                    
-                    // console.log(tx)
-
-                    // const tx = await insuranceContract.registerUpkeep(upkeepParams)
-                    // const receipt = tx.wait(1)
-
-                    // console.log(receipt.logs)
-
-                    const LINKFactory = new ethers.ContractFactory(
-                        LINKArtifacts.abi,
-                        LINKArtifacts.bytecode,
-                        signer
-                    )
-                    const LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress)
-
-                    const upkeepFactory = new ethers.ContractFactory(
-                        upkeepArtifact.abi,
-                        upkeepArtifact.bytecode,
-                        signer 
-                    )
-
-                    // const upkeep = await upkeepFactory.deploy(
-                    //     blockchain.sepolia.chainlinkLinkTokenAddress,
-                    //     blockchain.sepolia.chainlinkRegistrarAddress,
-                    //     ethers.utils.parseEther(String(10)) // LINK --> Juels
-                    // )
-                    // upkeep.deployTransaction.wait(1)
-
-                    const upkeepAddress = '0x28CA1Ad8B5b5AF4E9ccc57543f914CA032f95e05'
-                    const upkeep = upkeepFactory.attach(upkeepAddress)
-
-                    // console.log(`Upkeep address: ${upkeep.address}`)
-
-                    // const approveTx = await LINK.approve(upkeep.address, ethers.utils.parseEther(String(10)))
-                    // const approveReceipt = await approveTx.wait(1)
-                    // console.log(approveReceipt)
-
-                    // const tx = await upkeep.fund()
-                    // const receipt = await tx.wait(1)
-                    // console.log(receipt)
-
-                    const tx = await upkeep.register(upkeepParams)
-                    const receipt = await tx.wait(1)
-
-                    console.log(receipt)
-                }
-            }
-            catch(e) {
-                throw new Error(e)
-            }
-        }
-        catch(e) {
-            throw new Error(e)
-        }
-    }
-})()
+//             console.log(receipt)
+//         }
+//     }
+//     catch(e) {
+//         throw new Error(e)
+//     }
+// }
+// catch(e) {
+//     throw new Error(e)
+// }

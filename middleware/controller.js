@@ -1,7 +1,7 @@
-const ethers = require("ethers")
-const blockchain = require("./blockchain")
-const InsuranceArtifact = require("../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json")
-const {
+import * as ethers from 'ethers'
+import * as blockchain from './blockchain.js'
+import insuranceArtifacts from '../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
+import {
     SecretsManager,
     simulateScript,
     buildRequestCBOR,
@@ -9,7 +9,7 @@ const {
     decodeResult,
     Location,
     CodeLanguage,
-} = require("@chainlink/functions-toolkit")
+} from '@chainlink/functions-toolkit'
 
 const insuranceContractAddress = ''
 const subscriptionId = 0
@@ -79,7 +79,7 @@ async function setRequest() {
 
     const insuranceContract = new ethers.Contract(
         insuranceContractAddress,
-        InsuranceArtifact.abi, 
+        insuranceArtifacts.abi, 
         signer
     )
 
