@@ -16,25 +16,40 @@ const ora = require('ora')
 
 /**
  * Retona a última API criada
+ * Se nenhuma API existe, cria e retona uma nova
  * @param {ethers.Wallet} signer 
  * @returns {Promise<ethers.BaseContract>}
  */
 async function getAPI(signer) {
+    let APIAddress = ''
+    
     try {
-        const APIAddress = await fs.readFile(path.resolve(__dirname, '..', 'APIAddress.txt'))
-
-        if(APIAddress.length === 0) {
-            throw new Error('APIAddress.txt empty. Please create an API using the \"createAPI\" task.')
-        }
-        else {
-            const API = APIManager.getAPI(APIAddress.toString(), signer)
-
-            return API
-        }
+        APIAddress = await fs.readFile(path.join(__dirname, '..', 'APIAddress.txt'))
     }
     catch(e) {
-        throw new Error(e)
+        if(e.code === 'ENOENT') {
+            const fileToWrite = path.resolve(__dirname, '..', 'APIAddress.txt')
+            await fs.writeFile(fileToWrite, APIAddress)
+        }
+        else {
+            throw new Error(e)
+        }
     }
+
+    if(APIAddress.length === 0){
+        const spinner = ora('APIAddress.txt empty. Creating a new API...').start();
+        const API = await APIManager.createAPI(signer)
+        APIAddress = API.address
+        const fileToWrite = path.resolve(__dirname, '..', 'APIAddress.txt')
+        await fs.writeFile(fileToWrite, APIAddress)
+        spinner.succeed('New API created! Its address was saved to APIAddress.txt')
+
+        return API
+    }
+
+    const API = APIManager.getAPI(APIAddress.toString(), signer)
+
+    return API
 }
 
 /**
@@ -86,6 +101,13 @@ function getInfo() {
     }
 }
 
+/**
+ * Retorna o id da última inscrição em Chainlink Functions.
+ * Se nenhum id existe, realiza uma inscrição em Chainlink Functions e retona o id
+ * @param {SubscriptionManager} manager 
+ * @param {string} institutionAddress 
+ * @returns {Promise<number>}
+ */
 async function getSubscriptionId(manager, institutionAddress) {
     let subscriptionId = ''
     

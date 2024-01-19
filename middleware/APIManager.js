@@ -5,12 +5,12 @@ const bytecode = APIArtifact.bytecode
 
 /**
  * Implanta o contrato InsuranceAPI.sol na rede Ethereum
- * @param {HardhatEthersSigner} deployer
+ * @param {ethers.Wallet} signer
  * @returns {BaseContract}
  */
-async function createAPI(deployer){
-    const APIFactory = new ethers.ContractFactory(abi, bytecode, deployer)
-    const API = await APIFactory.deploy(deployer.address)
+async function createAPI(signer){
+    const APIFactory = new ethers.ContractFactory(abi, bytecode, signer)
+    const API = await APIFactory.deploy(signer.address)
     
     console.log(`API creation: waiting 1 block for deployment ${API.deployTransaction.hash} to be confirmed...`)
     API.deployTransaction.wait(1)
@@ -21,11 +21,12 @@ async function createAPI(deployer){
 /**
  * Retorna um contrato InsuranceAPI.sol já implantado na rede Ethereum
  * @param {string} APIAddress O endereço do contrato na rede Ethereum
+ * @param {ethers.Wallet} signer
  * @returns {BaseContract}
  */
-async function getAPI(APIAddress, deployer){
-    const APIFactory = new ethers.ContractFactory(abi, bytecode, deployer)
-    const API = await APIFactory.attach(APIAddress)
+function getAPI(APIAddress, signer){
+    const APIFactory = new ethers.ContractFactory(abi, bytecode, signer)
+    const API = APIFactory.attach(APIAddress)
 
     return API
 }
