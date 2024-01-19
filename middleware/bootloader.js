@@ -16,7 +16,7 @@ const fs = require('fs').promises;
 /**
  * Retona a última API criada
  * @param {ethers.Wallet} signer 
- * @returns {ethers.BaseContract}
+ * @returns {Promise<ethers.BaseContract>}
  */
 async function getAPI(signer) {
     try {
@@ -42,7 +42,7 @@ async function getAPI(signer) {
  * @param {ethers.Wallet} signer 
  * @param {ethers.BaseContract} API 
  * @param {Object} info 
- * @returns {ethers.BaseContract}
+ * @returns {Promise<ethers.BaseContract>}
  */
 async function getInstitution(signer, API, info) {
     let institutionAddress = ''
@@ -85,6 +85,36 @@ function getInfo() {
     }
 }
 
+async function getSubscriptionId(manager, institutionAddress) {
+    let subscriptionId = ''
+    
+    try {
+        subscriptionId = await fs.readFile(path.join(__dirname, '..', 'subscriptionId.txt'))
+    }
+    catch(e) {
+        if(e.code === 'ENOENT') {
+            const fileToWrite = path.resolve(__dirname, '..', 'subscriptionId.txt')
+            await fs.writeFile(fileToWrite, subscriptionId)
+        }
+        else {
+            throw new Error(e)
+        }
+    }
+
+    if(subscriptionId.length === 0){
+        console.log('subscriptionId.txt empty. Creating a new subscription...')
+        subscriptionId = await manager.createSubscription(institutionAddress)
+        const fileToWrite = path.resolve(__dirname, '..', 'subscriptionId.txt')
+        await fs.writeFile(fileToWrite, String(subscriptionId))
+        console.log('\nNew Chainlink subscription created.')
+
+        return Number(subscriptionId)
+    }
+    else{
+        return Number(subscriptionId.toString())
+    }
+}
+
 (async () => {
     if (require.main === module) {
         const { signer, provider } = await blockchain.interaction()
@@ -92,8 +122,14 @@ function getInfo() {
         const API = await getAPI(signer)
         const info = getInfo()
         const institution = await getInstitution(signer, API, info)
+        const manager = await chainlinkFunctions.createManager(
+            signer,
+            blockchain.sepolia.chainlinkLinkTokenAddress,
+            blockchain.sepolia.chainlinkRouterAddress
+        )
+        const subscriptionId = await getSubscriptionId(manager)
 
-        console.log(institution)
+        console.log(subscriptionId)
 
         return
         
@@ -102,40 +138,17 @@ function getInfo() {
         const insuranceFlag = 0
 
         // Chainlink Functions
-        const subscriptionFlag = 0
         const fundSubscriptionFlag = 0
         const addToSubFlag = 0
 
         // Chainlink Automation 
         const upkeepFlag = 1
 
-
-        let subscriptionId
         let juelsAmount = String(BigInt(10**18)) // 1 LINK
-        let manager
         let institutionAddress
         let insuranceContractAddress
 
         try {
-            manager = await chainlinkFunctions.createManager(
-                signer,
-                blockchain.sepolia.chainlinkLinkTokenAddress,
-                blockchain.sepolia.chainlinkRouterAddress
-            )
-        }
-        catch(e) {
-            throw new Error(e)
-        }
-
-        try {
-            if(subscriptionFlag) {
-                subscriptionId = await manager.createSubscription(institutionAddress)
-                
-                console.log(`Chainlink Functions subscription ID: ${subscriptionId}`)
-            }
-            else {
-                subscriptionId = 1895
-            }
  
             if(fundSubscriptionFlag) { 
                 /*

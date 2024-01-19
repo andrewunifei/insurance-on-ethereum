@@ -5,7 +5,7 @@ const { SubscriptionManager } = require("@chainlink/functions-toolkit");
  * @param {HardhatEthersSigner} signer 
  * @param {string} linkTokenAddress 
  * @param {string} routerAddress 
- * @returns {SubscriptionManager}
+ * @returns {Promise<SubscriptionManager>}
  */
 async function createManager(signer, linkTokenAddress, routerAddress) {
     const manager = new SubscriptionManager(
