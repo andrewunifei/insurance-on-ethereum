@@ -19,8 +19,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * Retona a última API criada
- * Se nenhuma API existe, cria e retona uma nova
+ * Retorna a última API criada
+ * Se nenhum endereço de API existe no arquivo APIAddress.txt, cria e retona uma nova
  * @param {ethers.Wallet} signer 
  * @returns {Promise<ethers.BaseContract>}
  */
@@ -58,7 +58,7 @@ async function getAPI(signer) {
 
 /**
  * Retorna a última instituição criada.
- * Se nenhuma instituição existe, cria e retona uma nova
+ * Se nenhum endereço de instituição existe no arquivo institutionAddress.txt, cria e retona uma nova
  * @param {ethers.Wallet} signer 
  * @param {ethers.BaseContract} API 
  * @param {Object} info 
@@ -107,7 +107,7 @@ function getInfo() {
 
 /**
  * Retorna o id da última inscrição em Chainlink Functions.
- * Se nenhum id existe, realiza uma inscrição em Chainlink Functions e retona o id
+ * Se nenhum id existe no arquivo subscriptionId.txt, realiza uma inscrição em Chainlink Functions e retona o id
  * @param {SubscriptionManager} manager 
  * @param {string} institutionAddress 
  * @returns {Promise<number>}
@@ -147,9 +147,6 @@ const { signer, provider } = await blockchain.interaction()
 const API = await getAPI(signer)
 console.log(API.address)
 
-if(1){
-    console.log('....???')
-}
 // const info = getInfo()
 // const institution = await getInstitution(signer, API, info)
 
