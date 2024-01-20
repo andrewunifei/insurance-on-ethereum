@@ -27,7 +27,11 @@ async function createAPI(signer){
  * @returns {ethers.BaseContract}
  */
 function getAPI(APIAddress, signer){
-    const APIFactory = new ethers.ContractFactory(abi, bytecode, signer)
+    const APIFactory = new ethers.ContractFactory(
+        APIArtifact.abi,
+        APIArtifact.bytecode,
+        signer
+    )
     const API = APIFactory.attach(APIAddress)
 
     return API
@@ -52,6 +56,3 @@ async function createInstitution(API, info) {
 }
 
 export { createAPI, getAPI, createInstitution }
-
-// Atual API
-// 0x74Ce03A9655585754F50627F13359cc2F40D8FFB

@@ -5,7 +5,7 @@
  * @param {Object} args 
  * @returns {Object} Recibo da transação
  */
-async function createInsuranceContract(institution, args){
+async function createInsuranceContract(institution, args) {
     const tx = await institution.createInsuranceContract(
         args.deployer,
         args.farmer,
@@ -33,11 +33,11 @@ async function createInsuranceContract(institution, args){
  * @param {string} farmerAddress 
  * @returns {Object} Recibo da transação
  */
-async function whitelistFarmer(institution, farmerAddress){
+async function whitelistFarmer(institution, farmerAddress) {
     const tx = await institution.whitelistAddr(farmerAddress)
-    console.log(`\nAdding to white list: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
+    console.log(`Adding to whitelist: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
     const receipt = await tx.wait(1)
-    console.log(`\nFarmer ${farmerAddress} added to white list of institution ${institution.address}`)
+    console.log(`✅ Farmer ${farmerAddress} added to whitelist of institution ${institution.address}`)
 
     return receipt
 }
@@ -48,13 +48,33 @@ async function whitelistFarmer(institution, farmerAddress){
  * @param {string} farmerAddress 
  * @returns {Object} Recibo da transação
  */
-async function blacklistFarmer(institution, farmerAddress){
+async function blacklistFarmer(institution, farmerAddress) {
     const tx = await institution.blacklistAddr(farmerAddress)
-    console.log(`\nRemoving from white list: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
+    console.log(`Removing from whitelist: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
     const receipt = await tx.wait(1)
-    console.log(`\nFarmer ${farmerAddress} removed from white list of institution ${institution.address}`)
+    console.log(`✅ Farmer ${farmerAddress} removed from whitelist of institution ${institution.address}`)
 
     return receipt
 }
 
-export { createInsuranceContract, whitelistFarmer, blacklistFarmer }
+/**
+ * Através de uma carteira, envia fundos para o contrato de uma instituição 
+ * @param {ethers.Wallet} signer 
+ * @param {ethers.BaseContract} institution 
+ * @param {Number} amount
+ * @returns {Object} Recibo da transação
+ */
+async function fundInstitution(signer, institution, amount) {
+    const tx = await signer.sendTransaction(
+        {
+            to: institution.address,
+            value: ethers.utils.parseEther(String(amount)) // eth --> wei
+        }
+    )
+    console.log(`Funding institution ${institution.address} with ${String(amount)} ethers`)
+    const receipt = await tx.wait(1)
+
+    return receipt
+}
+
+export { createInsuranceContract, whitelistFarmer, blacklistFarmer, fundInstitution }
