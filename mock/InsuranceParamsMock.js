@@ -3,8 +3,8 @@ import * as blockchain from '../middleware/blockchain.js'
 import fs from 'node:fs/promises'
 
 const params = {
-    signer: '', 
-    farmer: '', 
+    signer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
+    farmer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
     humidityLimit: 50,
     sampleMaxSize: 1,
     reparationValue: ethers.utils.parseEther("0"), // eth --> wei

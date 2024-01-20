@@ -130,7 +130,7 @@ async function getInsuranceContract(signer, institution, params) {
     const file = path.resolve(__dirname, '..', 'insuranceContractAddress.txt')
     let insuranceContractAddress = await getAddress(file)
 
-    if(institutionAddress.length === 0){
+    if(insuranceContractAddress.length === 0){
         console.log('insuranceContractAddress.txt empty. Creating a new institution...')
         const receipt = await institutionManager.createInsuranceContract(institution, params)
         insuranceContractAddress = receipt.events[0].args[0]
@@ -146,5 +146,10 @@ async function getInsuranceContract(signer, institution, params) {
 
     return insuranceContract
 }
+
+// ** TODO: Implementar essa função usando fs-extra **
+// async function clearAll() {
+
+// }
 
 export { getAPI, getInstitution, getSubscriptionId, getInsuranceContract }

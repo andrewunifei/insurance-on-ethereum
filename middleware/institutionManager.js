@@ -7,7 +7,7 @@
  */
 async function createInsuranceContract(institution, args) {
     const tx = await institution.createInsuranceContract(
-        args.deployer,
+        args.signer,
         args.farmer,
         args.humidityLimit,
         args.sampleMaxSize,
@@ -21,7 +21,7 @@ async function createInsuranceContract(institution, args) {
         args.gaslimit
     )
 
-    console.log(`\nInsurance Contract creation: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
+    console.log(`Insurance Contract creation: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
     const receipt = tx.wait(1)
 
     return receipt

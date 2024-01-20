@@ -1,28 +1,25 @@
 import * as ethers from 'ethers'
 import * as blockchain from './blockchain.js'
 import * as chainlinkFunctions from './chainlinkFunctions.js'
+import * as institutionManager from './institutionManager.js'
+import * as helpers from '../mock/helpers.js'
 import upkeepArtifact from '../build/artifacts/contracts/Upkeep.sol/Upkeep.json' assert { type: 'json' }
 import LINKArtifacts from '../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json' assert { type: 'json' }
-import * as helpers from '../mock/helpers.js'
-import params from '../mock/InsuranceParamsMock.js'
-import ora from 'ora'
-
-function getInfo() {
-    return {
-        name: 'Institution Version X'
-        // ... Pesquisar na literatura informações relevantes para identificar uma instituição
-    }
-}
+import insuranceContractParams from '../mock/InsuranceParamsMock.js'
+import insuranceInfo from '../mock/institutionInfoMock.js'
 
 const { signer, provider } = await blockchain.interaction(
     process.env.HARDHAT_ACCOUNT_PRIVATE_KEY,
     process.env.HARDHAT_RPC_URL
 )
 const API = await helpers.getAPI(signer)
-const info = getInfo()
-const institution = await helpers.getInstitution(signer, API, info)
+const institution = await helpers.getInstitution(signer, API, insuranceInfo)
 
-console.log(institution)
+// ** TODO: Resolver isso: **
+institution.isWhiteListed('0x')
+
+//const insuranceContract = await helpers.getInsuranceContract(signer, institution, insuranceContractParams)
+//console.log(insuranceContract)
 
 // const juelsAmount = String(BigInt(10**18)) // 1 LINK
 // const manager = await chainlinkFunctions.createManager(
@@ -41,8 +38,6 @@ console.log(institution)
 //     })
 //     spinner.succeed(`Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}`)
 // }
-
-// const insuranceContract = helpers.getInsuranceContract(institution, params)
 
 // console.log(insuranceContract)
 
