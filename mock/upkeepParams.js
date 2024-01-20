@@ -1,9 +1,11 @@
+import * as ethers from 'ethers'
+
 const upkeepParams = {
     name: 'upkeep-teste',
     encryptedEmail: ethers.utils.hexlify([]),
-    upkeepContract: insuranceContractAddress,
+    upkeepContract: '', // insuranceContractAddress
     gasLimit: 300000,
-    adminAddress: signer.address, // Pode ser a instituição (talvez)
+    adminAddress: '', // Pode ser a instituição (talvez)
     triggerType: 0,
     checkData: ethers.utils.hexlify([]),
     triggerConfig: ethers.utils.hexlify([]),

@@ -19,11 +19,11 @@ const { signer, provider } = await blockchain.interaction(
     process.env.HARDHAT_RPC_URL
 )
 const API = await helpers.getAPI(signer)
+const info = getInfo()
+const institution = await helpers.getInstitution(signer, API, info)
 
-console.log(API)
+console.log(institution)
 
-// const info = getInfo()
-// const institution = await helpers.getInstitution(signer, API, info)
 // const juelsAmount = String(BigInt(10**18)) // 1 LINK
 // const manager = await chainlinkFunctions.createManager(
 //     signer,

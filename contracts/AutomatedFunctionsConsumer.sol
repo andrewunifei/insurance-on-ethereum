@@ -27,16 +27,16 @@ interface UpkeepInterface {
 }
 
 struct RegistrationParams {
-    string name;
-    bytes encryptedEmail;
+    string  name;
+    bytes   encryptedEmail;
     address upkeepContract;
-    uint32 gasLimit;
+    uint32  gasLimit;
     address adminAddress;
-    uint8 triggerType;
-    bytes checkData;
-    bytes triggerConfig;
-    bytes offchainConfig;
-    uint96 amount;
+    uint8   triggerType;
+    bytes   checkData;
+    bytes   triggerConfig;
+    bytes   offchainConfig;
+    uint96  amount;
 }
 
 /**
@@ -49,35 +49,35 @@ struct RegistrationParams {
 contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
   using FunctionsRequest for FunctionsRequest.Request;
 
-  bytes public requestCBOR; // Concise Binary Object Representation para transferência de dados
-  bytes32 public latestRequestId;
-  bytes public latestResponse;
-  bytes public latestError;
-  uint64 public subscriptionId;
-  uint32 public fulfillGasLimit;
-  uint256 public updateInterval;
-  uint256 public lastUpkeepTimeStamp;
-  uint256 public upkeepCounter;
-  uint256 public responseCounter;
-  uint8 private controlFlag;
+  bytes   public  requestCBOR; // Concise Binary Object Representation para transferência de dados
+  bytes32 public  latestRequestId;
+  bytes   public  latestResponse;
+  bytes   public  latestError;
+  uint64  public  subscriptionId;
+  uint32  public  fulfillGasLimit;
+  uint256 public  updateInterval;
+  uint256 public  lastUpkeepTimeStamp;
+  uint256 public  upkeepCounter;
+  uint256 public  responseCounter;
+  uint8   private controlFlag;
 
   // Configuracao da automacao
   IAutomationRegistryConsumer public immutable registry;
-  Upkeep public i_upkeep;
-  uint256 upkeepId;
-  bytes public request;
-  uint32 public gasLimit;
-  bytes32 public donID;
-  bytes32 public s_lastRequestId;
-  bytes public s_lastResponse;
-  bytes public s_lastError;
-  uint256 public s_upkeepCounter;
-  uint256 public s_requestCounter;
-  uint256 public s_responseCounter;
+  Upkeep  public  i_upkeep;
+  uint256 public  upkeepId;
+  bytes   public  request;
+  uint32  public  gasLimit;
+  bytes32 public  donID;
+  bytes32 public  s_lastRequestId;
+  bytes   public  s_lastResponse;
+  bytes   public  s_lastError;
+  uint256 public  s_upkeepCounter;
+  uint256 public  s_requestCounter;
+  uint256 public  s_responseCounter;
 
-  address public institution;
-  address public farmer;
-  address public upkeepContract;
+  address public  institution;
+  address public  farmer;
+  address public  upkeepContract;
 
   error UnexpectedRequestID(bytes32 requestId);
 
@@ -86,11 +86,11 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   event RequestRevertedWithoutErrorMsg(bytes data);
 
   // Valores para regras de negócio
-  uint256 reparationValue;
-  uint256 humidityLimit;
-  uint256 public sampleMaxSize;
-  string[] public sampleStorage;
-  string private computationJS; // calculo da computacao do indice
+  uint256   public  reparationValue;
+  uint256   public  humidityLimit;
+  uint256   public  sampleMaxSize;
+  string[]  public  sampleStorage;
+  string    private computationJS; // calculo da computacao do indice
 
   // Variável para armazenar a média das amostras
   uint256 private mean;
