@@ -1,7 +1,7 @@
 /**
  * Cria um contrato de seguro a partir do contrato Institution
  * O endereço do contrato de seguro na rede Ethereum é armazenado na em uma lista na Institution
- * @param {BaseContract} institution 
+ * @param {ethers.BaseContract} institution 
  * @param {Object} args 
  * @returns {Object} Recibo da transação
  */
@@ -29,7 +29,7 @@ async function createInsuranceContract(institution, args){
 
 /**
  * Adiciona o endereço na rede Ethereum do fazendeiro na lista branca da instituição
- * @param {BaseContract} institution 
+ * @param {ethers.BaseContract} institution 
  * @param {string} farmerAddress 
  * @returns {Object} Recibo da transação
  */
@@ -44,7 +44,7 @@ async function whitelistFarmer(institution, farmerAddress){
 
 /**
  * Adiciona o endereço na rede Ethereum do fazendeiro na lista branca da instituição
- * @param {BaseContract} institution 
+ * @param {ethers.BaseContract} institution 
  * @param {string} farmerAddress 
  * @returns {Object} Recibo da transação
  */
@@ -57,8 +57,4 @@ async function blacklistFarmer(institution, farmerAddress){
     return receipt
 }
 
-module.exports = {
-    createInsuranceContract,
-    whitelistFarmer,
-    blacklistFarmer
-}
+export { createInsuranceContract, whitelistFarmer, blacklistFarmer }

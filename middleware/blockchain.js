@@ -1,10 +1,16 @@
-const ethers = require('ethers')
+import * as ethers from 'ethers'
+import * as dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 /**
  * Objeto com endereços relevantes de contratos Chainlink
  */
 const sepolia = {
-    // Antigo // chainlinkRegistrarAddress: '0x9a811502d843E5a03913d5A2cfb646c11463467A',
     chainlinkRegistrarAddress: '0xb0E49c5D0d05cbc241d68c05BC5BA1d1B7B72976',
     chainlinkRegistryAddress: '0x86EFBD0b6736Bed994962f9797049422A3A8E8Ad',
     chainlinkLinkTokenAddress: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
@@ -19,25 +25,19 @@ const sepoliaExplorerURL = 'https://sepolia.etherscan.io/'
  * e um assinante na rede ethereum
  * @returns {Object}
  */
-async function interaction() {
-    const privateKey = process.env.PRIVATE_KEY;
+async function interaction(privateKey, rpcUrl) {
     if(!privateKey) {
         throw new Error("Private key not provided - check your environment variables");
     }
 
-    const RPCURL = process.env.ETHEREUM_SEPOLIA_RPC_URL;
-    if(!RPCURL) {
+    if(!rpcUrl) {
         throw new Error(`RPCURL not provided  - check your environment variables`);
     }
 
-    const provider = new ethers.providers.JsonRpcProvider(RPCURL);
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     const signer = new ethers.Wallet(privateKey, provider);
 
-    return {signer, provider};
+    return { signer, provider };
 }
 
-module.exports = {
-    sepolia,
-    sepoliaExplorerURL,
-    interaction
-}
+export { sepolia, sepoliaExplorerURL, interaction }

@@ -1,15 +1,17 @@
-const ethers = require("ethers")
-const APIArtifact = require("../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json")
-const abi = APIArtifact.abi
-const bytecode = APIArtifact.bytecode
+import * as ethers from 'ethers'
+import APIArtifact from '../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' }
 
 /**
  * Implanta o contrato InsuranceAPI.sol na rede Ethereum
  * @param {ethers.Wallet} signer
- * @returns {BaseContract}
+ * @returns {Promise<ethers.BaseContract>}
  */
 async function createAPI(signer){
-    const APIFactory = new ethers.ContractFactory(abi, bytecode, signer)
+    const APIFactory = new ethers.ContractFactory(
+        APIArtifact.abi,
+        APIArtifact.bytecode,
+        signer
+    )
     const API = await APIFactory.deploy(signer.address)
     
     console.log(`API creation: waiting 1 block for deployment ${API.deployTransaction.hash} to be confirmed...`)
@@ -22,7 +24,7 @@ async function createAPI(signer){
  * Retorna um contrato InsuranceAPI.sol já implantado na rede Ethereum
  * @param {string} APIAddress O endereço do contrato na rede Ethereum
  * @param {ethers.Wallet} signer
- * @returns {BaseContract}
+ * @returns {ethers.BaseContract}
  */
 function getAPI(APIAddress, signer){
     const APIFactory = new ethers.ContractFactory(abi, bytecode, signer)
@@ -34,7 +36,7 @@ function getAPI(APIAddress, signer){
 /**
  * Cria uma instituição a partir do contrato InsuranceAPI
  * O endereço da instituição na rede Ethereum é armazenado em uma lista no InsuranceAPI
- * @param {BaseContract} API 
+ * @param {ethers.BaseContract} API 
  * @param {Object} info Informações para identificar a instituição
  * @returns {ContractTransactionReceipt}
  */
@@ -49,11 +51,7 @@ async function createInstitution(API, info) {
     return receipt
 }
 
-module.exports = {
-    createAPI,
-    getAPI,
-    createInstitution
-}
+export { createAPI, getAPI, createInstitution }
 
 // Atual API
 // 0x74Ce03A9655585754F50627F13359cc2F40D8FFB

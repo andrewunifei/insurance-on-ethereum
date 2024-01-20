@@ -1,12 +1,13 @@
 const ethers = require('ethers')
-const blockchain = require('./blockchain')
-const upkeepArtifacts = require('../build/artifacts/contracts/Upkeep.sol/Upkeep.json')
+import * as ethers from 'ethers'
+import * as blockchain from './blockchain.js'
+import upkeepArtifacts from '../build/artifacts/contracts/Upkeep.sol/Upkeep.json' assert { type: 'json' }
 
-async function createUpkeep(deployer){
+async function createUpkeep(signer){
     const upkeepFactory = new ethers.ContractFactory(
         upkeepArtifacts.abi,
         upkeepArtifacts.bytecode,
-        deployer
+        signer
     )
 
     const upkeep = await upkeepFactory.deploy(
@@ -20,17 +21,14 @@ async function createUpkeep(deployer){
     return upkeep
 }
 
-async function getUpkeep(upkeepAddress, deployer){
+async function getUpkeep(upkeepAddress, signer){
     const upkeep = new ethers.Contract(
         upkeepAddress,
         upkeepArtifacts.abi,
-        deployer
+        signer
     )
 
     return upkeep
 }
 
-module.exports = {
-    createUpkeep,
-    getUpkeep
-}
+export { createUpkeep, getUpkeep }
