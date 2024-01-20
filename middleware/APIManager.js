@@ -1,4 +1,4 @@
-import * as ethers from "ethers"
+import * as ethers from 'ethers'
 import APIArtifact from '../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' }
 
 /**

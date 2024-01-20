@@ -142,33 +142,35 @@ async function getSubscriptionId(manager, institutionAddress) {
     }
 }
 
-const { signer, provider } = await blockchain.interaction()
+// Conectando a blockchian local hardhat
+const { signer, provider } = await blockchain.interaction(
+    process.env.HARDHAT_ACCOUNT_PRIVATE_KEY,
+    process.env.HARDHAT_RPC_URL
+)
 
 const API = await getAPI(signer)
 console.log(API.address)
 
-// const info = getInfo()
-// const institution = await getInstitution(signer, API, info)
+const info = getInfo()
+const institution = await getInstitution(signer, API, info)
 
-// const juelsAmount = String(BigInt(10**18)) // 1 LINK
-// const manager = await chainlinkFunctions.createManager(
-//     signer,
-//     blockchain.sepolia.chainlinkLinkTokenAddress,
-//     blockchain.sepolia.chainlinkRouterAddress
-// )
-// const subscriptionId = await getSubscriptionId(manager)
-// const subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId)
+const juelsAmount = String(BigInt(10**18)) // 1 LINK
+const manager = await chainlinkFunctions.createManager(
+    signer,
+    blockchain.sepolia.chainlinkLinkTokenAddress,
+    blockchain.sepolia.chainlinkRouterAddress
+)
+const subscriptionId = await getSubscriptionId(manager)
+const subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId)
 
-// if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
-//     const spinner = ora('Subscription without funds. Funding...').start();
-//     receipt = await manager.fundSubscription({
-//         subscriptionId, 
-//         juelsAmount
-//     })
-//     spinner.succeed(`Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}`)
-// }
-
-
+if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
+    const spinner = ora('Subscription without funds. Funding...').start();
+    receipt = await manager.fundSubscription({
+        subscriptionId, 
+        juelsAmount
+    })
+    spinner.succeed(`Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}`)
+}
 
 // const insuranceFlag = 0
 

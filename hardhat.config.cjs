@@ -29,20 +29,11 @@ module.exports = {
   },
   networks: {
     hardhat: {
-      allowUnlimitedContractSize: true,
-      accounts: process.env.PRIVATE_KEY
-        ? [
-            {
-              privateKey: process.env.PRIVATE_KEY,
-              balance: "10000000000000000000000",
-            },
-          ]
-        : [],
     },
     ethereumSepolia: {
       url: process.env.ETHEREUM_SEPOLIA_RPC_URL || "UNSET",
       gasPrice: undefined,
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      accounts: process.env.SEPOLIA_ACCOUNT_PRIVATE_KEY !== undefined ? [process.env.SEPOLIA_ACCOUNT_PRIVATE_KEY] : [],
       verifyApiKey: process.env.ETHERSCAN_API_KEY || "UNSET",
       chainId: 11155111,
       confirmations: DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS,

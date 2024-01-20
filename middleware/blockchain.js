@@ -25,18 +25,16 @@ const sepoliaExplorerURL = 'https://sepolia.etherscan.io/'
  * e um assinante na rede ethereum
  * @returns {Object}
  */
-async function interaction() {
-    const privateKey = process.env.PRIVATE_KEY;
+async function interaction(privateKey, rpcUrl) {
     if(!privateKey) {
         throw new Error("Private key not provided - check your environment variables");
     }
 
-    const RPCURL = process.env.ETHEREUM_SEPOLIA_RPC_URL;
-    if(!RPCURL) {
+    if(!rpcUrl) {
         throw new Error(`RPCURL not provided  - check your environment variables`);
     }
 
-    const provider = new ethers.providers.JsonRpcProvider(RPCURL);
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
     const signer = new ethers.Wallet(privateKey, provider);
 
     return { signer, provider };
