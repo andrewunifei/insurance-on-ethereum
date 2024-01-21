@@ -124,7 +124,7 @@ async function getSubscriptionId(manager, institutionAddress) {
  * @param {ethers.Wallet} signer  
  * @param {ethers.BaseContract} institution 
  * @param {Object} params 
- * @returns 
+ * @returns {Promise<ethers.BaseContract>}
  */
 async function getInsuranceContract(signer, institution, params) {
     const file = path.resolve(__dirname, '..', 'insuranceContractAddress.txt')

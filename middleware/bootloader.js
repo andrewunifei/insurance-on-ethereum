@@ -18,16 +18,10 @@ const signerAddress = signer.address
 if(!await institution.isWhiteListed(signerAddress)){
     await institutionManager.whitelistFarmer(institution, signerAddress)
 }
+const insuranceContract = await helpers.getInsuranceContract(signer, institution, insuranceContractParams)
+console.log(insuranceContract)
 
 // const nullAddress = ethers.utils.hexlify(ethers.utils.zeroPad(0, 20))
-
-// Aparentemente quando uma função em Solidity é pure ou view ela gera o retorno original da função original
-// Caso contrário ela gera uma 'tx' que pode se transformar em 'receipt'
-
-
-
-//const insuranceContract = await helpers.getInsuranceContract(signer, institution, insuranceContractParams)
-//console.log(insuranceContract)
 
 // const juelsAmount = String(BigInt(10**18)) // 1 LINK
 // const manager = await chainlinkFunctions.createManager(
@@ -46,8 +40,6 @@ if(!await institution.isWhiteListed(signerAddress)){
 //     })
 //     spinner.succeed(`Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}`)
 // }
-
-// console.log(insuranceContract)
 
 // ** TODO: Organizar, separar, e modularizar o conteúdo abaixo **
 

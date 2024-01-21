@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 /**
- * Objeto com endereços relevantes de contratos Chainlink
+ * Objeto com endereços relevantes de contratos Chainlink na blockchain Ethereum Sepolia
  */
 const sepolia = {
     chainlinkRegistrarAddress:  '0xb0E49c5D0d05cbc241d68c05BC5BA1d1B7B72976',
@@ -27,11 +27,11 @@ const sepoliaExplorerURL = 'https://sepolia.etherscan.io/'
  */
 async function interaction(privateKey, rpcUrl) {
     if(!privateKey) {
-        throw new Error("Private key not provided - check your environment variables");
+        throw new Error('Private key not provided - check your environment variables');
     }
 
     if(!rpcUrl) {
-        throw new Error(`RPCURL not provided  - check your environment variables`);
+        throw new Error('RPCURL not provided  - check your environment variables');
     }
 
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
