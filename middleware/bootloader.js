@@ -14,9 +14,17 @@ const { signer, provider } = await blockchain.interaction(
 )
 const API = await helpers.getAPI(signer)
 const institution = await helpers.getInstitution(signer, API, insuranceInfo)
+const signerAddress = signer.address
+if(!await institution.isWhiteListed(nullAddress)){
+    await institutionManager.whitelistFarmer(institution, signerAddress)
+}
 
-// ** TODO: Resolver isso: **
-institution.isWhiteListed('0x')
+// const nullAddress = ethers.utils.hexlify(ethers.utils.zeroPad(0, 20))
+
+// Aparentemente quando uma função em Solidity é pure ou view ela gera o retorno original da função
+// Caso contrário ela gera uma 'tx' que pode se transformar em 'receipt'
+
+
 
 //const insuranceContract = await helpers.getInsuranceContract(signer, institution, insuranceContractParams)
 //console.log(insuranceContract)
@@ -73,4 +81,3 @@ institution.isWhiteListed('0x')
 // const receipt = await tx.wait(1)
 
 // console.log(receipt)
-        
