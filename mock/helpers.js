@@ -43,7 +43,7 @@ async function getAddress(file) {
  * @param {ethers.Wallet} signer 
  * @returns {Promise<ethers.BaseContract>}
  */
-async function getAPI(signer) {
+async function fetchAPI(signer) {
     const file = path.resolve(__dirname, '..', 'deployed', 'APIAddress.txt')
     let APIAddress = await getAddress(file)
 
@@ -71,7 +71,7 @@ async function getAPI(signer) {
  * @param {Object} info 
  * @returns {Promise<ethers.BaseContract>}
  */
-async function getInstitution(signer, API, info) {
+async function fetchInstitution(signer, API, info) {
     const file = path.resolve(__dirname, '..', 'deployed', 'institutionAddress.txt')
     let institutionAddress = await getAddress(file)
 
@@ -100,7 +100,7 @@ async function getInstitution(signer, API, info) {
  * @param {string} institutionAddress 
  * @returns {Promise<number>}
  */
-async function getSubscriptionId(manager, institutionAddress) {
+async function fetchSubscriptionId(manager, institutionAddress) {
     const file = path.resolve(__dirname, '..', 'subscriptionId.txt')
     let subscriptionId = await getAddress(file)
 
@@ -126,7 +126,7 @@ async function getSubscriptionId(manager, institutionAddress) {
  * @param {Object} params 
  * @returns {Promise<ethers.BaseContract>}
  */
-async function getInsuranceContract(signer, institution, params) {
+async function fetchInsuranceContract(signer, institution, params) {
     const file = path.resolve(__dirname, '..', 'insuranceContractAddress.txt')
     let insuranceContractAddress = await getAddress(file)
 
@@ -152,4 +152,4 @@ async function getInsuranceContract(signer, institution, params) {
 
 // }
 
-export { getAPI, getInstitution, getSubscriptionId, getInsuranceContract }
+export { fetchAPI, fetchInstitution, fetchSubscriptionId, fetchInsuranceContract }

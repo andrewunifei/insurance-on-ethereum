@@ -12,13 +12,13 @@ const { signer, provider } = await blockchain.interaction(
     process.env.HARDHAT_ACCOUNT_PRIVATE_KEY,
     process.env.HARDHAT_RPC_URL
 )
-const API = await helpers.getAPI(signer)
-const institution = await helpers.getInstitution(signer, API, insuranceInfo)
+const API = await helpers.fetchAPI(signer)
+const institution = await helpers.fetchInstitution(signer, API, insuranceInfo)
 const signerAddress = signer.address
-if(!await institution.isWhiteListed(signerAddress)){
+if(!await institution.isWhiteListed(signerAddress)) {
     await institutionManager.whitelistFarmer(institution, signerAddress)
 }
-const insuranceContract = await helpers.getInsuranceContract(signer, institution, insuranceContractParams)
+const insuranceContract = await helpers.fetchInsuranceContract(signer, institution, insuranceContractParams)
 console.log(insuranceContract)
 
 // const nullAddress = ethers.utils.hexlify(ethers.utils.zeroPad(0, 20))
