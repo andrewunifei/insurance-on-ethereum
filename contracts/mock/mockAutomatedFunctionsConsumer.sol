@@ -5,8 +5,7 @@ import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
-import {IAutomationRegistryConsumer, RegistrationParams} from "./Automation.sol";
-import {Upkeep} from "./Upkeep.sol";
+import {IAutomationRegistryConsumer, RegistrationParams} from "../Automation.sol";
 import "hardhat/console.sol"; // Comentar essa linha 
 
 interface UpkeepInterface {
@@ -37,7 +36,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
 
   // Configuracao da automacao
   IAutomationRegistryConsumer public immutable registry;
-  Upkeep  public  i_upkeep;
   uint256 public  upkeepId;
   bytes   public  request;
   uint32  public  gasLimit;

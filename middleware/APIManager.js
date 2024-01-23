@@ -1,12 +1,11 @@
 import * as ethers from 'ethers'
-import APIArtifact from '../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' }
 
 /**
  * Implanta o contrato InsuranceAPI.sol na rede Ethereum
  * @param {ethers.Wallet} signer
  * @returns {Promise<ethers.BaseContract>}
  */
-async function createAPI(signer){
+async function createAPI(signer, APIArtifact){
     const APIFactory = new ethers.ContractFactory(
         APIArtifact.abi,
         APIArtifact.bytecode,
@@ -26,7 +25,7 @@ async function createAPI(signer){
  * @param {ethers.Wallet} signer
  * @returns {ethers.BaseContract}
  */
-function getAPI(APIAddress, signer){
+function getAPI(APIAddress, signer, APIArtifact){
     const APIFactory = new ethers.ContractFactory(
         APIArtifact.abi,
         APIArtifact.bytecode,

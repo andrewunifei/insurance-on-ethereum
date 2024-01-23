@@ -4,12 +4,7 @@ import * as institutionManager from '../middleware/institutionManager.js'
 import * as insuranceContractManager from '../middleware/insuranceContractManager.js'
 import institutionArtifacts from '../build/artifacts/contracts/Institution.sol/Institution.json' assert { type: 'json' }
 import insuranceContractArtifacts from '../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
-import path from 'path'
 import fs from 'node:fs/promises'
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 /**
  * Lê e retorna o endereço gravado no arquivo de parâmetro.
@@ -38,49 +33,51 @@ async function getAddress(file) {
 
 /**
  * Retorna a última API criada.
- * Se nenhum endereço de API existir no arquivo APIAddress.txt, cria e retona uma nova API.
- * Caso necessário escreve o endereço da nova API no arquivo APIAddress.txt 
+ * Se nenhum endereço de API existir no arquivo ${filename}, cria e retona uma nova API.
+ * Caso necessário escreve o endereço da nova API no arquivo ${filename} 
  * @param {ethers.Wallet} signer 
+ * @param {string} file 
  * @returns {Promise<ethers.BaseContract>}
  */
-async function fetchAPI(signer) {
-    const file = path.resolve(__dirname, '..', 'deployed', 'APIAddress.txt')
+async function fetchAPI(signer, file, mockAPIArtifact) {
+    const filename = file.split("/").slice(-1)[0]
     let APIAddress = await getAddress(file)
 
     if(APIAddress.length === 0){
-        console.log('APIAddress.txt empty. Creating a new API...')
-        const API = await APIManager.createAPI(signer)
+        console.log(`${filename} empty. Creating a new API...`)
+        const API = await APIManager.createAPI(signer, mockAPIArtifact)
         APIAddress = API.address
         await fs.writeFile(file, APIAddress)
-        console.log('✅ New API created! Its address was saved to APIAddress.txt')
+        console.log(`✅ New API created! Its address was saved to ${filename}`)
 
         return API
     }
 
-    const API = APIManager.getAPI(APIAddress, signer)
+    const API = APIManager.getAPI(APIAddress, signer, mockAPIArtifact)
 
     return API
 }
 
 /**
  * Retorna a última instituição criada.
- * Se nenhum endereço de instituição existir no arquivo institutionAddress.txt, cria e retona uma nova instituição.
- * Caso necessário escreve o endereço da nova instituição no arquivo institutionAddress.txt 
+ * Se nenhum endereço de instituição existir no arquivo ${filename}, cria e retona uma nova instituição.
+ * Caso necessário escreve o endereço da nova instituição no arquivo ${filename} 
  * @param {ethers.Wallet} signer 
  * @param {ethers.BaseContract} API 
  * @param {Object} info 
+ * @param {string} file
  * @returns {Promise<ethers.BaseContract>}
  */
-async function fetchInstitution(signer, API, info) {
-    const file = path.resolve(__dirname, '..', 'deployed', 'institutionAddress.txt')
+async function fetchInstitution(signer, API, info, file) {
+    const filename = file.split("/").slice(-1)[0]
     let institutionAddress = await getAddress(file)
 
     if(institutionAddress.length === 0){
-        console.log('institutionAddress.txt empty. Creating a new institution...')
+        console.log(`${filename} empty. Creating a new institution...`)
         const receipt = await APIManager.createInstitution(API, info)
         institutionAddress = receipt.events[0].args[0]
         await fs.writeFile(file, institutionAddress)
-        console.log('✅ New institution created! Its address was saved to institutionAddress.txt')
+        console.log(`✅ New institution created! Its address was saved to ${filename}`)
     }
 
     const institution = new ethers.Contract(
@@ -94,21 +91,22 @@ async function fetchInstitution(signer, API, info) {
 
 /**
  * Retorna o id da última inscrição em Chainlink Functions.
- * Se nenhum id existe no arquivo subscriptionId.txt, realiza uma inscrição em Chainlink Functions e retona o id.
- * Caso necessário escreve o endereço da nova instituição no arquivo subscriptionId.txt 
+ * Se nenhum id existe no arquivo ${filename}, realiza uma inscrição em Chainlink Functions e retona o id.
+ * Caso necessário escreve o endereço da nova instituição no arquivo ${filename} 
  * @param {SubscriptionManager} manager 
  * @param {string} institutionAddress 
+ * @param {string} file
  * @returns {Promise<number>}
  */
-async function fetchSubscriptionId(manager, institutionAddress) {
-    const file = path.resolve(__dirname, '..', 'subscriptionId.txt')
+async function fetchSubscriptionId(manager, institutionAddress, file) {
+    const filename = file.split("/").slice(-1)[0]
     let subscriptionId = await getAddress(file)
 
     if(subscriptionId.length === 0){
-        console.log('subscriptionId.txt empty. Creating a new subscription...')
+        console.log(`${filename} empty. Creating a new subscription...`)
         subscriptionId = await manager.createSubscription(institutionAddress)
         await fs.writeFile(file, String(subscriptionId))
-        console.log('✅ New Chainlink subscription created! Its ID was saved to subscriptionId.txt')
+        console.log(`✅ New Chainlink subscription created! Its ID was saved to ${filename}`)
 
         return Number(subscriptionId)
     }
@@ -119,23 +117,24 @@ async function fetchSubscriptionId(manager, institutionAddress) {
 
 /**
  * Retorna o último contrato de seguro criadao.
- * Se nenhum endereço de contrato de seguro existir no arquivo insuranceContractAddress.txt, cria e retona um novo contrato.
- * Caso necessário escreve o endereço do novo contrato de seguro no arquivo insuranceContractAddress.txt 
+ * Se nenhum endereço de contrato de seguro existir no arquivo ${filename}, cria e retona um novo contrato.
+ * Caso necessário escreve o endereço do novo contrato de seguro no arquivo ${filename} 
  * @param {ethers.Wallet} signer  
  * @param {ethers.BaseContract} institution 
  * @param {Object} params 
+ * @param {string} file
  * @returns {Promise<ethers.BaseContract>}
  */
-async function fetchInsuranceContract(signer, institution, params) {
-    const file = path.resolve(__dirname, '..', 'insuranceContractAddress.txt')
+async function fetchInsuranceContract(signer, institution, params, file) {
+    const filename = file.split("/").slice(-1)[0]
     let insuranceContractAddress = await getAddress(file)
 
     if(insuranceContractAddress.length === 0){
-        console.log('insuranceContractAddress.txt empty. Creating a new institution...')
+        console.log(`${filename} empty. Creating a new institution...`)
         const receipt = await institutionManager.createInsuranceContract(institution, params)
         insuranceContractAddress = receipt.events[0].args[0]
         await fs.writeFile(file, insuranceContractAddress)
-        console.log('✅ New Insurance Contract created! Its address was saved to insuranceContractAddress.txt')
+        console.log(`✅ New Insurance Contract created! Its address was saved to ${filename}`)
     }
 
     const insuranceContract = new ethers.Contract(

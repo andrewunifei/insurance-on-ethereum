@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/AutomatedFunctionsConsumer.sol": {
-      "lastModificationDate": 1705786235516,
-      "contentHash": "3207434bbddd99184bc9f396eb1a6972",
+      "lastModificationDate": 1706006491752,
+      "contentHash": "bb59086b65ae37c5a1882595b15ff3f4",
       "sourceName": "contracts/AutomatedFunctionsConsumer.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -34,6 +34,7 @@
         "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol",
         "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
         "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol",
+        "./Automation.sol",
         "./Upkeep.sol",
         "hardhat/console.sol"
       ],
@@ -42,13 +43,12 @@
       ],
       "artifacts": [
         "AutomatedFunctionsConsumer",
-        "IAutomationRegistryConsumer",
         "UpkeepInterface"
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/Upkeep.sol": {
-      "lastModificationDate": 1705596129299,
-      "contentHash": "3619738163de15b3965f64d7f3bf9cac",
+      "lastModificationDate": 1706006465299,
+      "contentHash": "0cfb45615edc17b9fbc76dd1edcb5d62",
       "sourceName": "contracts/Upkeep.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -75,7 +75,8 @@
         }
       },
       "imports": [
-        "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol"
+        "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol",
+        "./Automation.sol"
       ],
       "versionPragmas": [
         "^0.8.7"
@@ -751,6 +752,163 @@
       },
       "imports": [
         "./Institution.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "InsuranceAPI"
+      ]
+    },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/Automation.sol": {
+      "lastModificationDate": 1706006386387,
+      "contentHash": "ead50125269d352ae9dd2e606c85d3e8",
+      "sourceName": "contracts/Automation.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "IAutomationRegistryConsumer"
+      ]
+    },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockAutomatedFunctionsConsumer.sol": {
+      "lastModificationDate": 1706006557052,
+      "contentHash": "3954eb8dec302362cfce26c6558efb8e",
+      "sourceName": "contracts/mock/mockAutomatedFunctionsConsumer.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol",
+        "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol",
+        "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
+        "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol",
+        "../Automation.sol",
+        "hardhat/console.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "AutomatedFunctionsConsumer",
+        "UpkeepInterface"
+      ]
+    },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockInstitution.sol": {
+      "lastModificationDate": 1706007813448,
+      "contentHash": "26e475609e726f96bf6f0d6bee477eab",
+      "sourceName": "contracts/mock/mockInstitution.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./mockAutomatedFunctionsConsumer.sol",
+        "hardhat/console.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "Institution"
+      ]
+    },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockInsuranceAPI.sol": {
+      "lastModificationDate": 1706007799252,
+      "contentHash": "2adb650b1908f7bb2d63fea395b625d2",
+      "sourceName": "contracts/mock/mockInsuranceAPI.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./mockInstitution.sol"
       ],
       "versionPragmas": [
         "^0.8.7"
