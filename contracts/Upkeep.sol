@@ -2,7 +2,7 @@
 pragma solidity ^0.8.7;
 
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
-import {RegistrationParams} from "./Automation.sol";
+import {RegistrationParams} from "./AutomationUtils.sol";
 
 interface AutomationRegistrarInterface {
     function registerUpkeep(

@@ -1,15 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol";
-import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
-import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
-import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
-import {IAutomationRegistryConsumer, RegistrationParams} from "../Automation.sol";
+import { FunctionsClient } from "./mockChainlink/mockFunctionsClient.sol";
+import { FunctionsRequest } from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
+import { ConfirmedOwner } from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
+import { AutomationCompatibleInterface } from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 import "hardhat/console.sol"; // Comentar essa linha 
 
-interface UpkeepInterface {
-  function register(RegistrationParams calldata params) external returns (uint256);
+interface IFunctionsRouter {
+  /// @notice Sends a request using the provided subscriptionId
+  /// @param subscriptionId - A unique subscription ID allocated by billing system,
+  /// a client can make requests from different contracts referencing the same subscription
+  /// @param data - CBOR encoded Chainlink Functions request data, use FunctionsClient API to encode a request
+  /// @param dataVersion - Gas limit for the fulfillment callback
+  /// @param callbackGasLimit - Gas limit for the fulfillment callback
+  /// @param donId - An identifier used to determine which route to send the request along
+  /// @return requestId - A unique request identifier
+  function sendRequest(
+    uint64 subscriptionId,
+    bytes calldata data,
+    uint16 dataVersion,
+    uint32 callbackGasLimit,
+    bytes32 donId
+  ) external returns (bytes32);
 }
 
 /**
@@ -19,9 +32,7 @@ interface UpkeepInterface {
  * @notice Ele é automatizado, então em intervalos pré-especificados ele lê dados climáticos
  * @notice Se os dados estão fora dos índices pré-definidos a função [INSERIR NOME DA FUNÇÃO] é disparada
  */
-contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
-  using FunctionsRequest for FunctionsRequest.Request;
-
+contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   bytes   public  requestCBOR; // Concise Binary Object Representation para transferência de dados
   bytes32 public  latestRequestId;
   bytes   public  latestResponse;
@@ -35,7 +46,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   uint8   private controlFlag;
 
   // Configuracao da automacao
-  IAutomationRegistryConsumer public immutable registry;
+  address public  registry;
   uint256 public  upkeepId;
   bytes   public  request;
   uint32  public  gasLimit;
@@ -72,7 +83,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
         address caller,
         address owner,
         address automationRegistry
-    );
+  );
 
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
   event upkeepRegistered(uint256 upkeepId);
@@ -104,12 +115,12 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     uint256 _reparationValue,
     uint256 _updateInterval,
     address router,
-    uint64 _subscriptionId,
+    uint64  _subscriptionId,
     address _registry,
     address sepoliaLINKAddress, // Aqui para LinkTokenInterface
     address sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
-    uint32 _fulfillGasLimit
-  ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
+    uint32  _fulfillGasLimit
+  ) ConfirmedOwner(_deployer) payable {
     institution = _deployer;
     farmer = _farmer;
     humidityLimit = _humidityLimit; 
@@ -118,29 +129,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     updateInterval = _updateInterval;
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
-    registry = IAutomationRegistryConsumer(_registry); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
-    // i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
-    // emit upkeepCreated(address(i_upkeep));
+    registry = _registry;
     lastUpkeepTimeStamp = block.timestamp;
   }
-
-  // ** TODO: function createUpkeep() public returns (uint256)**
-  //
-  // 
-  //
-
-  // Se eu não me engano eu movi a lógica da criação do upkeep para dentro do contrato
-  // porque eu quero que o contrato seja capaz de controlar a upkeep (pausar por exemplo)
-  // não sei se é possível fazer isso se a upkeep é criada usando JavaScript
-  /**
-   * @notice Registrando um novo upkeep
-   */
-
-  // function registerUpkeep(RegistrationParams calldata params) public {
-  //   upkeepId = UpkeepInterface(address(i_upkeep)).register(params);
-
-  //   emit upkeepRegistered(upkeepId);
-  // }
 
   /**
    * @notice Muda o estado do contrato para armazenar o objeto FunctionsRequest.Request codificado em CBOR
@@ -169,14 +160,14 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   /**
    * @notice Usado por Chainlink Automation para checar se `performUpkeep` deve ser chamada
    */
-  function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory) {
+  function checkUpkeep(bytes memory) public view returns (bool upkeepNeeded, bytes memory) {
     upkeepNeeded = (block.timestamp - lastUpkeepTimeStamp) > updateInterval;
   }
 
   /**
    * @notice Chamada por Chainlink Automation para realizar uma requisição através da Chainlink Functions
    */
-  function performUpkeep(bytes calldata) external onlyAllowed override {
+  function performUpkeep(bytes calldata) external onlyAllowed {
     (bool upkeepNeeded, ) = checkUpkeep("");
     require(upkeepNeeded, "Time interval not met");
     lastUpkeepTimeStamp = block.timestamp;
@@ -185,23 +176,13 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     // Se a quantidade de amostras não é o suficiente, coleta nova amostra:
     if(sampleMaxSize > sampleStorage.length){
       s_upkeepCounter = s_upkeepCounter + 1;
-      try 
-        i_router.sendRequest(
-          subscriptionId, 
+      s_lastRequestId = _sendRequest(
           requestCBOR,
-          FunctionsRequest.REQUEST_DATA_VERSION,
+          subscriptionId,
           gasLimit,
           donID
-        )
-      returns (bytes32 requestId) {
-        s_lastRequestId = requestId;
-        s_requestCounter = s_requestCounter + 1;
-        emit RequestSent(requestId);
-      } catch Error(string memory reason) {
-        emit RequestRevertedWithErrorMsg(reason);
-      } catch (bytes memory data) {
-        emit RequestRevertedWithoutErrorMsg(data);
-      }
+      );
+      s_requestCounter = s_requestCounter + 1;
     }
     // Se a quantidade de amostras é o suficiente:
     else{ 
@@ -209,32 +190,21 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
 
       controlFlag = 1;
 
-      FunctionsRequest.Request memory req;
-      req.initializeRequest(FunctionsRequest.Location.Inline, FunctionsRequest.CodeLanguage.JavaScript, computationJS);
-      req.setArgs(sampleStorage);
-      bytes memory encodedCBOR = req.encodeCBOR();
+      // Seria interessante codificar o CBOR do computation.js com JavaScript
+      // Mas por enquanto vou colocar oresquerCBOR que já foi codificado
 
       s_upkeepCounter = s_upkeepCounter + 1;
-      try 
-        i_router.sendRequest(
+      _sendRequest(
+          requestCBOR,
           subscriptionId, 
-          encodedCBOR,
-          FunctionsRequest.REQUEST_DATA_VERSION,
           gasLimit,
           donID
-        )
-      returns (bytes32 requestId) {
+      );
         s_lastRequestId = requestId;
         s_requestCounter = s_requestCounter + 1;
-        emit RequestSent(requestId);
-      } catch Error(string memory reason) {
-        emit RequestRevertedWithErrorMsg(reason);
-      } catch (bytes memory data) {
-        emit RequestRevertedWithoutErrorMsg(data);
       }
 
-      registry.pauseUpkeep(upkeepId);
-    }
+      // registry.pauseUpkeep(upkeepId);
   }
 
   function verifyIndex() internal {
@@ -257,7 +227,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @param response Resposta da requisição
    * @param err Erro do código fonte ou do pipeline de execução da requisição
    */
-  function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
+  function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal {
     latestResponse = response;
     latestError = err;
     responseCounter = responseCounter + 1;
