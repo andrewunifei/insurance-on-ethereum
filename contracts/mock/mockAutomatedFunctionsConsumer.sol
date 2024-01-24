@@ -2,7 +2,6 @@
 pragma solidity ^0.8.7;
 
 import { FunctionsClient } from "./mockChainlink/mockFunctionsClient.sol";
-import { FunctionsRequest } from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 import { ConfirmedOwner } from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import { AutomationCompatibleInterface } from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 import "hardhat/console.sol"; // Comentar essa linha 
@@ -33,6 +32,7 @@ interface IFunctionsRouter {
  * @notice Se os dados estão fora dos índices pré-definidos a função [INSERIR NOME DA FUNÇÃO] é disparada
  */
 contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
+  // Chanlink Functions 
   bytes   public  requestCBOR; // Concise Binary Object Representation para transferência de dados
   bytes32 public  latestRequestId;
   bytes   public  latestResponse;
@@ -40,12 +40,10 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   uint64  public  subscriptionId;
   uint32  public  fulfillGasLimit;
   uint256 public  updateInterval;
-  uint256 public  lastUpkeepTimeStamp;
-  uint256 public  upkeepCounter;
   uint256 public  responseCounter;
-  uint8   private controlFlag;
+  address public  router;
 
-  // Configuracao da automacao
+  // Chainlink automation
   address public  registry;
   uint256 public  upkeepId;
   bytes   public  request;
@@ -57,6 +55,10 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   uint256 public  s_upkeepCounter;
   uint256 public  s_requestCounter;
   uint256 public  s_responseCounter;
+  uint256 public  lastUpkeepTimeStamp;
+  uint256 public  upkeepCounter;
+  address public  sepoliaLINKAddress;
+  address public  sepoliaRegistrarAddress;
 
   address public  institution;
   address public  farmer;
@@ -69,6 +71,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   event RequestRevertedWithoutErrorMsg(bytes data);
 
   // Valores para regras de negócio
+  uint8     private controlFlag;
   uint256   public  reparationValue;
   uint256   public  humidityLimit;
   uint256   public  sampleMaxSize;
@@ -102,7 +105,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
    * @notice Construtor do contrato
    *
    * @param _humidityLimit O índice limite de comparação
-   * @param router O contrato do oráculo interface do Chainlink Functions
+   * @param _router O contrato do roteador do Chainlink Functions
    * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos (DON) para cobranças de requisições
    * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
    * @param _updateInterval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
@@ -114,11 +117,11 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     uint256 _sampleMaxSize,
     uint256 _reparationValue,
     uint256 _updateInterval,
-    address router,
+    address _router,
     uint64  _subscriptionId,
     address _registry,
-    address sepoliaLINKAddress, // Aqui para LinkTokenInterface
-    address sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
+    address _sepoliaLINKAddress, // Aqui para LinkTokenInterface
+    address _sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
     uint32  _fulfillGasLimit
   ) ConfirmedOwner(_deployer) payable {
     institution = _deployer;
@@ -131,6 +134,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     reparationValue = _reparationValue;
     registry = _registry;
     lastUpkeepTimeStamp = block.timestamp;
+    router = _router;
+    sepoliaLINKAddress = _sepoliaLINKAddress;
+    sepoliaRegistrarAddress = _sepoliaRegistrarAddress;
   }
 
   /**
@@ -160,51 +166,49 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   /**
    * @notice Usado por Chainlink Automation para checar se `performUpkeep` deve ser chamada
    */
-  function checkUpkeep(bytes memory) public view returns (bool upkeepNeeded, bytes memory) {
+  function checkUpkeep(bytes memory) public view returns (bool upkeepNeeded, bytes memory performData) {
     upkeepNeeded = (block.timestamp - lastUpkeepTimeStamp) > updateInterval;
+
+    return (upkeepNeeded, performData);
   }
 
   /**
    * @notice Chamada por Chainlink Automation para realizar uma requisição através da Chainlink Functions
    */
   function performUpkeep(bytes calldata) external onlyAllowed {
+    require(upkeepId != 0, "Upkeep not registered");
     (bool upkeepNeeded, ) = checkUpkeep("");
     require(upkeepNeeded, "Time interval not met");
     lastUpkeepTimeStamp = block.timestamp;
     upkeepCounter = upkeepCounter + 1;
 
-    // Se a quantidade de amostras não é o suficiente, coleta nova amostra:
-    if(sampleMaxSize > sampleStorage.length){
-      s_upkeepCounter = s_upkeepCounter + 1;
+    // Se a quantidade de amostras não é o suficiente, coleta uma nova amostra:
+    if(sampleMaxSize > sampleStorage.length) {
       s_lastRequestId = _sendRequest(
           requestCBOR,
           subscriptionId,
           gasLimit,
           donID
       );
+      requestId = s_lastRequestId;
       s_requestCounter = s_requestCounter + 1;
     }
     // Se a quantidade de amostras é o suficiente:
-    else{ 
-      require(upkeepId != 0, "Upkeep not registered");
-
+    else { 
       controlFlag = 1;
 
-      // Seria interessante codificar o CBOR do computation.js com JavaScript
-      // Mas por enquanto vou colocar oresquerCBOR que já foi codificado
-
-      s_upkeepCounter = s_upkeepCounter + 1;
-      _sendRequest(
+      // Seria interessante codificar o CBOR do Computation.js com JavaScript
+      // Mas por enquanto vou colocar o requestCBOR que já foi codificado
+      s_lastRequestId  = _sendRequest(
           requestCBOR,
           subscriptionId, 
           gasLimit,
           donID
       );
-        s_lastRequestId = requestId;
-        s_requestCounter = s_requestCounter + 1;
-      }
-
+      requestId = s_lastRequestId;
+      s_requestCounter = s_requestCounter + 1;
       // registry.pauseUpkeep(upkeepId);
+    }
   }
 
   function verifyIndex() internal {
@@ -233,6 +237,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     responseCounter = responseCounter + 1;
 
     if(controlFlag == 0){
+      // converter para string com abi.encodePacked() se possível com bytes
       string memory responseAsString = string(response); // Isso aqui era: string(bytes32(response))
 
       // Armazena no array as amostras de dados

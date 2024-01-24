@@ -265,7 +265,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     responseCounter = responseCounter + 1;
 
     if(controlFlag == 0){
+      // converter para string com abi.encodePacked() se possível com bytes
       string memory responseAsString = string(response); // Isso aqui era: string(bytes32(response))
+  
 
       // Armazena no array as amostras de dados
       sampleStorage.push(responseAsString);

@@ -7,6 +7,7 @@ contract Laboratory {
     bytes32 public counterBytes32;
     uint256 public funBits256 = 1;
     string public decoded;
+    string[] public sampleStorage; 
 
     constructor(bytes32 _incomingData) {
         funBytes32 = _incomingData;
@@ -18,15 +19,11 @@ contract Laboratory {
         console.logBytes32(counterBytes32);
     }
 
-    function increaseCounter() public {
-        funBits256 += 1;
-        counterBytes32 = bytes32(funBytes32);
+    function insert(string calldata data) public {
+        sampleStorage.push(data);
     }
 
-    function decodeCounter() public view {
-        string memory tempStr = string(abi.encodePacked(counterBytes32));
-
-        console.log(tempStr);
+    function sampleStorageSize() public view returns (uint256){
+        return sampleStorage.length;
     }
-
 }
