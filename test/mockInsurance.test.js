@@ -1,9 +1,9 @@
-import { expect } from "chai";
+import { expect } from 'chai';
 import ethers from 'ethers';
 import blockchain from '../middleware/blockchain.js';
 import insuranceContractArtifact from '../build/artifacts/contracts/mock/mockAutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
 
-describe("mockAutomatedFunctionsConsumer", async () => {
+describe('mockAutomatedFunctionsConsumer', async () => {
     const { signer, provider } = await blockchain.interaction(
         process.env.HARDHAT_ACCOUNT_PRIVATE_KEY,
         process.env.HARDHAT_RPC_URL
@@ -14,7 +14,7 @@ describe("mockAutomatedFunctionsConsumer", async () => {
         signer
     );
 
-    it("Should set the parameters correctly", async () => {
+    it('Should set the parameters correctly', async () => {
         const params = {
             // Esses endereços origem na blockcahin localhost (npx hardhat node)
             signer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
@@ -50,7 +50,7 @@ describe("mockAutomatedFunctionsConsumer", async () => {
 
         insuranceContract.reparationValue()
             .then(value => expect(ethers.BigNumber.from(value).toString())
-                            .to.equal(ethers.BigNumber.from(ethers.utils.parseEther("1")).toString())); 
+                            .to.equal(ethers.BigNumber.from(ethers.utils.parseEther('1')).toString())); 
 
         insuranceContract.interval()
             .then(value => expect(ethers.BigNumber.from(value).toNumber()).to.equal(1)); 
