@@ -77,6 +77,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   uint256   public  sampleMaxSize;
   string[]  public  sampleStorage;
   string    private computationJS; // calculo da computacao do indice
+  // MOCK: Essa variável só exsite aqui
+  bytes     public  computationCBOR
 
   // Variável para armazenar a média das amostras
   uint256 private mean;
@@ -164,6 +166,13 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   }
 
   /**
+   * @notice MOCK. Essa função só existe no mock. Ela é usada off-chain para enviar um CBOR para aqui
+   */
+  setComputation(bytes calldata receivedCBOR) external onlyOwner{
+    computationCBOR = receivedCBOR;
+  }
+
+  /**
    * @notice Usado por Chainlink Automation para checar se `performUpkeep` deve ser chamada
    */
   function checkUpkeep(bytes memory) public view returns (bool upkeepNeeded, bytes memory performData) {
@@ -198,9 +207,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
       controlFlag = 1;
 
       // Seria interessante codificar o CBOR do Computation.js com JavaScript
-      // Mas por enquanto vou colocar o requestCBOR que já foi codificado
+      // E atribuir ele para a variável computationCBOR
       s_lastRequestId  = _sendRequest(
-          requestCBOR,
+          computationCBOR,
           subscriptionId, 
           gasLimit,
           donID
