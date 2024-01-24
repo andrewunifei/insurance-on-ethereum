@@ -115,12 +115,12 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     institution = _deployer;
     farmer = _farmer;
     humidityLimit = _humidityLimit; 
-    subscriptionId = _subscriptionId;
-    fulfillGasLimit = _fulfillGasLimit;
-    updateInterval = _updateInterval;
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
+    updateInterval = _updateInterval;
+    subscriptionId = _subscriptionId;
     registry = IAutomationRegistryConsumer(_registry); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
+    fulfillGasLimit = _fulfillGasLimit;
     // i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
     // emit upkeepCreated(address(i_upkeep));
     lastUpkeepTimeStamp = block.timestamp;

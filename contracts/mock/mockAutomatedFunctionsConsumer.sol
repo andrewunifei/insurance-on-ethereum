@@ -39,7 +39,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   bytes   public  latestError;
   uint64  public  subscriptionId;
   uint32  public  fulfillGasLimit;
-  uint256 public  updateInterval;
+  uint256 public  interval;
   uint256 public  responseCounter;
   address public  router;
 
@@ -78,7 +78,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   string[]  public  sampleStorage;
   string    private computationJS; // calculo da computacao do indice
   // MOCK: Essa variável só exsite aqui
-  bytes     public  computationCBOR
+  bytes     public  computationCBOR;
 
   // Variável para armazenar a média das amostras
   uint256 private mean;
@@ -110,7 +110,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
    * @param _router O contrato do roteador do Chainlink Functions
    * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos (DON) para cobranças de requisições
    * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
-   * @param _updateInterval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
+   * @param _interval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
    */
   constructor(
     address _deployer,
@@ -118,7 +118,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     uint256 _humidityLimit,
     uint256 _sampleMaxSize,
     uint256 _reparationValue,
-    uint256 _updateInterval,
+    uint256 _interval,
     address _router,
     uint64  _subscriptionId,
     address _registry,
@@ -129,16 +129,16 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     institution = _deployer;
     farmer = _farmer;
     humidityLimit = _humidityLimit; 
-    subscriptionId = _subscriptionId;
-    fulfillGasLimit = _fulfillGasLimit;
-    updateInterval = _updateInterval;
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
-    registry = _registry;
-    lastUpkeepTimeStamp = block.timestamp;
+    interval = _interval;
     router = _router;
+    subscriptionId = _subscriptionId;
+    registry = _registry;
     sepoliaLINKAddress = _sepoliaLINKAddress;
     sepoliaRegistrarAddress = _sepoliaRegistrarAddress;
+    fulfillGasLimit = _fulfillGasLimit;
+    lastUpkeepTimeStamp = block.timestamp;
   }
 
   /**
@@ -149,26 +149,26 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
    * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos para cobranças de requisições
    * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
    * @param _donID Novo ID do job
-   * @param _updateInterval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
+   * @param _interval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
    */
   function setRequest(
     bytes calldata newRequestCBOR,
     uint64 _subscriptionId,
     uint32 _fulfillGasLimit,
     bytes32 _donID,
-    uint256 _updateInterval
+    uint256 _interval
   ) external onlyOwner {
     requestCBOR = newRequestCBOR;
     subscriptionId = _subscriptionId;
     fulfillGasLimit = _fulfillGasLimit;
     donID = _donID;
-    updateInterval = _updateInterval;
+    interval = _interval;
   }
 
   /**
    * @notice MOCK. Essa função só existe no mock. Ela é usada off-chain para enviar um CBOR para aqui
    */
-  setComputation(bytes calldata receivedCBOR) external onlyOwner{
+  function setComputation(bytes calldata receivedCBOR) external onlyOwner{
     computationCBOR = receivedCBOR;
   }
 
@@ -176,7 +176,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
    * @notice Usado por Chainlink Automation para checar se `performUpkeep` deve ser chamada
    */
   function checkUpkeep(bytes memory) public view returns (bool upkeepNeeded, bytes memory performData) {
-    upkeepNeeded = (block.timestamp - lastUpkeepTimeStamp) > updateInterval;
+    upkeepNeeded = (block.timestamp - lastUpkeepTimeStamp) > interval;
 
     return (upkeepNeeded, performData);
   }

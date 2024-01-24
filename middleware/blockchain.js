@@ -40,4 +40,4 @@ async function interaction(privateKey, rpcUrl) {
     return { signer, provider };
 }
 
-export { sepolia, sepoliaExplorerURL, interaction }
+export default { sepolia, sepoliaExplorerURL, interaction }
