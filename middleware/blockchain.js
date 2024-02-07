@@ -8,13 +8,13 @@ const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 
 /**
- * Objeto com endereços relevantes de contratos Chainlink
+ * Objeto com endereços relevantes de contratos Chainlink na blockchain Ethereum Sepolia
  */
 const sepolia = {
-    chainlinkRegistrarAddress: '0xb0E49c5D0d05cbc241d68c05BC5BA1d1B7B72976',
-    chainlinkRegistryAddress: '0x86EFBD0b6736Bed994962f9797049422A3A8E8Ad',
-    chainlinkLinkTokenAddress: '0x779877A7B0D9E8603169DdbD7836e478b4624789',
-    chainlinkRouterAddress: '0xb83E47C2bC239B3bf370bc41e1459A34b41238D0'
+    chainlinkRegistrarAddress:  '0xb0E49c5D0d05cbc241d68c05BC5BA1d1B7B72976',
+    chainlinkRegistryAddress:   '0x86EFBD0b6736Bed994962f9797049422A3A8E8Ad',
+    chainlinkLinkTokenAddress:  '0x779877A7B0D9E8603169DdbD7836e478b4624789',
+    chainlinkRouterAddress:     '0xb83E47C2bC239B3bf370bc41e1459A34b41238D0'
 }
 
 const sepoliaExplorerURL = 'https://sepolia.etherscan.io/'
@@ -27,11 +27,11 @@ const sepoliaExplorerURL = 'https://sepolia.etherscan.io/'
  */
 async function interaction(privateKey, rpcUrl) {
     if(!privateKey) {
-        throw new Error("Private key not provided - check your environment variables");
+        throw new Error('Private key not provided - check your environment variables');
     }
 
     if(!rpcUrl) {
-        throw new Error(`RPCURL not provided  - check your environment variables`);
+        throw new Error('RPCURL not provided  - check your environment variables');
     }
 
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
@@ -40,4 +40,4 @@ async function interaction(privateKey, rpcUrl) {
     return { signer, provider };
 }
 
-export { sepolia, sepoliaExplorerURL, interaction }
+export default { sepolia, sepoliaExplorerURL, interaction }

@@ -44,6 +44,13 @@ contract Institution{
         whitelist[_farmerAddr] = false;
     }
 
+    function isWhiteListed(address _farmerAddr) view external returns (bool) {
+        bool result = whitelist[_farmerAddr];
+        console.log(result);
+
+        return result;
+    }
+
     function getInsurance(uint256 _index) view public returns (AutomatedFunctionsConsumer){
         return contracts[msg.sender][_index];
     }

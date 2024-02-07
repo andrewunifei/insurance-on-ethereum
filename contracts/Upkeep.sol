@@ -2,19 +2,7 @@
 pragma solidity ^0.8.7;
 
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
-
-struct RegistrationParams {
-    string name;
-    bytes encryptedEmail;
-    address upkeepContract;
-    uint32 gasLimit;
-    address adminAddress;
-    uint8 triggerType;
-    bytes checkData;
-    bytes triggerConfig;
-    bytes offchainConfig;
-    uint96 amount;
-}
+import {RegistrationParams} from "./AutomationUtils.sol";
 
 interface AutomationRegistrarInterface {
     function registerUpkeep(

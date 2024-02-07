@@ -5,38 +5,12 @@ import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
+import {IAutomationRegistryConsumer, RegistrationParams} from "./AutomationUtils.sol";
 import {Upkeep} from "./Upkeep.sol";
 import "hardhat/console.sol"; // Comentar essa linha 
 
-// Mover isso para um arquivo próprio
-/** 
- * @notice Interface para interagir com upkeep criado para automação
- */ 
-interface IAutomationRegistryConsumer {
-  function getBalance(uint256 id) external view returns (uint96 balance);
-  function getMinBalance(uint256 id) external view returns (uint96 minBalance);
-  function cancelUpkeep(uint256 id) external;
-  function pauseUpkeep(uint256 id) external;
-  function unpauseUpkeep(uint256 id) external;
-  function addFunds(uint256 id, uint96 amount) external;
-  function withdrawFunds(uint256 id, address to) external;
-}
-
 interface UpkeepInterface {
   function register(RegistrationParams calldata params) external returns (uint256);
-}
-
-struct RegistrationParams {
-    string name;
-    bytes encryptedEmail;
-    address upkeepContract;
-    uint32 gasLimit;
-    address adminAddress;
-    uint8 triggerType;
-    bytes checkData;
-    bytes triggerConfig;
-    bytes offchainConfig;
-    uint96 amount;
 }
 
 /**
@@ -49,35 +23,35 @@ struct RegistrationParams {
 contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
   using FunctionsRequest for FunctionsRequest.Request;
 
-  bytes public requestCBOR; // Concise Binary Object Representation para transferência de dados
-  bytes32 public latestRequestId;
-  bytes public latestResponse;
-  bytes public latestError;
-  uint64 public subscriptionId;
-  uint32 public fulfillGasLimit;
-  uint256 public updateInterval;
-  uint256 public lastUpkeepTimeStamp;
-  uint256 public upkeepCounter;
-  uint256 public responseCounter;
-  uint8 private controlFlag;
+  bytes   public  requestCBOR; // Concise Binary Object Representation para transferência de dados
+  bytes32 public  latestRequestId;
+  bytes   public  latestResponse;
+  bytes   public  latestError;
+  uint64  public  subscriptionId;
+  uint32  public  fulfillGasLimit;
+  uint256 public  updateInterval;
+  uint256 public  lastUpkeepTimeStamp;
+  uint256 public  upkeepCounter;
+  uint256 public  responseCounter;
+  uint8   private controlFlag;
 
   // Configuracao da automacao
   IAutomationRegistryConsumer public immutable registry;
-  Upkeep public i_upkeep;
-  uint256 upkeepId;
-  bytes public request;
-  uint32 public gasLimit;
-  bytes32 public donID;
-  bytes32 public s_lastRequestId;
-  bytes public s_lastResponse;
-  bytes public s_lastError;
-  uint256 public s_upkeepCounter;
-  uint256 public s_requestCounter;
-  uint256 public s_responseCounter;
+  Upkeep  public  i_upkeep;
+  uint256 public  upkeepId;
+  bytes   public  request;
+  uint32  public  gasLimit;
+  bytes32 public  donID;
+  bytes32 public  s_lastRequestId;
+  bytes   public  s_lastResponse;
+  bytes   public  s_lastError;
+  uint256 public  s_upkeepCounter;
+  uint256 public  s_requestCounter;
+  uint256 public  s_responseCounter;
 
-  address public institution;
-  address public farmer;
-  address public upkeepContract;
+  address public  institution;
+  address public  farmer;
+  address public  upkeepContract;
 
   error UnexpectedRequestID(bytes32 requestId);
 
@@ -86,11 +60,11 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   event RequestRevertedWithoutErrorMsg(bytes data);
 
   // Valores para regras de negócio
-  uint256 reparationValue;
-  uint256 humidityLimit;
-  uint256 public sampleMaxSize;
-  string[] public sampleStorage;
-  string private computationJS; // calculo da computacao do indice
+  uint256   public  reparationValue;
+  uint256   public  humidityLimit;
+  uint256   public  sampleMaxSize;
+  string[]  public  sampleStorage;
+  string    private computationJS; // calculo da computacao do indice
 
   // Variável para armazenar a média das amostras
   uint256 private mean;
@@ -141,12 +115,12 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     institution = _deployer;
     farmer = _farmer;
     humidityLimit = _humidityLimit; 
-    subscriptionId = _subscriptionId;
-    fulfillGasLimit = _fulfillGasLimit;
-    updateInterval = _updateInterval;
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
+    updateInterval = _updateInterval;
+    subscriptionId = _subscriptionId;
     registry = IAutomationRegistryConsumer(_registry); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
+    fulfillGasLimit = _fulfillGasLimit;
     // i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
     // emit upkeepCreated(address(i_upkeep));
     lastUpkeepTimeStamp = block.timestamp;
@@ -291,7 +265,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     responseCounter = responseCounter + 1;
 
     if(controlFlag == 0){
+      // converter para string com abi.encodePacked() se possível com bytes
       string memory responseAsString = string(response); // Isso aqui era: string(bytes32(response))
+  
 
       // Armazena no array as amostras de dados
       sampleStorage.push(responseAsString);
