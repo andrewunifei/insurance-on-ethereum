@@ -149,20 +149,20 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
    * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos para cobranças de requisições
    * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
    * @param _donID Novo ID do job
-   * @param _interval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
    */
+  // [REMOVIDO] @param _interval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
   function setRequest(
     bytes calldata newRequestCBOR,
     uint64 _subscriptionId,
     uint32 _fulfillGasLimit,
-    bytes32 _donID,
-    uint256 _interval
+    bytes32 _donID
+    //uint256 _interval
   ) external onlyOwner {
     requestCBOR = newRequestCBOR;
     subscriptionId = _subscriptionId;
     fulfillGasLimit = _fulfillGasLimit;
     donID = _donID;
-    interval = _interval;
+    //interval = _interval;
   }
 
   /**
