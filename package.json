@@ -25,6 +25,7 @@
   "homepage": "https://github.com/andrewunifei/insurance-on-ethereum#readme",
   "devDependencies": {
     "@chainlink/contracts": "0.8.0",
+    "cbor": "^9.0.2",
     "dotenv": "^16.3.1",
     "hardhat": "2.14.0",
     "kill-port": "^2.0.1",
