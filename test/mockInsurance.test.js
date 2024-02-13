@@ -16,7 +16,7 @@ describe('mockAutomatedFunctionsConsumer', async () => {
 
     it('Should set the parameters correctly', async () => {
         const params = {
-            // Esses endereços origem na blockcahin localhost (npx hardhat node)
+            // Esses endereços tem origem na blockcahin localhost (npx hardhat node)
             signer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
             farmer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
             humidityLimit: 1,

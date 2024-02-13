@@ -11,12 +11,14 @@ import {
     CodeLanguage,
 } from '@chainlink/functions-toolkit'
 
-const insuranceContractAddress = ''
-const subscriptionId = 0
+const insuranceContractAddress = '' // Mock value
+const subscriptionId = 0 // Mock value
 
 async function setDonHostedSecrets(secrets, parameters) {
-    const donId = 'fun-ethereum-sepolia-1'
+    const donId = parameters.donId
+    const signer = parameters.signer
 
+    // IMPORTANTE: Esses parâmetros devem ser passados para essa função através de `parameters` 
     // DON-Hosted Secrets
     const gatewayUrls = [
         "https://01.functions-gateway.testnet.chain.link/",
@@ -24,9 +26,10 @@ async function setDonHostedSecrets(secrets, parameters) {
     ]
     const slotId = 0
     const minutesUntilExpiration = 60
+    // ****************************************************************************************
 
     // Request
-    console.log("Initializing request....\n")
+    console.log("Initializing setting of DON Hosted Secrets...\n")
 
     // Encripta a chave da API
     const secretsManager = new SecretsManager(
@@ -39,7 +42,7 @@ async function setDonHostedSecrets(secrets, parameters) {
     await secretsManager.initialize()
     const encryptedSecrets = await secretsManager.encryptSecrets(secrets)
 
-    // Crrega a encriptação para o DON 
+    // Carrega a encriptação para o DON 
     console.log(`Upload encrypted secret to gateways ${gatewayUrls}. slotId ${slotId}. Expiration in minutes: ${expirationTimeMinutes}`)
     const uploadResult = await secretsManager.uploadEncryptedSecretsToDON(
         {
@@ -66,41 +69,62 @@ async function setDonHostedSecrets(secrets, parameters) {
     return donHostedEncryptedSecretsReference
 }
 
-async function setRequest() {
-    const explorerUrl = blockchain.sepoliaExplorerURL
+async function setRequest(config) {
+    /*
+        IMPORTANTE: As partes comentadas dizem respeito a mecânica antiga
+        que buscava um contrato já instanciado 
+        e após a construção do CBOR imediatamente chamava a setRequest do contrato
+    */
+
+    // const explorerUrl = blockchain.sepoliaExplorerURL
     const { signer } = await blockchain.interaction()
 
-    const computation = '../rules/computation.js'
-    const args = ["44.34", "10.99"]
-    const gasLimit = 300000
+    // IMPORTANTE: Esses parâmetros devem ser passados para essa função, e não definidos por ela
+    // const computation = '../rules/computation.js'
+    // const args = ["44.34", "10.99"]
+    // const gasLimit = 300000
+    // const secrets = { apiKey: process.env.OPEN_WEATHER_API_KEY }
+    // const donId = 'fun-ethereum-sepolia-1'
+    // *****************************************************************************************
 
-    const secrets = { apiKey: process.env.OPEN_WEATHER_API_KEY }
-    const donHostedEncryptedSecretsReference = await setDonHostedSecrets(secrets)
-
-    const insuranceContract = new ethers.Contract(
-        insuranceContractAddress,
-        insuranceArtifacts.abi, 
+    const parameters = {
+        donId: config.donId,
         signer
-    )
+    }
 
-    const functionsRequestBytesHexString = buildRequestCBOR(
+    const donHostedEncryptedSecretsReference = await setDonHostedSecrets(config.secrets, parameters)
+
+    const requestCBOR = buildRequestCBOR(
         {
             codeLocation: Location.Inline,
             codeLanguage: CodeLanguage.JavaScript,
             secretsLocation: Location.DONHosted,
-            source: computation,
+            source: config.computation,
             encryptedSecretsReference: donHostedEncryptedSecretsReference,
-            args,
+            args: config.args,
             bytesArgs: []
         }
     )
 
-    const tx = insuranceContract.setRequest(
-        functionsRequestBytesHexString,
+    return { 
+        requestCBOR,
         subscriptionId,
         gasLimit,
-        ethers.utils.formatBytes32String(donId)
-    )
+        formatedDonId: ethers.utils.formatBytes32String(config.donId)
+     }
 
-    console.log(`\n✅ Automated Functions request settings updated! Transaction hash ${tx.hash} - Check the explorer ${explorerUrl}/tx/${tx.hash}`);
+    // const insuranceContract = new ethers.Contract(
+    //     insuranceContractAddress,
+    //     insuranceArtifacts.abi, 
+    //     signer
+    // )
+    //
+    // const tx = insuranceContract.setRequest(
+    //     requestCBOR,
+    //     subscriptionId,
+    //     gasLimit: config.gasLimit,
+    //     ethers.utils.formatBytes32String(donId)
+    // )
+
+    // console.log(`\n✅ Automated Functions request settings updated! Transaction hash ${tx.hash} - Check the explorer ${explorerUrl}/tx/${tx.hash}`);
 }
