@@ -10,15 +10,13 @@ import {
     CodeLanguage,
 } from '@chainlink/functions-toolkit'
 
-
 function buildRequestParameters(config) {
     const requestCBOR = buildRequestCBOR(
         {
             codeLocation: Location.Inline,
             codeLanguage: CodeLanguage.JavaScript,
             source: config.computation,
-            args: config.args,
-            bytesArgs: []
+            args: config.args
         }
     )
 
