@@ -1,29 +1,29 @@
 import { expect } from 'chai';
 import ethers from 'ethers';
 import blockchain from '../middleware/blockchain.js';
-import { buildRequestParameters } from '../mock/mockController.js'
-import cbor from 'cbor'
+import { buildRequestParameters } from '../mock/mockController.js';
+import cbor from 'cbor';
 import {
     buildRequestCBOR,
     Location,
     CodeLanguage,
-} from '@chainlink/functions-toolkit'
+} from '@chainlink/functions-toolkit';
 
 async function decodeEthereumHex(str) {
     const formatedStr = str.slice(2);
     const decodedCBOR = await cbor.decodeAll(formatedStr);
 
     return decodedCBOR;
-}
+};
 
-describe('Controller', async () => {
+describe('Module: Controller', async () => {
     const config = {
         computation: '../rules/computation.js',
         args: ["44.34", "10.99"],
         secrets: { apiKey: process.env.OPEN_WEATHER_API_KEY },
         donId: 'fun-ethereum-sepolia-1',
         subscriptionId: 0
-    }
+    };
 
     describe('buildRequestParameters', async () => {
         let expectedObjToStr;
@@ -48,5 +48,5 @@ describe('Controller', async () => {
     
             expect(objToStr).to.equal(expectedObjToStr);   
         });
-    })
+    });
 });

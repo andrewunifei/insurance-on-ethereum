@@ -3,7 +3,7 @@ import * as blockchain from '../middleware/blockchain.js'
 import fs from 'node:fs/promises'
 
 const params = {
-    // Esses endereços origem na blockcahin localhost (npx hardhat node)
+    // Esses endereços tem origem na blockcahin localhost (npx hardhat node)
     signer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
     farmer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
     humidityLimit: 1,

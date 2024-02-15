@@ -1,6 +1,6 @@
 /**
- * Esse mock NÃO faz uso de secrets
- * Porque para secrets é necessário uma conexão com uma network externa para comunicar com o DON
+ * >>> Esse mock NÃO faz uso de secrets <<<
+ * Porque secrets necessita uma conexão com uma network externa para comunicar com o DON
  */
 
 import * as ethers from 'ethers'
