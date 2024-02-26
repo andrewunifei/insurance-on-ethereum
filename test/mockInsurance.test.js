@@ -115,14 +115,14 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     });
 
     describe('checkUpkeep', async () => {
-        it('Should test the stric nature of the comparison. Checkupkeep is \'strictly greater\', if the difference of timestamps is equal to the interval, should return false', async () => {
+        it('If the difference of timestamps is equal to the interval (seconds), should return false', async () => {
             // Move o timestamp ${interval} segundo(s) no futuro + 1 segundo (tempo para minerar o bloco)
             // É necessário minerar dois blocos para funcionar, porque o intervalo é entre esss dois blocos
             await helpers.mine(2 ,{ interval: 9 });
             const check = await insuranceContract.checkUpkeep([]);
             expect(check[0]).to.equal(false) ;
         });
-        it('Should test the stric nature of the comparison. Checkupkeep is \'strictly greater\', if the difference of timestamps is greater than the interval, should return true', async () => {
+        it('If the difference of timestamps is greater than the interval (seconds), should return true', async () => {
             // Move o timestamp ${interval} segundo(s) no futuro + 1 segundo (tempo para minerar o bloco)
             // É necessário minerar dois blocos para funcionar, porque o intervalo é entre esss dois blocos
             await helpers.mine(2, { interval: 10 });
@@ -130,4 +130,8 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
             expect(check[0]).to.equal(true);
         });
     });
+
+    describe('performUpkeep', async () => {
+        
+    })
 })
