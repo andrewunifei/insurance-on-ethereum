@@ -1,6 +1,7 @@
 import { expect } from 'chai';
 import helpers from '@nomicfoundation/hardhat-network-helpers';
-import ethers from 'ethers';
+//import ethers from 'ethers';
+
 import blockchain from '../middleware/blockchain.js';
 import { buildRequestParameters } from '../mock/mockController.js'
 import insuranceContractArtifact from '../build/artifacts/contracts/mock/mockAutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
@@ -25,33 +26,34 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
         gaslimit: 300000
     };
 
-    const signer = await ethers.getSigner()
-    console.log(signer)
+    let signer;
+    let provider;
 
-    before(async () => {
+    // Implanta o contrato inteligente toda vez antes de um novo 'describe'
+    beforeEach(async () => {
         // const { signer, provider } = await blockchain.interaction(
         //     process.env.HARDHAT_ACCOUNT_PRIVATE_KEY,
         //     process.env.HARDHAT_RPC_URL
         // );
 
-        const provider = hre.network.provider
-        const signer = await ethers.getSigner()
-        console.log(signer)
+        provider = hre.network.provider
+        signer = await ethers.getSigner()
 
-        // insuranceContractFactory = new ethers.ContractFactory(
-        //     insuranceContractArtifact.abi,
-        //     insuranceContractArtifact.bytecode,
-        //     signer
-        // );
+        insuranceContractFactory = new ethers.ContractFactory(
+            insuranceContractArtifact.abi,
+            insuranceContractArtifact.bytecode,
+            signer
+        );
+
+        // apply permite uma [lista] de argumentos para uma função
+        insuranceContract = await insuranceContractFactory.deploy.apply( 
+            insuranceContractFactory, Object.values(params) 
+        );
+        await insuranceContract.deployTransaction.wait(1);
     })
 
     describe('constructor', async () => {
         it('Should set the parameters correctly', async () => {
-            insuranceContract = await insuranceContractFactory.deploy.apply( 
-                insuranceContractFactory, Object.values(params) // apply permite uma [lista] de argumentos
-            );
-            await insuranceContract.deployTransaction.wait(1);
-
             // await e then em conjunto é necessário porque o mocha não aguarda o then, mas aguarda o await
             // estou usando o then para evitar a declaração de múltiplas variáveis
             await insuranceContract.institution()
@@ -97,30 +99,35 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
         });
 
         it('Should set the request parameters correctly', async () => {
-            console.log(await helpers.time.latestBlock())
-            await helpers.mine(5, { interval: 15 });
-            console.log(await helpers.time.latestBlock()) 
+            // Modifica a blockchain. Isso cria um novo bloco e modifica o timestamp (+1 segundo)
             await insuranceContract.setRequest.apply(
                 insuranceContract, Object.values(requestParameters)
             );
+
+            // Não modifica a blockchain, apenas consulta o estado de variáveis públicas
             await insuranceContract.requestCBOR()
                 .then(value => expect(value).to.equal(requestParameters.requestCBOR));
             await insuranceContract.subscriptionId()
                 .then(value => expect(ethers.BigNumber.from(value).toNumber()).to.equal(requestParameters.subscriptionId));
             await insuranceContract.donID()
                 .then(value => expect(value).to.equal(requestParameters.bytes32DonId));
-            console.log(await helpers.time.latestBlock())
         });
     });
 
-    // describe('checkUpkeep', async () => {
-    //     it('Should check the time correctly', async () => {
-    //         console.log(await helpers.time.latestBlock())
-    //         await helpers.mine(1, { interval: 15 });
-    //         console.log(await helpers.time.latestBlock())
-    //         await insuranceContract.checkUpkeep([]);
-    //         console.log(await helpers.time.latestBlock())
-    //     });
-    // });
-
+    describe('checkUpkeep', async () => {
+        it('Should test the stric nature of the comparison. Checkupkeep is \'strictly greater\', if the difference of timestamps is equal to the interval, should return false', async () => {
+            // Move o timestamp ${interval} segundo(s) no futuro + 1 segundo (tempo para minerar o bloco)
+            // É necessário minerar dois blocos para funcionar, porque o intervalo é entre esss dois blocos
+            await helpers.mine(2 ,{ interval: 9 });
+            const check = await insuranceContract.checkUpkeep([]);
+            expect(check[0]).to.equal(false) ;
+        });
+        it('Should test the stric nature of the comparison. Checkupkeep is \'strictly greater\', if the difference of timestamps is greater than the interval, should return true', async () => {
+            // Move o timestamp ${interval} segundo(s) no futuro + 1 segundo (tempo para minerar o bloco)
+            // É necessário minerar dois blocos para funcionar, porque o intervalo é entre esss dois blocos
+            await helpers.mine(2, { interval: 10 });
+            const check = await insuranceContract.checkUpkeep([]);
+            expect(check[0]).to.equal(true);
+        });
+    });
 })

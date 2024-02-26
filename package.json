@@ -26,6 +26,7 @@
   "devDependencies": {
     "@chainlink/contracts": "0.8.0",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.10",
+    "@nomiclabs/hardhat-ethers": "^2.2.3",
     "cbor": "^9.0.2",
     "dotenv": "^16.3.1",
     "hardhat": "2.14.0",

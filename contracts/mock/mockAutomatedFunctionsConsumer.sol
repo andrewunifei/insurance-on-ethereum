@@ -139,7 +139,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     sepoliaRegistrarAddress = _sepoliaRegistrarAddress;
     fulfillGasLimit = _fulfillGasLimit;
     lastUpkeepTimeStamp = block.timestamp;
-    console.log('constructor block.timestamp: ', lastUpkeepTimeStamp);
   }
 
   /**
@@ -165,7 +164,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     //fulfillGasLimit = _fulfillGasLimit;
     donID = _donID;
     //interval = _interval;
-    console.log('setRequest block.timestamp: ', block.timestamp);
   }
 
   /**
@@ -180,8 +178,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
    */
   function checkUpkeep(bytes memory) public view returns (bool upkeepNeeded, bytes memory performData) {
     upkeepNeeded = (block.timestamp - lastUpkeepTimeStamp) > interval;
-    console.log('checkUpkeep block.timestamp: ', block.timestamp);
-    console.log('upkeepNeeded value: ', upkeepNeeded);
 
     return (upkeepNeeded, performData);
   }
