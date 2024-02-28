@@ -4,6 +4,7 @@ require('dotenv').config()
 // No projeto em geral eu estou usando o Ethers normal
 // Talvez seja necessário remover essa linha
 require("@nomiclabs/hardhat-ethers");
+require("@nomicfoundation/hardhat-chai-matchers");
 
 const REPORT_GAS = process.env.REPORT_GAS?.toLowerCase() === "true" ? true : false
 const DEFAULT_VERIFICATION_BLOCK_CONFIRMATIONS = 2

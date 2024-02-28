@@ -132,6 +132,12 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     });
 
     describe('performUpkeep', async () => {
-        
+        it('Should revert if Upkeep is not needed', async () => {
+            await expect(insuranceContract.performUpkeep([])).to.be.revertedWith('Time interval not met');
+        })
+        it('Should NOT revert if Upkeep is needed', async () => {
+            await helpers.mine(2, { interval: 10 });
+            await expect(insuranceContract.performUpkeep([])).not.to.be.reverted;
+        })
     })
 })

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
+import "hardhat/console.sol";
+
 contract FunctionsClient {
 
     struct RequestParams {
@@ -15,7 +17,7 @@ contract FunctionsClient {
 
     uint16 public constant REQUEST_DATA_VERSION = 1;
     bytes32 public requestId;
-    uint256 private nonce = 0;
+    uint256 private nonce = 1;
     mapping (bytes32 => RequestParams[]) public requests;
 
     function _sendRequest(
@@ -31,9 +33,16 @@ contract FunctionsClient {
             callbackGasLimit: callbackGasLimit,
             donId: donId
         });
+        // TODO: Converter uint256 -> bytes32 -> string
+        // Afim de verificar se o ID retornado está correto
         requestId = bytes32(nonce);
         nonce += 1;
         requests[requestId].push(incomingData);
+
+        //string memory requestIdStr = string(abi.encodePacked(requestId));
+
+        // Isso funciona
+        console.logBytes32(requestId);
 
         emit RequestSent(requestId);
         return requestId;

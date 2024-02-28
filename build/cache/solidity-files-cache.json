@@ -761,8 +761,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockAutomatedFunctionsConsumer.sol": {
-      "lastModificationDate": 1708974129924,
-      "contentHash": "ffba34db0e37361271269a3962088e38",
+      "lastModificationDate": 1709125811960,
+      "contentHash": "d04a806dca01e79edaa361d2b6404fd2",
       "sourceName": "contracts/mock/mockAutomatedFunctionsConsumer.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -916,8 +916,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockChainlink/mockFunctionsClient.sol": {
-      "lastModificationDate": 1706050592617,
-      "contentHash": "b539e190f6b28d9e73549902c31056e5",
+      "lastModificationDate": 1709126993512,
+      "contentHash": "98d1a483f2836b39009379b84901f350",
       "sourceName": "contracts/mock/mockChainlink/mockFunctionsClient.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -943,7 +943,9 @@
           }
         }
       },
-      "imports": [],
+      "imports": [
+        "hardhat/console.sol"
+      ],
       "versionPragmas": [
         "^0.8.19"
       ],

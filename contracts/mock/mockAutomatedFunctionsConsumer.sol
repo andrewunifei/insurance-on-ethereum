@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 import { FunctionsClient } from "./mockChainlink/mockFunctionsClient.sol";
 import { ConfirmedOwner } from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import { AutomationCompatibleInterface } from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
-import "hardhat/console.sol"; // Comentar essa linha 
+import "hardhat/console.sol";
 
 interface IFunctionsRouter {
   /// @notice Sends a request using the provided subscriptionId
@@ -139,6 +139,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     sepoliaRegistrarAddress = _sepoliaRegistrarAddress;
     fulfillGasLimit = _fulfillGasLimit;
     lastUpkeepTimeStamp = block.timestamp;
+    upkeepId = 1;
   }
 
   /**
@@ -202,6 +203,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
       );
       requestId = s_lastRequestId;
       s_requestCounter = s_requestCounter + 1;
+      string memory requestIdStr = string(abi.encodePacked(s_lastRequestId));
+      console.log("Request id:", requestIdStr);
     }
     // Se a quantidade de amostras é o suficiente:
     else { 
