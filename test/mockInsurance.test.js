@@ -132,12 +132,38 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     });
 
     describe('performUpkeep', async () => {
-        it('Should revert if Upkeep is not needed', async () => {
-            await expect(insuranceContract.performUpkeep([])).to.be.revertedWith('Time interval not met');
+        it('Should revert if Upkeep is NOT needed', async () => {
+            await expect(insuranceContract.performUpkeep([], 0)).to.be.revertedWith('Time interval not met');
         })
         it('Should NOT revert if Upkeep is needed', async () => {
             await helpers.mine(2, { interval: 10 });
-            await expect(insuranceContract.performUpkeep([])).not.to.be.reverted;
+            await expect(insuranceContract.performUpkeep([], 0)).not.to.be.reverted;
+        })
+        it('Sample size NOT met: should correctly call _sendRequest() from mock Chainlink Functions', async () => {
+            const expectIdValue = ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32)
+            await helpers.mine(2, { interval: 10 });
+            await expect(insuranceContract.performUpkeep([], 0))
+                .to.emit(insuranceContract, 'RequestIdUpdated')
+                .withArgs(expectIdValue);
+        })
+        it('Sample size NOT met: Should NOT change controlFlag value', async () => {
+            await helpers.mine(2, { interval: 10 });
+            await expect(insuranceContract.performUpkeep([], 0))
+                .to.emit(insuranceContract, 'ControlFlagValue')
+                .withArgs(0);
+        })
+        it('Sample size met: Should correctly call _sendRequest() from mock Chainlink Functions', async () => {
+            const expectIdValue = ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32)
+            await helpers.mine(2, { interval: 10 });
+            await expect(insuranceContract.performUpkeep([], 2))
+                .to.emit(insuranceContract, 'RequestIdUpdated')
+                .withArgs(expectIdValue)
+        })
+        it('Sample size met: Should change controlFlag value', async () => {
+            await helpers.mine(2, { interval: 10 });
+            await expect(insuranceContract.performUpkeep([], 2))
+                .to.emit(insuranceContract, 'ControlFlagValue')
+                .withArgs(1);
         })
     })
 })

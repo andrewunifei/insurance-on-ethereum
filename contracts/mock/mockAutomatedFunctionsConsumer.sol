@@ -70,6 +70,10 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   event RequestRevertedWithErrorMsg(string reason);
   event RequestRevertedWithoutErrorMsg(bytes data);
 
+  // Eventos exclusivos para o Mock
+  event RequestIdUpdated(bytes32 requestId);
+  event ControlFlagValue(uint8 controlFlag);
+
   // Valores para regras de negócio
   uint8     private controlFlag;
   uint256   public  reparationValue;
@@ -186,7 +190,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   /**
    * @notice Chamada por Chainlink Automation para realizar uma requisição através da Chainlink Functions
    */
-  function performUpkeep(bytes calldata) external onlyAllowed {
+  function performUpkeep(bytes calldata, uint256 mockSampleStorageLength) external onlyAllowed {
     require(upkeepId != 0, "Upkeep not registered");
     (bool upkeepNeeded, ) = checkUpkeep("");
     require(upkeepNeeded, "Time interval not met");
@@ -194,7 +198,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     upkeepCounter = upkeepCounter + 1;
 
     // Se a quantidade de amostras não é o suficiente, coleta uma nova amostra:
-    if(sampleMaxSize > sampleStorage.length) {
+    if(sampleMaxSize > mockSampleStorageLength) {
       s_lastRequestId = _sendRequest(
           requestCBOR,
           subscriptionId,
@@ -203,8 +207,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
       );
       requestId = s_lastRequestId;
       s_requestCounter = s_requestCounter + 1;
-      string memory requestIdStr = string(abi.encodePacked(s_lastRequestId));
-      console.log("Request id:", requestIdStr);
+      emit RequestIdUpdated(requestId);
+      emit ControlFlagValue(controlFlag);
     }
     // Se a quantidade de amostras é o suficiente:
     else { 
@@ -221,6 +225,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
       requestId = s_lastRequestId;
       s_requestCounter = s_requestCounter + 1;
       // registry.pauseUpkeep(upkeepId);
+      emit RequestIdUpdated(requestId);
+      emit ControlFlagValue(controlFlag);
     }
   }
 

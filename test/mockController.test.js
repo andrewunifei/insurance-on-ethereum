@@ -1,6 +1,4 @@
 import { expect } from 'chai';
-import ethers from 'ethers';
-import blockchain from '../middleware/blockchain.js';
 import { buildRequestParameters } from '../mock/mockController.js';
 import cbor from 'cbor';
 import {
@@ -29,6 +27,7 @@ describe('Module: Controller', async () => {
         let expectedObjToStr;
 
         before(async () => {
+            // buildRequestCBOR() é uma função de Chainlink Functions
             const expected = buildRequestCBOR(
                 {
                     codeLocation: Location.Inline,

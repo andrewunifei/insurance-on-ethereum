@@ -39,11 +39,6 @@ contract FunctionsClient {
         nonce += 1;
         requests[requestId].push(incomingData);
 
-        //string memory requestIdStr = string(abi.encodePacked(requestId));
-
-        // Isso funciona
-        console.logBytes32(requestId);
-
         emit RequestSent(requestId);
         return requestId;
 
