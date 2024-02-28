@@ -179,6 +179,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Chamada por Chainlink Automation para realizar uma requisição através da Chainlink Functions
    */
   function performUpkeep(bytes calldata) external onlyAllowed override {
+    require(upkeepId != 0, "Upkeep not registered");
     (bool upkeepNeeded, ) = checkUpkeep("");
     require(upkeepNeeded, "Time interval not met");
     lastUpkeepTimeStamp = block.timestamp;
@@ -207,8 +208,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     }
     // Se a quantidade de amostras é o suficiente:
     else{ 
-      require(upkeepId != 0, "Upkeep not registered");
-
       controlFlag = 1;
 
       FunctionsRequest.Request memory req;

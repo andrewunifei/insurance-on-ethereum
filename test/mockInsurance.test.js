@@ -139,30 +139,40 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
             await helpers.mine(2, { interval: 10 });
             await expect(insuranceContract.performUpkeep([], 0)).not.to.be.reverted;
         })
-        it('Sample size NOT met: should correctly call _sendRequest() from mock Chainlink Functions', async () => {
+        it('Max sample size NOT met: should correctly call _sendRequest() from mock Chainlink Functions', async () => {
             const expectIdValue = ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32)
             await helpers.mine(2, { interval: 10 });
             await expect(insuranceContract.performUpkeep([], 0))
                 .to.emit(insuranceContract, 'RequestIdUpdated')
                 .withArgs(expectIdValue);
         })
-        it('Sample size NOT met: Should NOT change controlFlag value', async () => {
+        it('Max sample size NOT met: Should NOT change controlFlag value', async () => {
             await helpers.mine(2, { interval: 10 });
             await expect(insuranceContract.performUpkeep([], 0))
                 .to.emit(insuranceContract, 'ControlFlagValue')
                 .withArgs(0);
         })
-        it('Sample size met: Should correctly call _sendRequest() from mock Chainlink Functions', async () => {
+        it('Max sample size met: Should correctly call _sendRequest() from mock Chainlink Functions', async () => {
             const expectIdValue = ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32)
             await helpers.mine(2, { interval: 10 });
             await expect(insuranceContract.performUpkeep([], 2))
                 .to.emit(insuranceContract, 'RequestIdUpdated')
                 .withArgs(expectIdValue)
         })
-        it('Sample size met: Should change controlFlag value', async () => {
+        it('Max sample size met: Should change controlFlag value', async () => {
             await helpers.mine(2, { interval: 10 });
             await expect(insuranceContract.performUpkeep([], 2))
                 .to.emit(insuranceContract, 'ControlFlagValue')
+                .withArgs(1);
+        })
+    })
+
+    describe('fulfillRequest', async () => {
+        it('Max sample size NOT met: Should push the new sample to data structure', async () => {
+            const requestId = ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32);
+            const response = ethers.utils.arrayify('0x01');
+            await expect(insuranceContract.fulfillRequest(requestId, response, []))
+                .to.emit(insuranceContract, 'sampleStorageLength')
                 .withArgs(1);
         })
     })

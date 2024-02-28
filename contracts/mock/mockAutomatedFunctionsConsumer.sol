@@ -73,6 +73,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   // Eventos exclusivos para o Mock
   event RequestIdUpdated(bytes32 requestId);
   event ControlFlagValue(uint8 controlFlag);
+  event sampleStorageLength(uint256 length);
 
   // Valores para regras de negócio
   uint8     private controlFlag;
@@ -250,7 +251,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
    * @param response Resposta da requisição
    * @param err Erro do código fonte ou do pipeline de execução da requisição
    */
-  function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal {
+  function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) external {
     latestResponse = response;
     latestError = err;
     responseCounter = responseCounter + 1;
@@ -258,9 +259,13 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     if(controlFlag == 0){
       // converter para string com abi.encodePacked() se possível com bytes
       string memory responseAsString = string(response); // Isso aqui era: string(bytes32(response))
+      console.logBytes(response);
+      console.log('response string: ', responseAsString);
 
       // Armazena no array as amostras de dados
       sampleStorage.push(responseAsString);
+
+      emit sampleStorageLength(sampleStorage.length);
     }
     else{
       // Refazer isso para que a rede Chainlink realize uma computação do índice mais complexo do que a média
