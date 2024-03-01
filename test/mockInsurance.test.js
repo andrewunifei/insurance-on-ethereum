@@ -15,7 +15,7 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
         signer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
         farmer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
         humidityLimit: 1,
-        sampleMaxSize: 1,
+        maxSampleQuantity: 10,
         reparationValue: ethers.utils.parseEther("1"), // eth --> wei
         interval: 10,
         router: blockchain.sepolia.chainlinkRouterAddress,
@@ -62,8 +62,8 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
                 .then(value => expect(value).to.equal(params.farmer));
             await insuranceContract.humidityLimit()
                 .then(value => expect(ethers.BigNumber.from(value).toNumber()).to.equal(params.humidityLimit));   
-            await insuranceContract.sampleMaxSize()
-                .then(value => expect(ethers.BigNumber.from(value).toNumber()).to.equal(params.sampleMaxSize));  
+            await insuranceContract.maxSampleQuantity()
+                .then(value => expect(ethers.BigNumber.from(value).toNumber()).to.equal(params.maxSampleQuantity));  
             await insuranceContract.reparationValue()
                 .then(value => expect(ethers.BigNumber.from(value).toString())
                                 .to.equal(ethers.BigNumber.from(params.reparationValue).toString())); 
@@ -155,13 +155,13 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
         it('Max sample size met: Should correctly call _sendRequest() from mock Chainlink Functions', async () => {
             const expectIdValue = ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32)
             await helpers.mine(2, { interval: 10 });
-            await expect(insuranceContract.performUpkeep([], 2))
+            await expect(insuranceContract.performUpkeep([], 11))
                 .to.emit(insuranceContract, 'RequestIdUpdated')
                 .withArgs(expectIdValue)
         })
         it('Max sample size met: Should change controlFlag value', async () => {
             await helpers.mine(2, { interval: 10 });
-            await expect(insuranceContract.performUpkeep([], 2))
+            await expect(insuranceContract.performUpkeep([], 11))
                 .to.emit(insuranceContract, 'ControlFlagValue')
                 .withArgs(1);
         })
@@ -175,6 +175,14 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
                 .to.emit(insuranceContract, 'sampleStorageLength')
                 .withArgs(1);
         })
-        it('Should convert hexadecimal ')
+        it('Max sample quantity met: Should bypass controlFlag', async () => {
+            const requestId = ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32);
+            const response = ethers.utils.arrayify('0x616e64726577');
+            await helpers.mine(2, { interval: 10 });
+            await insuranceContract.performUpkeep([], 11);
+            await expect(insuranceContract.fulfillRequest(requestId, response, []))
+                .to.emit(insuranceContract, 'sampleStorageLength')
+                .withArgs(params.maxSampleQuantity);
+        })
     })
 })

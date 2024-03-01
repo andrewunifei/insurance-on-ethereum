@@ -79,8 +79,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   uint8     private controlFlag;
   uint256   public  reparationValue;
   uint256   public  humidityLimit;
-  uint256   public  sampleMaxSize;
-  string[]  public  sampleStorage;
+  uint256   public  maxSampleQuantity;
+  bytes[]  public  sampleStorage;
   string    private computationJS; // calculo da computacao do indice
   // MOCK: Essa variável só exsite aqui
   bytes     public  computationCBOR;
@@ -121,7 +121,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     address _deployer,
     address _farmer,
     uint256 _humidityLimit,
-    uint256 _sampleMaxSize,
+    uint256 _maxSampleQuantity,
     uint256 _reparationValue,
     uint256 _interval,
     address _router,
@@ -134,7 +134,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     institution = _deployer;
     farmer = _farmer;
     humidityLimit = _humidityLimit; 
-    sampleMaxSize = _sampleMaxSize;
+    maxSampleQuantity = _maxSampleQuantity;
     reparationValue = _reparationValue;
     interval = _interval;
     router = _router;
@@ -199,7 +199,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     upkeepCounter = upkeepCounter + 1;
 
     // Se a quantidade de amostras não é o suficiente, coleta uma nova amostra:
-    if(sampleMaxSize > mockSampleStorageLength) {
+    if(maxSampleQuantity > mockSampleStorageLength) {
       s_lastRequestId = _sendRequest(
           requestCBOR,
           subscriptionId,
@@ -257,19 +257,18 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     responseCounter = responseCounter + 1;
 
     if(controlFlag == 0){
-      string memory responseAsString = string(response); // É necessário ser ASCII 
+      // string memory responseAsString = string(response); // É necessário ser ASCII 
 
       // Armazena no array as amostras de dados
-      sampleStorage.push(responseAsString);
+      sampleStorage.push(response);
 
       emit sampleStorageLength(sampleStorage.length);
     }
     else{
       // Refazer isso para que a rede Chainlink realize uma computação do índice mais complexo do que a média
       // Essa computação do índice deve ser com base na literatura científica
-      mean = uint256(bytes32(response)); // remover
-
-      verifyIndex(); // remover
+ 
+      emit sampleStorageLength(maxSampleQuantity);
     }
 
     emit OCRResponse(requestId, response, err);
