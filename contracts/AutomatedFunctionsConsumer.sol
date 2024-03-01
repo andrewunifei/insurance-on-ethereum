@@ -286,4 +286,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   function contractBalance() public view returns (uint){
     return address(this).balance;
   }
+
+  // Função para receber ether, msg.data deve estar vazio
+  receive() external payable {}
 }

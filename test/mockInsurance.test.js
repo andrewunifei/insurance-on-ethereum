@@ -1,11 +1,13 @@
 import { expect } from 'chai';
 import helpers from '@nomicfoundation/hardhat-network-helpers';
+import pkg from 'hardhat';
+const { ethers } = pkg;
+
 //import ethers from 'ethers';
 
 import blockchain from '../middleware/blockchain.js';
 import { buildRequestParameters } from '../mock/mockController.js'
 import insuranceContractArtifact from '../build/artifacts/contracts/mock/mockAutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
-import hre from 'hardhat';
 
 describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     let insuranceContractFactory;
@@ -13,10 +15,10 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     const params = {
         // Esses endereços tem origem na blockcahin localhost (npx hardhat node)
         signer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
-        farmer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
-        humidityLimit: 1,
+        farmer: '0x70997970C51812dc3A010C7d01b50e0d17dc79C8', 
+        humidityLimit: 10,
         maxSampleQuantity: 10,
-        reparationValue: ethers.utils.parseEther("1"), // eth --> wei
+        reparationValue: ethers.utils.parseEther(String(1)), // eth --> wei
         interval: 10,
         router: blockchain.sepolia.chainlinkRouterAddress,
         subscriptionId: 0,
@@ -27,7 +29,6 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     };
 
     let signer;
-    let provider;
 
     // Implanta o contrato inteligente toda vez antes de um novo 'describe'
     beforeEach(async () => {
@@ -36,7 +37,6 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
         //     process.env.HARDHAT_RPC_URL
         // );
 
-        provider = hre.network.provider
         signer = await ethers.getSigner()
 
         insuranceContractFactory = new ethers.ContractFactory(
@@ -185,4 +185,44 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
                 .withArgs(params.maxSampleQuantity);
         })
     })
+
+    describe('verify', async () => {
+        beforeEach(async () => {
+            const tx = await signer.sendTransaction(
+                {
+                    to: insuranceContract.address,
+                    value: ethers.utils.parseEther(String(2)) // eth --> wei
+                }
+            );
+            await tx.wait(1);
+        })
+
+        it('Should send the contract balance to the farmer because condition met', async () => {
+            await insuranceContract.verifyIndex(1);
+            const farmerBalance = await ethers.provider.getBalance(params.farmer);
+            expect(farmerBalance).to.equal(ethers.utils.parseEther(String(10002)));
+        });
+        it('Should send the contract balance to the institution because condition NOT met', async () => {
+            const institutionBalanceBefore = await ethers.provider.getBalance(signer.address);
+            await insuranceContract.verifyIndex(11);
+            const institutionBalanceAfter = await ethers.provider.getBalance(signer.address);
+            const difference = institutionBalanceAfter - institutionBalanceBefore;
+            const condition = (difference >= ethers.utils.parseEther(String(1.99)) && difference <= ethers.utils.parseEther(String(2)));
+            expect(condition).to.be.true;
+        })
+    })
+
+    describe('contractBalance', async () => {
+        it('Should return the correct contract balance', async () => {
+            const tx = await signer.sendTransaction(
+                {
+                    to: insuranceContract.address,
+                    value: ethers.utils.parseEther(String(2)) // eth --> wei
+                }
+            );
+            await tx.wait(1);
+
+            expect(await insuranceContract.contractBalance()).to.equal(ethers.utils.parseEther(String(2)))
+        });
+    });
 })

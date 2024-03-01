@@ -3,7 +3,7 @@ require('dotenv').config()
 // Eu irei importar o Hardhat Ethers para fazer alguns testes com funções relacioandas com tempo
 // No projeto em geral eu estou usando o Ethers normal
 // Talvez seja necessário remover essa linha
-require("@nomiclabs/hardhat-ethers");
+// require("@nomiclabs/hardhat-ethers");
 require("@nomicfoundation/hardhat-chai-matchers");
 
 const REPORT_GAS = process.env.REPORT_GAS?.toLowerCase() === "true" ? true : false

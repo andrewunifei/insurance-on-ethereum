@@ -231,8 +231,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     }
   }
 
-  function verifyIndex() internal {
-    if(mean < humidityLimit){
+  function verifyIndex(uint256 mockMean) public {
+    if(mockMean < humidityLimit){
       // Transfere para a conta do agricultor
       (bool sent, /* bytes memory data */) = payable(farmer).call{value: address(this).balance}("");
       require(sent, "Erro ao pagar a indenizacao");
@@ -278,4 +278,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
   function contractBalance() public view returns (uint){
     return address(this).balance;
   }
+
+  // Função para receber ether, msg.data deve estar vazio
+  receive() external payable {}
 }
