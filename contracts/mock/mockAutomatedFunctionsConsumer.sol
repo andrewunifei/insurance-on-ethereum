@@ -257,10 +257,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner{
     responseCounter = responseCounter + 1;
 
     if(controlFlag == 0){
-      // converter para string com abi.encodePacked() se possível com bytes
-      string memory responseAsString = string(response); // Isso aqui era: string(bytes32(response))
-      console.logBytes(response);
-      console.log('response string: ', responseAsString);
+      string memory responseAsString = string(response); // É necessário ser ASCII 
 
       // Armazena no array as amostras de dados
       sampleStorage.push(responseAsString);

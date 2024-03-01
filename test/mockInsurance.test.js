@@ -170,10 +170,11 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     describe('fulfillRequest', async () => {
         it('Max sample size NOT met: Should push the new sample to data structure', async () => {
             const requestId = ethers.utils.hexZeroPad(ethers.utils.hexlify(1), 32);
-            const response = ethers.utils.arrayify('0x01');
+            const response = ethers.utils.arrayify('0x616e64726577');
             await expect(insuranceContract.fulfillRequest(requestId, response, []))
                 .to.emit(insuranceContract, 'sampleStorageLength')
                 .withArgs(1);
         })
+        it('Should convert hexadecimal ')
     })
 })
