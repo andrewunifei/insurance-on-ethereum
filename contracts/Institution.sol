@@ -70,6 +70,7 @@ contract Institution{
         address _registry, //Era: IAutomationRegistryConsumer _registry
         address _sepoliaLINKAddress,
         address _sepoliaRegistrarAddress,
+        uint96 _upkeepFundAmount,
         uint32 _fulfillGasLimit    
     ) external {
         require(whitelist[_farmer], "Endereco nao esta na lista branca");
@@ -89,6 +90,7 @@ contract Institution{
             _registry,
             _sepoliaLINKAddress,
             _sepoliaRegistrarAddress,
+            _upkeepFundAmount,
             _fulfillGasLimit            
         );
         contracts[_farmer].push(c);

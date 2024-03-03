@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/AutomatedFunctionsConsumer.sol": {
-      "lastModificationDate": 1709294498416,
-      "contentHash": "f675f46a92c1a204f4ba3ae828b3766a",
+      "lastModificationDate": 1709374541131,
+      "contentHash": "6b7da374f74e7248f59b0d4ea9b2684b",
       "sourceName": "contracts/AutomatedFunctionsConsumer.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -36,6 +36,7 @@
         "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol",
         "./AutomationUtils.sol",
         "./Upkeep.sol",
+        "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol",
         "hardhat/console.sol"
       ],
       "versionPragmas": [
@@ -684,8 +685,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/Institution.sol": {
-      "lastModificationDate": 1707338816300,
-      "contentHash": "dca5cd3d3ffb2cc0843a7c7698b8b5a8",
+      "lastModificationDate": 1709374727562,
+      "contentHash": "9a65777df3ad42bca60af2718cff0e4a",
       "sourceName": "contracts/Institution.sol",
       "solcConfig": {
         "version": "0.8.19",

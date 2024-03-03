@@ -6,7 +6,7 @@ import * as helpers from '../mock/helpers.js'
 import APIArtifact from '../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' }
 import upkeepArtifact from '../build/artifacts/contracts/Upkeep.sol/Upkeep.json' assert { type: 'json' }
 import LINKArtifacts from '../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json' assert { type: 'json' }
-import insuranceContractParams from '../mock/InsuranceParamsMock.js'
+import insuranceContractParams from '../mock/mockInsuranceParams.js'
 import insuranceInfo from '../mock/institutionInfoMock.js'
 
 const { signer, provider } = await blockchain.interaction(
@@ -62,7 +62,8 @@ console.log(insuranceContract)
 
 // // console.log(`Upkeep address: ${upkeep.address}`)
 
-// // const approveTx = await LINK.approve(upkeep.address, ethers.utils.parseEther(String(10)))
+// Talvez seja necessário attach o contrato da interface LINK para usar funções LINK
+// const approveTx = await LINK.approve(upkeep.address, ethers.utils.parseEther(String(10)))
 // // const approveReceipt = await approveTx.wait(1)
 // // console.log(approveReceipt)
 

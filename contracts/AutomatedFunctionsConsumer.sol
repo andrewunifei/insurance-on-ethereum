@@ -7,6 +7,7 @@ import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/Confir
 import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 import {IAutomationRegistryConsumer, RegistrationParams} from "./AutomationUtils.sol";
 import {Upkeep} from "./Upkeep.sol";
+import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
 import "hardhat/console.sol"; // Comentar essa linha 
 
 interface UpkeepInterface {
@@ -23,6 +24,7 @@ interface UpkeepInterface {
 contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
   using FunctionsRequest for FunctionsRequest.Request;
 
+  // Configuração Chainlink Functions
   bytes   public  requestCBOR; // Concise Binary Object Representation para transferência de dados
   bytes32 public  latestRequestId;
   bytes   public  latestResponse;
@@ -30,24 +32,24 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   uint64  public  subscriptionId;
   uint32  public  fulfillGasLimit;
   uint256 public  updateInterval;
-  uint256 public  lastUpkeepTimeStamp;
-  uint256 public  upkeepCounter;
-  uint256 public  responseCounter;
-  uint8   private controlFlag;
 
-  // Configuracao da automacao
+  // Configuração Chainlink Automation
   IAutomationRegistryConsumer public immutable registry;
-  Upkeep  public  i_upkeep;
+  Upkeep  public  c_upkeep;
   uint256 public  upkeepId;
   bytes   public  request;
   uint32  public  gasLimit;
   bytes32 public  donID;
+  uint256 public  lastUpkeepTimeStamp;
+  uint256 public  upkeepCounter;
+  uint256 public  responseCounter;
   bytes32 public  s_lastRequestId;
   bytes   public  s_lastResponse;
   bytes   public  s_lastError;
   uint256 public  s_upkeepCounter;
   uint256 public  s_requestCounter;
   uint256 public  s_responseCounter;
+  uint8   private controlFlag;
 
   address public  institution;
   address public  farmer;
@@ -110,6 +112,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     address _registry,
     address sepoliaLINKAddress, // Aqui para LinkTokenInterface
     address sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
+    uint96 upkeepFundAmount,
     uint32 _fulfillGasLimit
   ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
     institution = _deployer;
@@ -121,15 +124,15 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     subscriptionId = _subscriptionId;
     registry = IAutomationRegistryConsumer(_registry); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
     fulfillGasLimit = _fulfillGasLimit;
-    // i_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário no própio contrato mesmo
-    // emit upkeepCreated(address(i_upkeep));
+    c_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress, upkeepFundAmount); // Talvez seja melhor deixa em uma função separada
+    LinkTokenInterface(sepoliaLINKAddress).approve(address(c_upkeep), upkeepFundAmount); // Talvez seja melhor deixa em uma função separada
+    c_upkeep.fund();
+    emit upkeepCreated(address(c_upkeep));
     lastUpkeepTimeStamp = block.timestamp;
   }
 
-  // ** TODO: function createUpkeep() public returns (uint256)**
-  //
-  // 
-  //
+  // ** TODO: function createUpkeep() public returns (uint256) **
+  // function createUpkeep(uint256 fundAmount) public {}
 
   // Se eu não me engano eu movi a lógica da criação do upkeep para dentro do contrato
   // porque eu quero que o contrato seja capaz de controlar a upkeep (pausar por exemplo)
@@ -138,11 +141,11 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Registrando um novo upkeep
    */
 
-  // function registerUpkeep(RegistrationParams calldata params) public {
-  //   upkeepId = UpkeepInterface(address(i_upkeep)).register(params);
+  function registerUpkeep(RegistrationParams calldata params) public {
+    upkeepId = UpkeepInterface(address(c_upkeep)).register(params);
 
-  //   emit upkeepRegistered(upkeepId);
-  // }
+    emit upkeepRegistered(upkeepId);
+  }
 
   /**
    * @notice Muda o estado do contrato para armazenar o objeto FunctionsRequest.Request codificado em CBOR
@@ -171,8 +174,10 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   /**
    * @notice Usado por Chainlink Automation para checar se `performUpkeep` deve ser chamada
    */
-  function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory) {
+  function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory performData) {
     upkeepNeeded = (block.timestamp - lastUpkeepTimeStamp) > updateInterval;
+
+    return (upkeepNeeded, performData);
   }
 
   /**
@@ -188,14 +193,13 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     // Se a quantidade de amostras não é o suficiente, coleta nova amostra:
     if(sampleMaxSize > sampleStorage.length){
       s_upkeepCounter = s_upkeepCounter + 1;
-      try 
-        i_router.sendRequest(
+      try i_router.sendRequest(
           subscriptionId, 
           requestCBOR,
           FunctionsRequest.REQUEST_DATA_VERSION,
           gasLimit,
           donID
-        )
+      )
       returns (bytes32 requestId) {
         s_lastRequestId = requestId;
         s_requestCounter = s_requestCounter + 1;
@@ -211,19 +215,22 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
       controlFlag = 1;
 
       FunctionsRequest.Request memory req;
-      req.initializeRequest(FunctionsRequest.Location.Inline, FunctionsRequest.CodeLanguage.JavaScript, computationJS);
+      req.initializeRequest(
+        FunctionsRequest.Location.Inline, 
+        FunctionsRequest.CodeLanguage.JavaScript, 
+        computationJS
+      );
       req.setArgs(sampleStorage);
       bytes memory encodedCBOR = req.encodeCBOR();
 
       s_upkeepCounter = s_upkeepCounter + 1;
-      try 
-        i_router.sendRequest(
+      try i_router.sendRequest(
           subscriptionId, 
           encodedCBOR,
           FunctionsRequest.REQUEST_DATA_VERSION,
           gasLimit,
           donID
-        )
+      )
       returns (bytes32 requestId) {
         s_lastRequestId = requestId;
         s_requestCounter = s_requestCounter + 1;
@@ -265,7 +272,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
 
     if(controlFlag == 0){
       // converter para string com abi.encodePacked() se possível com bytes
-      string memory responseAsString = string(response); // Isso aqui era: string(bytes32(response))
+      // Essa conversão vai depender do tipo de dado retornado
+      // Porque se o bytes não representar ASCII a conversão é inútil
+      string memory responseAsString = string(response); 
   
 
       // Armazena no array as amostras de dados
