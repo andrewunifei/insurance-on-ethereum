@@ -119,22 +119,25 @@ describe('Smart Contract: mockInstitution', async () => {
         });
     });
 
-    // describe('withdraw', async () => {
-    //     it('Should withdraw correctly', async () => {
-    //         const tx = await signer.sendTransaction(
-    //             {
-    //                 to: institutionContract.address,
-    //                 value: ethers.utils.parseEther(String(10))
-    //             }
-    //         );
-    //         await tx.wait(1);
+    describe('withdraw', async () => {
+        it('Should withdraw correctly', async () => {
+            const tx = await signer.sendTransaction(
+                {
+                    to: institutionContract.address,
+                    value: ethers.utils.parseEther(String(10))
+                }
+            );
+            await tx.wait(1);
 
-    //         const deployerBalance = await ethers.provider.getBalance(signer.address);
-    //         await institutionContract.withdraw();
-    //         const balanceAfter = await ethers.provider.getBalance(signer.address);
-    //         await expect(balanceAfter).to.equal(deployerBalance + 10);
-    //     })
-    // });
+            const deployerBalance = await ethers.provider.getBalance(signer.address);
+            await institutionContract.withdraw();
+            const balanceAfter = await ethers.provider.getBalance(signer.address);
+            const adjusted = deployerBalance.add(ethers.utils.parseEther(String(10)));
+            const difference = adjusted - balanceAfter;
+            const condition = (difference < ethers.utils.parseEther(String(0.1)));
+            expect(condition).to.be.true;
+        })
+    });
 
     describe('contractBalance', async () => {
         it('Should return the correct balance of the Institution', async () => {

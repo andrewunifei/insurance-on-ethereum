@@ -180,7 +180,7 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
             await insuranceContract.verifyIndex(11);
             const institutionBalanceAfter = await ethers.provider.getBalance(signer.address);
             const difference = institutionBalanceAfter - institutionBalanceBefore;
-            const condition = (difference >= ethers.utils.parseEther(String(1.99)) && difference <= ethers.utils.parseEther(String(2)));
+            const condition = (difference >= ethers.utils.parseEther(String(1.999)) && difference <= ethers.utils.parseEther(String(2)));
             expect(condition).to.be.true;
         })
     })
