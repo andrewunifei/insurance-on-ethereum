@@ -112,7 +112,7 @@ describe('Smart Contract: mockInsurance', async () => {
             ).to.be.revertedWith('Address is not in white list.');
         })
 
-        it('Should revert if the Institution doesn\'t has funds', async () => {
+        it('Should revert if the Institution doesn\'t have funds', async () => {
             await institutionContract.whitelistAddr(farmerAddr);
             await expect(
                 institutionContract.createInsuranceContract.apply(
