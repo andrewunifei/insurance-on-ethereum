@@ -2,10 +2,6 @@ import { expect } from 'chai';
 import helpers from '@nomicfoundation/hardhat-network-helpers';
 import hh from 'hardhat';
 const { ethers } = hh;
-
-//import ethers from 'ethers';
-
-import blockchain from '../middleware/blockchain.js';
 import { buildRequestParameters } from '../mock/mockController.js'
 import insuranceContractArtifact from '../build/artifacts/contracts/mock/mockAutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
 import params from '../mock/mockInsuranceParams.js'
@@ -16,11 +12,6 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
 
     // Implanta o contrato inteligente toda vez antes de um novo 'describe'
     beforeEach(async () => {
-        // const { signer, provider } = await blockchain.interaction(
-        //     process.env.HARDHAT_ACCOUNT_PRIVATE_KEY,
-        //     process.env.HARDHAT_RPC_URL
-        // );
-
         signer = await ethers.getSigner();
 
         const insuranceContractFactory = new ethers.ContractFactory(

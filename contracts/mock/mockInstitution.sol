@@ -127,5 +127,4 @@ contract Institution{
      * @notice Função para receber ether, msg.data deve estar vazio
      */
     receive() external payable {}
-
 }

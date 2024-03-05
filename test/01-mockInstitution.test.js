@@ -1,13 +1,10 @@
 import { expect } from 'chai';
-import helpers from '@nomicfoundation/hardhat-network-helpers';
 import hh from 'hardhat';
 const { ethers } = hh;
-
-import blockchain from '../middleware/blockchain.js';
 import institutionArtifact from '../build/artifacts/contracts/mock/mockInstitution.sol/Institution.json' assert { type: 'json' }
 import insuranceContractParams from '../mock/mockInsuranceParams.js'
 
-describe('Smart Contract: mockInsurance', async () => {
+describe('Smart Contract: mockInstitution', async () => {
     let institutionContract;
     let signer;
 
@@ -110,7 +107,7 @@ describe('Smart Contract: mockInsurance', async () => {
                     institutionContract, Object.values(insuranceContractParams)
                 )
             ).to.be.revertedWith('Address is not in white list.');
-        })
+        });
 
         it('Should revert if the Institution doesn\'t have funds', async () => {
             await institutionContract.whitelistAddr(farmerAddr);
@@ -119,6 +116,38 @@ describe('Smart Contract: mockInsurance', async () => {
                     institutionContract, Object.values(insuranceContractParams)
                 )
             ).to.be.revertedWith('Not enough funds to finance Insurance Contract');
-        })  
+        });
+    });
+
+    // describe('withdraw', async () => {
+    //     it('Should withdraw correctly', async () => {
+    //         const tx = await signer.sendTransaction(
+    //             {
+    //                 to: institutionContract.address,
+    //                 value: ethers.utils.parseEther(String(10))
+    //             }
+    //         );
+    //         await tx.wait(1);
+
+    //         const deployerBalance = await ethers.provider.getBalance(signer.address);
+    //         await institutionContract.withdraw();
+    //         const balanceAfter = await ethers.provider.getBalance(signer.address);
+    //         await expect(balanceAfter).to.equal(deployerBalance + 10);
+    //     })
+    // });
+
+    describe('contractBalance', async () => {
+        it('Should return the correct balance of the Institution', async () => {
+            const tx = await signer.sendTransaction(
+                {
+                    to: institutionContract.address,
+                    value: ethers.utils.parseEther(String(10))
+                }
+            );
+            await tx.wait(1);
+
+            const balance = await institutionContract.contractBalance();
+            expect(balance).to.equal(ethers.utils.parseEther(String(10)));
+        });
     });
 })
