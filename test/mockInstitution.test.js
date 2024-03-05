@@ -25,6 +25,8 @@ describe('Smart Contract: mockInsurance', async () => {
         ['Phone', '+00 000000000'],
     ]
 
+    const farmerAddr = '0x70997970C51812dc3A010C7d01b50e0d17dc79C8';
+
     beforeEach(async () => {
         signer = await ethers.getSigner();
 
@@ -58,4 +60,32 @@ describe('Smart Contract: mockInsurance', async () => {
             };
         });
     })
+
+    describe('whitelistAddr', async () => {
+        it('Should white list the address of the farmer correctly', async () => {
+            await institutionContract.whitelistAddr(farmerAddr);
+            const addrWhiteListed = await institutionContract.whitelist(farmerAddr);
+            expect(addrWhiteListed).to.be.true;
+        });
+    });
+
+    describe('blacklistAddr', async () => {
+        it('Should black list the address of the farmer correctly', async () => {
+            await institutionContract.blacklistAddr(farmerAddr);
+            const addrWhiteListed = await institutionContract.whitelist(farmerAddr);
+            expect(addrWhiteListed).to.be.false;
+        });
+    });
+
+    describr('getInsurance', async () => {
+        it('Should get the correct Insurance Contract from data structure', async () => {
+            await institutionContract.getInsurance();
+        });
+    });
+
+    describre('createInsuranceContract', async () => {
+        it('Should create an Insurance Contract correctly', async () => {
+            
+        });
+    });
 })

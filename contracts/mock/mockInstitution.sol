@@ -55,21 +55,6 @@ contract Institution{
         whitelist[_farmerAddr] = false;
     }
 
-    /**
-     * Verifica se o endereço do agricultor está na lista branca
-     * @param _farmerAddr Endereçod da carteira do agricultor
-     */
-    function isWhiteListed(address _farmerAddr) view external returns (bool) {
-        bool result = whitelist[_farmerAddr];
-        console.log(result);
-
-        return result;
-    }
-
-    function getInsurance(uint256 _index) view public returns (AutomatedFunctionsConsumer){
-        return contracts[msg.sender][_index];
-    }
-
     // Criar um contrato agrícola
     function createInsuranceContract(
         address _deployer,
@@ -108,6 +93,10 @@ contract Institution{
 
         emit InsuranceContractCreated(address(c));
     }
+
+    // function getInsurance(uint256 _index) view public returns (AutomatedFunctionsConsumer){
+    //     return contracts[msg.sender][_index];
+    // }
 
     /**
      * @notice Para sacar o balanço do contrato
