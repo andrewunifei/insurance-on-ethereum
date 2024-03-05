@@ -96,5 +96,29 @@ describe('Smart Contract: mockInsurance', async () => {
             await institutionContract.contracts(farmerAddr, 0)
                 .then(value => expect(value.length).to.equal(42));
         });
+
+        it('Should revert if farmer address is not in white list', async () => {
+            const tx = await signer.sendTransaction(
+                {
+                    to: institutionContract.address,
+                    value: ethers.utils.parseEther(String(10))
+                }
+            );
+            await tx.wait(1);
+            await expect(
+                institutionContract.createInsuranceContract.apply(
+                    institutionContract, Object.values(insuranceContractParams)
+                )
+            ).to.be.revertedWith('Address is not in white list.');
+        })
+
+        it('Should revert if the Institution doesn\'t has funds', async () => {
+            await institutionContract.whitelistAddr(farmerAddr);
+            await expect(
+                institutionContract.createInsuranceContract.apply(
+                    institutionContract, Object.values(insuranceContractParams)
+                )
+            ).to.be.revertedWith('Not enough funds to finance Insurance Contract');
+        })  
     });
 })
