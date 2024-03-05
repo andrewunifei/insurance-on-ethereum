@@ -8,31 +8,38 @@ error NotOwner();
 
 contract Institution{
     // payable para que seja possível para a instituição sacar os fundos desse contrato
-    address immutable public i_owner;
+    address immutable public im_owner;
     string public institutionName;
-    string public id;
-    mapping (string => string) info;
+    string[] public infoKeys;
+    mapping (string => string) public info;
     mapping (address => bool) public whitelist;
     mapping (address => AutomatedFunctionsConsumer[]) public contracts; // Antes era mapping address => address[]
 
     event InsuranceContractCreated(address insuranceContractAddress);
 
     modifier owner {
-        if(msg.sender != i_owner) {
+        if(msg.sender != im_owner) {
             revert NotOwner();
         }
         _;
     }
 
     constructor(address _owner, string memory _institutionName) {
-        i_owner = _owner;
+        im_owner = _owner;
         institutionName = _institutionName;
     }
 
-    // Dicionário para a instituição registrar informações adicionais além do que está no construtor
-    // Exemplo de informaçãoa adicional: endereço físico
-    function registerInfo(string memory _name, string memory _description) external owner {
-        info[_name] = _description;
+    /**
+     * @notice Dicionário para a instituição registrar informações adicionais além do que está no construtor
+     * @param infoArray Lista de listas com informações chave valor
+     */
+    function registerInfo(string[2][] memory infoArray) external owner {
+        for(uint i = 0; i < infoArray.length; i++) {            
+            info[infoArray[i][0]] = infoArray[i][1];
+            infoKeys.push(infoArray[i][0]);
+        }
+
+        console.log(info['Code']);
     }
 
     // Valida endereço do agricutor (adicionar na lista branca)
@@ -98,7 +105,7 @@ contract Institution{
 
     // Sacar o balanço do contrato
     function withdraw() external owner {
-        (bool callStatus, /* bytes memory data */) = payable(i_owner).call{value: address(this).balance}("");
+        (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
         require(callStatus, "O saque falhou.");
     }
 

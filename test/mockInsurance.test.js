@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import helpers from '@nomicfoundation/hardhat-network-helpers';
-import pkg from 'hardhat';
-const { ethers } = pkg;
+import hh from 'hardhat';
+const { ethers } = hh;
 
 //import ethers from 'ethers';
 
@@ -10,8 +10,9 @@ import { buildRequestParameters } from '../mock/mockController.js'
 import insuranceContractArtifact from '../build/artifacts/contracts/mock/mockAutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
 
 describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
-    let insuranceContractFactory;
     let insuranceContract;
+    let signer;
+
     const params = {
         // Esses endereços tem origem na blockcahin localhost (npx hardhat node)
         signer: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266', 
@@ -28,8 +29,6 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
         gaslimit: 300000
     };
 
-    let signer;
-
     // Implanta o contrato inteligente toda vez antes de um novo 'describe'
     beforeEach(async () => {
         // const { signer, provider } = await blockchain.interaction(
@@ -37,9 +36,9 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
         //     process.env.HARDHAT_RPC_URL
         // );
 
-        signer = await ethers.getSigner()
+        signer = await ethers.getSigner();
 
-        insuranceContractFactory = new ethers.ContractFactory(
+        const insuranceContractFactory = new ethers.ContractFactory(
             insuranceContractArtifact.abi,
             insuranceContractArtifact.bytecode,
             signer
@@ -55,7 +54,7 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     describe('constructor', async () => {
         it('Should set the parameters correctly', async () => {
             // await e then em conjunto é necessário porque o mocha não aguarda o then, mas aguarda o await
-            // estou usando o then para evitar a declaração de múltiplas variáveis
+            // Estou usando o then para evitar a declaração de múltiplas variáveis
             await insuranceContract.institution()
                 .then(value => expect(value).to.equal(params.signer));
             await insuranceContract.farmer()
@@ -97,7 +96,6 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
         before(async () => {
             requestParameters = buildRequestParameters(config);
         });
-
         it('Should set the request parameters correctly', async () => {
             // Modifica a blockchain. Isso cria um novo bloco e modifica o timestamp (+1 segundo)
             await insuranceContract.setRequest.apply(
@@ -196,7 +194,6 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
             );
             await tx.wait(1);
         })
-
         it('Should send the contract balance to the farmer because condition met', async () => {
             await insuranceContract.verifyIndex(1);
             const farmerBalance = await ethers.provider.getBalance(params.farmer);

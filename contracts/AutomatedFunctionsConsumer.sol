@@ -35,6 +35,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
 
   // Configuração Chainlink Automation
   IAutomationRegistryConsumer public immutable registry;
+  address public  sepoliaLINKAddress;
+  address public  sepoliaRegistrarAddress;
   Upkeep  public  c_upkeep;
   uint256 public  upkeepId;
   bytes   public  request;
@@ -110,9 +112,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     address router,
     uint64 _subscriptionId,
     address _registry,
-    address sepoliaLINKAddress, // Aqui para LinkTokenInterface
-    address sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
-    uint96 upkeepFundAmount,
+    address _sepoliaLINKAddress, // Aqui para LinkTokenInterface
+    address _sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
     uint32 _fulfillGasLimit
   ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
     institution = _deployer;
@@ -122,25 +123,26 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     reparationValue = _reparationValue;
     updateInterval = _updateInterval;
     subscriptionId = _subscriptionId;
-    registry = IAutomationRegistryConsumer(_registry); // Talvez remover - tem relação com upkeep, mas estou fazendo isso em JS... talvez seja necessário fazer no próprio contrato mesmo
+    registry = IAutomationRegistryConsumer(_registry);
     fulfillGasLimit = _fulfillGasLimit;
-    c_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress, upkeepFundAmount); // Talvez seja melhor deixa em uma função separada
-    LinkTokenInterface(sepoliaLINKAddress).approve(address(c_upkeep), upkeepFundAmount); // Talvez seja melhor deixa em uma função separada
-    c_upkeep.fund();
+    sepoliaLINKAddress = _sepoliaLINKAddress;
+    sepoliaRegistrarAddress = _sepoliaRegistrarAddress;
     emit upkeepCreated(address(c_upkeep));
     lastUpkeepTimeStamp = block.timestamp;
   }
 
-  // ** TODO: function createUpkeep() public returns (uint256) **
-  // function createUpkeep(uint256 fundAmount) public {}
-
   // Se eu não me engano eu movi a lógica da criação do upkeep para dentro do contrato
   // porque eu quero que o contrato seja capaz de controlar a upkeep (pausar por exemplo)
   // não sei se é possível fazer isso se a upkeep é criada usando JavaScript
+  function createUpkeep(uint96 upkeepFundAmount) public {
+      c_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress, upkeepFundAmount); 
+      LinkTokenInterface(sepoliaLINKAddress).approve(address(c_upkeep), upkeepFundAmount);
+      c_upkeep.fund();
+  }
+
   /**
    * @notice Registrando um novo upkeep
    */
-
   function registerUpkeep(RegistrationParams calldata params) public {
     upkeepId = UpkeepInterface(address(c_upkeep)).register(params);
 
