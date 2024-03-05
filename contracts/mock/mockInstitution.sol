@@ -7,13 +7,12 @@ import "hardhat/console.sol"; // Comentar essa linha
 error NotOwner();
 
 contract Institution{
-    // payable para que seja possível para a instituição sacar os fundos desse contrato
     address immutable public im_owner;
     string public institutionName;
     string[] public infoKeys;
     mapping (string => string) public info;
     mapping (address => bool) public whitelist;
-    mapping (address => AutomatedFunctionsConsumer[]) public contracts; // Antes era mapping address => address[]
+    mapping (address => AutomatedFunctionsConsumer[]) public contracts;
 
     event InsuranceContractCreated(address insuranceContractAddress);
 
@@ -38,19 +37,28 @@ contract Institution{
             info[infoArray[i][0]] = infoArray[i][1];
             infoKeys.push(infoArray[i][0]);
         }
-
-        console.log(info['Code']);
     }
 
-    // Valida endereço do agricutor (adicionar na lista branca)
+    /**
+     * @notice Valida endereço do agricutor (adicionar na lista branca)
+     * @param _farmerAddr Endereço da carteira do agricultor 
+     */
     function whitelistAddr(address _farmerAddr) external {
         whitelist[_farmerAddr] = true;
     }
 
+    /**
+     * @notice Remove a validação do endereço do agricutor
+     * @param _farmerAddr Endereço da carteira do agricultor 
+     */
     function blacklistAddr(address _farmerAddr) external {
         whitelist[_farmerAddr] = false;
     }
 
+    /**
+     * Verifica se o endereço do agricultor está na lista branca
+     * @param _farmerAddr Endereçod da carteira do agricultor
+     */
     function isWhiteListed(address _farmerAddr) view external returns (bool) {
         bool result = whitelist[_farmerAddr];
         console.log(result);
@@ -70,11 +78,9 @@ contract Institution{
         uint256 _sampleMaxSize,
         uint256 _reparationValue,
         uint256 _updateInterval,
-        // string memory _lat,
-        // string memory _lon,
         address router,
         uint64 _subscriptionId,
-        address _registry, //Era: IAutomationRegistryConsumer _registry
+        address _registry, // Era: IAutomationRegistryConsumer _registry
         address _sepoliaLINKAddress,
         address _sepoliaRegistrarAddress,
         uint32 _fulfillGasLimit    
@@ -103,18 +109,24 @@ contract Institution{
         emit InsuranceContractCreated(address(c));
     }
 
-    // Sacar o balanço do contrato
+    /**
+     * @notice Para sacar o balanço do contrato
+     */
     function withdraw() external owner {
         (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
         require(callStatus, "O saque falhou.");
     }
 
-    // Consultar o balanço do contrato
+    /**
+     * @notice Para consultar o balanço do contrato
+     */
     function contractBalance() public view returns (uint){
         return address(this).balance;
     }
 
-    // Função para receber ether, msg.data deve estar vazio
+    /**
+     * @notice Função para receber ether, msg.data deve estar vazio
+     */
     receive() external payable {}
 
 }

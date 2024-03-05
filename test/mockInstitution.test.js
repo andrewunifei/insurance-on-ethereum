@@ -16,7 +16,7 @@ describe('Smart Contract: mockInsurance', async () => {
     };
 
     const info = [
-        ['Code', '1234556789'],
+        ['Code', '123456789'],
         ['Full Name', 'Capital Expansion LTDA'],
         ['Short name', 'CE'],
         ['Address', 'Wall St'],
@@ -50,17 +50,12 @@ describe('Smart Contract: mockInsurance', async () => {
     });
 
     describe('registerInfo', async () => {
-        before(async () => {
-            await institutionContract.registerInfo(info);
-        });
         it('Should set the institution extra information correctly', async () => {
-            // for (let pair of info) {
-            //     await institutionContract.info(pair[0])
-            //         .then(value => expect(value).to.equal(pair[1]))
-            // }
-
-            await institutionContract.info('Code')
-                .then(value => console.log(value));
-        })
+            await institutionContract.registerInfo(info);
+            for (let pair of info) {
+                await institutionContract.info(pair[0])
+                    .then(value => expect(value).to.equal(pair[1]))
+            };
+        });
     })
 })
