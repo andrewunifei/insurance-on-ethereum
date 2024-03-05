@@ -55,7 +55,21 @@ contract Institution{
         whitelist[_farmerAddr] = false;
     }
 
-    // Criar um contrato agrícola
+    /**
+     * @notice Criar um contrato agrícola na rede Ethereum
+     * @param _deployer Endereço do deployer da instituição
+     * @param _farmer Endereço do fazendeiro que irá participar do contato
+     * @param _humidityLimit Limite de umidade (Esse critério provavelmente irá mudar)
+     * @param _sampleMaxSize Número máximo de amostras a serem coletadas
+     * @param _reparationValue Valor de indenização para o agricultor
+     * @param _updateInterval Intervalo (em minuto) entre a coleta das amostras
+     * @param router Endereço do roteador para configurar Chainlink Functions
+     * @param _subscriptionId Endereço da subscrição Chainlink Functions
+     * @param _registry Endereço do registro para manipular a Upkeep (Chainlink Automation)
+     * @param _sepoliaLINKAddress Endereço do token LINK na testnet Sepolia
+     * @param _sepoliaRegistrarAddress Endereço do registrar na testnet Sepolia (Chainlink Automation)
+     * @param _fulfillGasLimit Limite de gás para ser usado
+     */
     function createInsuranceContract(
         address _deployer,
         address _farmer,
@@ -70,8 +84,8 @@ contract Institution{
         address _sepoliaRegistrarAddress,
         uint32 _fulfillGasLimit    
     ) external {
-        require(whitelist[_farmer], "Endereco nao esta na lista branca");
-        // require(_reparationValue <= address(this).balance, "Sem fundos suficiente para financiar o contrato");
+        require(whitelist[_farmer], "Address is not in white list.");
+        require(_reparationValue <= address(this).balance, "Not enough funds to finance Insurance Contract");
 
         AutomatedFunctionsConsumer c = new AutomatedFunctionsConsumer{
             value: _reparationValue
@@ -94,16 +108,12 @@ contract Institution{
         emit InsuranceContractCreated(address(c));
     }
 
-    // function getInsurance(uint256 _index) view public returns (AutomatedFunctionsConsumer){
-    //     return contracts[msg.sender][_index];
-    // }
-
     /**
      * @notice Para sacar o balanço do contrato
      */
     function withdraw() external owner {
         (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
-        require(callStatus, "O saque falhou.");
+        require(callStatus, "Withdraw failed.");
     }
 
     /**

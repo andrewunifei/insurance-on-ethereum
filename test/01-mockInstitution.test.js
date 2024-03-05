@@ -5,12 +5,13 @@ const { ethers } = hh;
 
 import blockchain from '../middleware/blockchain.js';
 import institutionArtifact from '../build/artifacts/contracts/mock/mockInstitution.sol/Institution.json' assert { type: 'json' }
+import insuranceContractParams from '../mock/mockInsuranceParams.js'
 
 describe('Smart Contract: mockInsurance', async () => {
     let institutionContract;
     let signer;
 
-    const params = {
+    const insuranceParams = {
         owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266',
         institutionName: 'Capital Expansion LTDA'
     };
@@ -37,7 +38,7 @@ describe('Smart Contract: mockInsurance', async () => {
         );
 
         institutionContract = await institutionFactory.deploy.apply(
-            institutionFactory, Object.values(params)
+            institutionFactory, Object.values(insuranceParams)
         );
         await institutionContract.deployTransaction.wait(1);
     })
@@ -45,9 +46,9 @@ describe('Smart Contract: mockInsurance', async () => {
     describe('constructor', async () => {
         it('Should set the parameters correctly', async () => {
             await institutionContract.im_owner()
-                .then(value => expect(value).to.equal(params.owner));
+                .then(value => expect(value).to.equal(insuranceParams.owner));
             await institutionContract.institutionName()
-                .then(value => expect(value).to.equal(params.institutionName));
+                .then(value => expect(value).to.equal(insuranceParams.institutionName));
         });
     });
 
@@ -77,15 +78,23 @@ describe('Smart Contract: mockInsurance', async () => {
         });
     });
 
-    describr('getInsurance', async () => {
-        it('Should get the correct Insurance Contract from data structure', async () => {
-            await institutionContract.getInsurance();
-        });
-    });
-
-    describre('createInsuranceContract', async () => {
+    describe('createInsuranceContract', async () => {
         it('Should create an Insurance Contract correctly', async () => {
-            
+            const tx = await signer.sendTransaction(
+                {
+                    to: institutionContract.address,
+                    value: ethers.utils.parseEther(String(10))
+                }
+            );
+            await tx.wait(1);
+            await institutionContract.whitelistAddr(farmerAddr);
+            await expect(
+                institutionContract.createInsuranceContract.apply(
+                    institutionContract, Object.values(insuranceContractParams)
+                )
+            ).to.emit(institutionContract, 'InsuranceContractCreated');
+            await institutionContract.contracts(farmerAddr, 0)
+                .then(value => expect(value.length).to.equal(42));
         });
     });
 })
