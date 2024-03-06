@@ -40,7 +40,7 @@ contract InsuranceAPI {
         return institutions[msg.sender][_index];
     }
 
-    function donate() private payable {
+    function donate() private {
         donators[msg.sender] += msg.value;
     }
 

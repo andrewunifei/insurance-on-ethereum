@@ -55,7 +55,7 @@ describe('Smart Contract: mockInsuranceAPI', async () => {
             const data = await APIContract.getAllInstitution();
 
             expect(data.length).to.equal(3);
-            for (let address of data) {
+            for (const address of data) {
                 expect(address.length).to.equal(42);
             }
         });
@@ -63,7 +63,58 @@ describe('Smart Contract: mockInsuranceAPI', async () => {
 
     describe('donate', async () => {
         it('Should properly associate the donator address with the amount they donated', async () => {
-            
+            const tx1 = await signer.sendTransaction(
+                {
+                    to: APIContract.address,
+                    value: ethers.utils.parseEther(String(10))
+                }
+            );
+            await tx1.wait(1);
+
+            const tx2 = await signer.sendTransaction(
+                {
+                    to: APIContract.address,
+                    value: ethers.utils.parseEther(String(10))
+                }
+            );
+            await tx2.wait(1);
+
+            const totalAmountDonated = ethers.utils.parseEther(String(20));
+            const data = await APIContract.donators(signer.address);
+            expect(data).to.equal(totalAmountDonated);
+        })
+
+        it('Should push the donator address to data structure', async () => {
+            const tx = await signer.sendTransaction(
+                {
+                    to: APIContract.address,
+                    value: ethers.utils.parseEther(String(10))
+                }
+            );
+            await tx.wait(1);
+
+            const data = await APIContract.donatorsAddresses(0);
+            expect(data.length).to.equal(42);
         })
     });
+
+    describe('getAllDonators', async () => {
+        it('Should return all donators from data structure', async () => {
+            const signers = await ethers.getSigners()
+
+            for(let i = 0; i < 3; i++) {
+                const tx = await signers[i].sendTransaction(
+                    {
+                        to: APIContract.address,
+                        value: ethers.utils.parseEther(String(10))
+                    }
+                );
+                await tx.wait(1);
+            }
+
+            const data = await APIContract.getAllDonators();
+            
+            console.log(data);
+        })
+    })
 });
