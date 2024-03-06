@@ -7,19 +7,19 @@ contract InsuranceAPI {
     // mapping (address => address[]) private institutions; --> Depende da minha escolha na função createInstitution()
     mapping (address => Institution[]) private institutions;
     mapping (address => uint256) public donators;
-    address public immutable i_owner;
+    address public immutable im_owner;
 
     event InstitutionCreated(address institutionAddress);
 
     modifier owner {
-        if(msg.sender != i_owner) {
+        if(msg.sender != im_owner) {
             revert NotOwner();
         }
         _;
     }
 
     constructor(address _owner){
-        i_owner = _owner;
+        im_owner = _owner;
     }
 
     // Usando o mesmo endereço permite a criação de diversos contratos que representam Instituições
@@ -40,7 +40,7 @@ contract InsuranceAPI {
         return institutions[msg.sender][_index];
     }
 
-    function donate() public payable {
+    function donate() private payable {
         donators[msg.sender] += msg.value;
     }
 
@@ -53,7 +53,7 @@ contract InsuranceAPI {
     }
 
     function withdraw() external owner {
-        (bool callStatus, /* bytes memory data */) = payable(i_owner).call{value: address(this).balance}("");
+        (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
         require(callStatus, "O saque falhou.");
     }
 }

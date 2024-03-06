@@ -1,0 +1,69 @@
+import { expect } from 'chai';
+import hh from 'hardhat';
+const { ethers } = hh;
+import APIArtifact from '../build/artifacts/contracts/mock/mockInsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' }
+
+describe('Smart Contract: mockInsuranceAPI', async () => {
+    let APIContract;
+    let signer;
+
+    const APIParams = {
+        owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
+    };
+
+    const insuranceParams = {
+        institutionName: 'Capital Expansion LTDA'
+    };
+
+    beforeEach(async () => {
+        signer = await ethers.getSigner();
+
+        const APIFactory = new ethers.ContractFactory(
+            APIArtifact.abi,
+            APIArtifact.bytecode,
+            signer
+        );
+
+        APIContract = await APIFactory.deploy.apply(
+            APIFactory, Object.values(APIParams)
+        );
+        await APIContract.deployTransaction.wait(1);
+    });
+
+    describe('constructor', async () => {
+        it('Should set the parameters correctly', async () => {
+            await APIContract.im_owner()
+                .then(value => expect(value).to.equal(APIParams.owner));
+        });
+    });
+
+    describe('createInstitution', async () => {
+        it('Should create an Institution correctly', async () => {
+            await expect(
+                await APIContract.createInstitution(insuranceParams.institutionName)
+            ).to.emit(APIContract, 'InstitutionCreated');
+            await APIContract.institutions(APIParams.owner, 0)
+                .then(value => expect(value.length).to.equal(42));
+        });
+    });
+
+    describe('getAllInstitution', async () => {
+        it('Should return all Institutions from data structure', async () => {
+            await APIContract.createInstitution('a');
+            await APIContract.createInstitution('b');
+            await APIContract.createInstitution('c');
+            const data = await APIContract.getAllInstitution();
+
+            expect(data.length).to.equal(3);
+            for (let address of data) {
+                expect(address.length).to.equal(42);
+            }
+        });
+    });
+
+    describe('donate', async () => {
+        it('Should properly associate the donator address with the amount they donated', async () => {
+            
+        })
+    });
+});

@@ -4,22 +4,22 @@ pragma solidity ^0.8.7;
 import "./mockInstitution.sol";
 
 contract InsuranceAPI {
-    // mapping (address => address[]) private institutions; --> Depende da minha escolha na função createInstitution()
-    mapping (address => Institution[]) private institutions;
+    mapping (address => Institution[]) public institutions;
     mapping (address => uint256) public donators;
-    address public immutable i_owner;
+    address[] public donatorsAddresses;
+    address public immutable im_owner;
 
     event InstitutionCreated(address institutionAddress);
 
     modifier owner {
-        if(msg.sender != i_owner) {
+        if(msg.sender != im_owner) {
             revert NotOwner();
         }
         _;
     }
 
     constructor(address _owner){
-        i_owner = _owner;
+        im_owner = _owner;
     }
 
     // Usando o mesmo endereço permite a criação de diversos contratos que representam Instituições
@@ -30,18 +30,23 @@ contract InsuranceAPI {
             msg.sender,
             _institutionName
         );
-        institutions[msg.sender].push(i); // Talvez eu queira apenas amarzenar o endereço. O que for mais fãcil para manipular o contrato futuramente
+        institutions[msg.sender].push(i); // Talvez eu queira apenas armazenar o endereço. O que for mais fãcil para manipular o contrato futuramente
         // usedAddresses.push(msg.sender);
 
         emit InstitutionCreated(address(i));
     }
 
-    function getInstitution(uint256 _index) view public returns(Institution) {
-        return institutions[msg.sender][_index];
+    function getAllInstitution() public view returns (Institution[] memory) {
+        return institutions[msg.sender];
     }
 
     function donate() public payable {
         donators[msg.sender] += msg.value;
+        donatorsAddresses.push(msg.sender);
+    }
+
+    function getAllDonators() public view returns (address[] memory){
+        return donatorsAddresses;
     }
 
     receive() external payable {
@@ -53,7 +58,7 @@ contract InsuranceAPI {
     }
 
     function withdraw() external owner {
-        (bool callStatus, /* bytes memory data */) = payable(i_owner).call{value: address(this).balance}("");
-        require(callStatus, "O saque falhou.");
+        (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
+        require(callStatus, "Withdraw failed.");
     }
 }
