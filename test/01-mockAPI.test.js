@@ -102,7 +102,7 @@ describe('Smart Contract: mockInsuranceAPI', async () => {
         it('Should return all donators from data structure', async () => {
             const signers = await ethers.getSigners()
 
-            for(let i = 0; i < 3; i++) {
+            for(let i = 2; i < 5; i++) {
                 const tx = await signers[i].sendTransaction(
                     {
                         to: APIContract.address,
@@ -113,8 +113,10 @@ describe('Smart Contract: mockInsuranceAPI', async () => {
             }
 
             const data = await APIContract.getAllDonators();
-            
-            console.log(data);
+
+            for(let i = 0; i < 3; i++) {
+                expect(data[i].length).to.equal(42);
+            }
         })
     })
 });
