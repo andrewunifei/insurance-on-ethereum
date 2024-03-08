@@ -161,27 +161,37 @@ describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     })
 
     describe('verify', async () => {
+        const insuranceContractBalance = ethers.utils.parseEther(String(2))
+
         beforeEach(async () => {
             const tx = await signer.sendTransaction(
                 {
                     to: insuranceContract.address,
-                    value: ethers.utils.parseEther(String(2)) // eth --> wei
+                    value: insuranceContractBalance // eth --> wei
                 }
             );
             await tx.wait(1);
         })
         it('Should send the contract balance to the farmer because condition met', async () => {
+            const farmerBalanceBefore = await ethers.provider.getBalance(params.farmer);
+            const expectedValue = farmerBalanceBefore.add(insuranceContractBalance);
+
             await insuranceContract.verifyIndex(1);
-            const farmerBalance = await ethers.provider.getBalance(params.farmer);
-            expect(farmerBalance).to.equal(ethers.utils.parseEther(String(10002)));
+            const farmerBalanceAfter = await ethers.provider.getBalance(params.farmer);
+
+            expect(farmerBalanceAfter).to.equal(expectedValue);
         });
         it('Should send the contract balance to the institution because condition NOT met', async () => {
             const institutionBalanceBefore = await ethers.provider.getBalance(signer.address);
-            await insuranceContract.verifyIndex(11);
+            const expectedValue = institutionBalanceBefore.add(insuranceContractBalance);
+
+            const tx = await insuranceContract.verifyIndex(11);
+            const receipt = await tx.wait();
+            const gasUsed = receipt.gasUsed.mul(receipt.effectiveGasPrice);
             const institutionBalanceAfter = await ethers.provider.getBalance(signer.address);
-            const difference = institutionBalanceAfter - institutionBalanceBefore;
-            const condition = (difference >= ethers.utils.parseEther(String(1.999)) && difference <= ethers.utils.parseEther(String(2)));
-            expect(condition).to.be.true;
+            const balanceCorrected = institutionBalanceAfter.add(gasUsed);
+            
+            expect(balanceCorrected).equal(expectedValue);
         })
     })
 
