@@ -6,6 +6,8 @@ import APIArtifact from '../build/artifacts/contracts/mock/mockInsuranceAPI.sol/
 describe('Smart Contract: mockInsuranceAPI', async () => {
     let APIContract;
     let signer;
+    let gasUsedDeploying;
+    gasUsedDeploying = ethers.BigNumber.from(0);
 
     const APIParams = {
         owner: '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'
@@ -27,7 +29,8 @@ describe('Smart Contract: mockInsuranceAPI', async () => {
         APIContract = await APIFactory.deploy.apply(
             APIFactory, Object.values(APIParams)
         );
-        await APIContract.deployTransaction.wait(1);
+        const receipt = await APIContract.deployTransaction.wait(1);
+        gasUsedDeploying = gasUsedDeploying.add(receipt.gasUsed.mul(receipt.effectiveGasPrice));
     });
 
     describe('constructor', async () => {
@@ -82,7 +85,7 @@ describe('Smart Contract: mockInsuranceAPI', async () => {
             const totalAmountDonated = ethers.utils.parseEther(String(20));
             const data = await APIContract.donators(signer.address);
             expect(data).to.equal(totalAmountDonated);
-        })
+        });
 
         it('Should push the donator address to data structure', async () => {
             const tx = await signer.sendTransaction(
@@ -95,7 +98,7 @@ describe('Smart Contract: mockInsuranceAPI', async () => {
 
             const data = await APIContract.donatorsAddresses(0);
             expect(data.length).to.equal(42);
-        })
+        });
     });
 
     describe('getAllDonators', async () => {
@@ -117,6 +120,32 @@ describe('Smart Contract: mockInsuranceAPI', async () => {
             for(let i = 0; i < 3; i++) {
                 expect(data[i].length).to.equal(42);
             }
-        })
-    })
+        });
+    });
+
+    describe('withdraw', async () => {
+        it('Should withdraw all the funds to the deployer of the API', async () => {
+            const signers = await ethers.getSigners();
+            const totalSent = ethers.utils.parseEther(String(30));
+
+            for(let i = 2; i < 5; i++) {
+                const tx = await signers[i].sendTransaction(
+                    {
+                        to: APIContract.address,
+                        value: ethers.utils.parseEther(String(10))
+                    }
+                );
+                await tx.wait(1);
+            }
+
+            const balanceBefore =  await ethers.provider.getBalance(signer.address);
+            const tx = await APIContract.withdraw();
+            const receipt = await tx.wait();
+            const gasUsed = receipt.gasUsed.mul(receipt.effectiveGasPrice);
+            const balanceAfter = await ethers.provider.getBalance(signer.address);
+            let correction = balanceAfter.add(gasUsed);
+            correction = correction.sub(totalSent);
+            expect(balanceBefore).to.equal(correction);
+        });
+    });
 });
