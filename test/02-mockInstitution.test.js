@@ -119,6 +119,29 @@ describe('Smart Contract: mockInstitution', async () => {
         });
     });
 
+    describe('getAllInsuranceContracts', async () => {
+        it('Should return the addresses of all contracts associated with a farmer address', async () => {
+            for(let i = 0; i < 2; i++){
+                const tx = await signer.sendTransaction(
+                    {
+                        to: institutionContract.address,
+                        value: ethers.utils.parseEther(String(10))
+                    }
+                );
+                await tx.wait(1);
+                await institutionContract.whitelistAddr(farmerAddr);
+                await institutionContract.createInsuranceContract.apply(
+                    institutionContract, Object.values(insuranceContractParams)
+                );
+            };
+            const data = await institutionContract.getAllInsuranceContracts(farmerAddr);
+            expect(data.length).to.equal(2);
+            for(let i = 0; i < data.length; i++){
+                expect(data[0].length).to.equal(42);
+            }
+        })
+    })
+
     describe('withdraw', async () => {
         it('Should withdraw correctly', async () => {
             const valueSent = ethers.utils.parseEther(String(10));

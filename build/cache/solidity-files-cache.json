@@ -685,8 +685,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/Institution.sol": {
-      "lastModificationDate": 1709632252249,
-      "contentHash": "dca5cd3d3ffb2cc0843a7c7698b8b5a8",
+      "lastModificationDate": 1710259598204,
+      "contentHash": "fa8c61f9e4a5df7b74fcbea4f0c8e38d",
       "sourceName": "contracts/Institution.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -724,8 +724,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/InsuranceAPI.sol": {
-      "lastModificationDate": 1709727831280,
-      "contentHash": "36ab92284ee32b359fa56f4ef4768575",
+      "lastModificationDate": 1710258913422,
+      "contentHash": "2454354e3ac8ff2afa5625af6b868952",
       "sourceName": "contracts/InsuranceAPI.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -804,8 +804,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockInstitution.sol": {
-      "lastModificationDate": 1709651949787,
-      "contentHash": "1d5ec493818a22baedb901a01a3636a0",
+      "lastModificationDate": 1710260160441,
+      "contentHash": "d6e1a26ad3f23c717cc18e67344a8b40",
       "sourceName": "contracts/mock/mockInstitution.sol",
       "solcConfig": {
         "version": "0.8.19",

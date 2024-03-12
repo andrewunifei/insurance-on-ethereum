@@ -75,7 +75,7 @@ contract Institution{
         address _farmer,
         uint256 _humidityLimit,
         uint256 _sampleMaxSize,
-        uint256 _reparationValue,
+        uint256 _reparationValue, // Essa variável espera um valor em wei
         uint256 _updateInterval,
         address router,
         uint64 _subscriptionId,
@@ -106,6 +106,13 @@ contract Institution{
         contracts[_farmer].push(c);
 
         emit InsuranceContractCreated(address(c));
+    }
+
+    /**
+     * @notice retorna todos os contratos associados a um fazendeiro
+     */
+    function getAllInsuranceContracts(address _farmerAddress) view public returns (AutomatedFunctionsConsumer[] memory){
+        return contracts[_farmerAddress];
     }
 
     /**

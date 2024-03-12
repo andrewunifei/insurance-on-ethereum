@@ -4,9 +4,9 @@ pragma solidity ^0.8.7;
 import "./Institution.sol";
 
 contract InsuranceAPI {
-    // mapping (address => address[]) private institutions; --> Depende da minha escolha na função createInstitution()
     mapping (address => Institution[]) private institutions;
     mapping (address => uint256) public donators;
+    address[] public donatorsAddresses;
     address public immutable im_owner;
 
     event InstitutionCreated(address institutionAddress);
@@ -36,12 +36,17 @@ contract InsuranceAPI {
         emit InstitutionCreated(address(i));
     }
 
-    function getInstitution(uint256 _index) view public returns(Institution) {
-        return institutions[msg.sender][_index];
+    function getAllInstitution() public view returns (Institution[] memory) {
+        return institutions[msg.sender];
     }
 
-    function donate() private {
+    function donate() public payable {
         donators[msg.sender] += msg.value;
+        donatorsAddresses.push(msg.sender);
+    }
+
+    function getAllDonators() public view returns (address[] memory){
+        return donatorsAddresses;
     }
 
     receive() external payable {
@@ -54,6 +59,6 @@ contract InsuranceAPI {
 
     function withdraw() external owner {
         (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
-        require(callStatus, "O saque falhou.");
+        require(callStatus, "Withdraw failed.");
     }
 }
