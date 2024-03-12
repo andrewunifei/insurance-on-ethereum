@@ -61,7 +61,7 @@ contract Institution{
         address _farmer,
         uint256 _humidityLimit,
         uint256 _sampleMaxSize,
-        uint256 _reparationValue,
+        uint256 _reparationValue, // Essa variável espera um valor em wei
         uint256 _updateInterval,
         // string memory _lat,
         // string memory _lon,
