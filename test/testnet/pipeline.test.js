@@ -29,10 +29,13 @@ describe('(TESTNET) Deployment Pipeline', async () => {
     describe('InsuranceAPI', async () => {
         it('Should deploy the API contract to Sepolia Testnet correctly', async () => {
             const pathToFile = path.resolve('deployed/pipeline-test-API.txt');
-            console.log(pathToFile);
             API = await helpers.fetchAPI(signer, pathToFile, APIArtifact);
+            expect(API.address.length).to.equal(42);
+        });
 
-            console.log(API)
-        })
+        it('Should deploy an Instiution through the API to Sepolia Testnet successfully', async () => {
+            
+        });
     })
+
 })
