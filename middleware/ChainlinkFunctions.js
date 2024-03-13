@@ -61,4 +61,4 @@ async function simulateComputation(source, args, bytesArgs = [], secrets = {}) {
     }
 }
 
-export { createManager, simulateComputation }
+export default { createManager, simulateComputation }

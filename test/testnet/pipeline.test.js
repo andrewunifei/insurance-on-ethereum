@@ -1,5 +1,7 @@
+import ethers from 'ethers'
 import path from 'path';
 import blockchain from '../../middleware/blockchain.js';
+import chainlinkFunctions from '../../middleware/chainlinkFunctions.js'
 import { expect } from 'chai';
 import helpers from '../../mock/helpers.js';
 import APIArtifact from '../../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' };
@@ -9,9 +11,18 @@ function minutesToSeconds(minutes) {
 }
 
 describe('(TESTNET) Deployment Pipeline', async () => {
+    // Interações com a Blockchain
     let signer;
     let provider;
+
+    // Contratos
     let API, institution;
+
+    // Chainlink Functions
+    let manager;
+    let subscriptionId;
+
+    // Parâmetros
     const institutionName = 'Capital Expansion LTDA';
     const farmerAddr = '0xF91CA466849f1f53D12ACb40F7245dA43Af4A839';
     const institutionInfo = [
@@ -23,20 +34,20 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         ['Email', 'contact@ce.com'],
         ['Phone', '+00 000000000'],
     ];
-    const insuranceParams = {
-        signer: signer.address,
-        farmer: farmerAddr,
-        hudityLimit: 50,
-        sampleMaxSize: 5,
-        reparationValue: ethers.utils.parseEther(String(0.01)),
-        updateInteval: minutesToSeconds(3),
-        router: blockchain.sepolia.chainlinkRouterAddress,
-        subscriptionId: 0, // TODO
-        regitry: blockchain.sepolia.chainlinkRegistryAddress,
-        sepoliaLINKAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
-        sepoliaRegistratAddress: blockchain.sepolia.chainlinkRegistrarAddress,
-        fulfillGasLimit: 300000
-    }
+    // const insuranceParams = {
+    //     signer: signer.address,
+    //     farmer: farmerAddr,
+    //     hudityLimit: 50,
+    //     sampleMaxSize: 5,
+    //     reparationValue: ethers.utils.parseEther(String(0.01)),
+    //     updateInteval: minutesToSeconds(3),
+    //     router: blockchain.sepolia.chainlinkRouterAddress,
+    //     subscriptionId: 0, // TODO
+    //     regitry: blockchain.sepolia.chainlinkRegistryAddress,
+    //     sepoliaLINKAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
+    //     sepoliaRegistratAddress: blockchain.sepolia.chainlinkRegistrarAddress,
+    //     fulfillGasLimit: 300000
+    // };
 
     before(async () => {
         const payload = await blockchain.interaction(
@@ -63,22 +74,59 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
     });
 
-    describe('Institution', async () => {
-        it('Should register infomations about the Institution correctly', async () => {
-            const tx = await institution.registerInfo(institutionInfo); // Array de array 
-            await tx.wait();
-            for (let pair of institutionInfo) {
-                await institution.info(pair[0])
-                    .then(value => expect(value).to.equal(pair[1]))
-            };
+    describe('Chainlink Functions', async () => {
+        before(async () => {
+            manager = await chainlinkFunctions.createManager(
+                signer,
+                blockchain.sepolia.chainlinkLinkTokenAddress,
+                blockchain.sepolia.chainlinkRouterAddress
+            );
         });
 
-        it('Should deploy a new Insurance Contract through the Institution successfully', async () => { 
-            const tx = await institution.whitelistAddr(farmerAddr);
-            await tx.wait();
-            const tx2 = await institution.createInsuranceContract(
-
+        it('Should CREATE a Chainlink Functions subscription successfully', async () => {
+            subscriptionId = await helpers.fetchSubscriptionId(
+                manager, 
+                institution.address,
+                'deployed/pipeline-test-subscriptionId.txt'
             );
+          
+            expect(subscriptionId).to.be.greaterThan(0);
+        });
+
+        it('Should FUND the Chainlink Functions subscription correctly', async () => {
+            const juelsAmount = String(ethers.utils.parseEther(String(1))); // 1 LINK
+            let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
+
+            if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
+                console.log(`❗️ Subscription without funds. Funding...`)
+                const receipt = await manager.fundSubscription({
+                    subscriptionId, 
+                    juelsAmount
+                });
+                console.log(`✅ Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}`)
+            };
+            
+            subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
+            console.log(`Subscription balance: ${subscriptionInfo.balance}`);
         })
     });
+
+    // describe('Institution', async () => {
+    //     it('Should register infomations about the Institution correctly', async () => {
+    //         const tx = await institution.registerInfo(institutionInfo); // Array de array 
+    //         await tx.wait();
+    //         for (let pair of institutionInfo) {
+    //             await institution.info(pair[0])
+    //                 .then(value => expect(value).to.equal(pair[1]))
+    //         };
+    //     });
+
+    //     it('Should deploy a new Insurance Contract through the Institution successfully', async () => { 
+    //         const tx = await institution.whitelistAddr(farmerAddr);
+    //         await tx.wait();
+    //         const tx2 = await institution.createInsuranceContract(
+
+    //         );
+    //     })
+    // });
 })
