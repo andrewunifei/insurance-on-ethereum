@@ -105,9 +105,9 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                 });
                 console.log(`✅ Successfully funded Subscription ${subscriptionId} at transaction ${receipt.transactionHash}`)
             };
-            
+
             subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
-            console.log(`Subscription balance: ${subscriptionInfo.balance}`);
+            expect(subscriptionInfo.balance).to.equal(juelsAmount);
         })
     });
 
