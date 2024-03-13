@@ -14,7 +14,7 @@ import insuranceContractArtifact from '../../build/artifacts/contracts/Automated
 describe('(TESTNET) Deployment Pipeline', async () => {
     let signer;
     let provider;
-    let API;
+    let API, institution;
 
     before(async () => {
         const data = await blockchain.interaction(
@@ -34,7 +34,11 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
 
         it('Should deploy an Instiution through the API to Sepolia Testnet successfully', async () => {
-            
+            const pathToFile = path.resolve('deployed/pipeline-test-institution.txt');
+            const institutionName = 'Farmers Association';
+            const data = await helpers.fetchInstitution(signer, API, institutionName, pathToFile);
+            institution = data.institution;
+            expect(institution.address.length).to.equal(42);
         });
     })
 

@@ -40,12 +40,12 @@ function getAPI(APIAddress, signer, APIArtifact){
  * Cria uma instituição a partir do contrato InsuranceAPI
  * O endereço da instituição na rede Ethereum é armazenado em uma lista no InsuranceAPI
  * @param {ethers.BaseContract} API 
- * @param {Object} info Informações para identificar a instituição
+ * @param {Object} name Nome da instituição
  * @returns {ContractTransactionReceipt}
  */
-async function createInstitution(API, info) {
+async function createInstitution(API, name) {
     const tx = await API.createInstitution(
-        info.name
+        name
     )
 
     console.log(`Institution creation: waiting 1 block for transaction ${tx.hash} to be confirmed...`)

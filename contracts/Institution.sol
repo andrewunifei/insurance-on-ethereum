@@ -40,6 +40,10 @@ contract Institution{
     }
 
     /**
+     * Feature não-essencial: update info
+     */
+
+    /**
      * @notice Valida endereço do agricutor (adicionar na lista branca)
      * @param _farmerAddr Endereço da carteira do agricultor 
      */

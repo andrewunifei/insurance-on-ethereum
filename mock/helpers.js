@@ -68,16 +68,24 @@ async function fetchAPI(signer, path, APIArtifact) {
  * @param {string} path
  * @returns {Promise<ethers.BaseContract>}
  */
-async function fetchInstitution(signer, API, info, path) {
+async function fetchInstitution(signer, API, name, path) {
     const filename = path.split("/").slice(-1)[0]
     let institutionAddress = await getAddress(path)
 
     if(institutionAddress.length === 0){
         console.log(`${filename} empty. Creating a new institution...`)
-        const receipt = await APIManager.createInstitution(API, info)
+        const receipt = await APIManager.createInstitution(API, name)
         institutionAddress = receipt.events[0].args[0]
         await fs.writeFile(path, institutionAddress)
         console.log(`✅ New institution created! Its address was saved to ${filename}`)
+
+        const institution = new ethers.Contract(
+            institutionAddress,
+            institutionArtifacts.abi,
+            signer
+        )
+
+        return { institution, receipt }
     }
 
     const institution = new ethers.Contract(
@@ -86,7 +94,7 @@ async function fetchInstitution(signer, API, info, path) {
         signer
     )
 
-    return institution
+    return { institution, receipt: null }
 }
 
 /**
