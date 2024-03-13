@@ -6,10 +6,6 @@ import { expect } from 'chai';
 import helpers from '../../mock/helpers.js';
 import APIArtifact from '../../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' };
 
-function minutesToSeconds(minutes) {
-    return minutes * 60;
-}
-
 describe('(TESTNET) Deployment Pipeline', async () => {
     // Interações com a Blockchain
     let signer;
@@ -40,7 +36,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
     //     hudityLimit: 50,
     //     sampleMaxSize: 5,
     //     reparationValue: ethers.utils.parseEther(String(0.01)),
-    //     updateInteval: minutesToSeconds(3),
+    //     updateInteval: 3 * 60,
     //     router: blockchain.sepolia.chainlinkRouterAddress,
     //     subscriptionId: 0, // TODO
     //     regitry: blockchain.sepolia.chainlinkRegistryAddress,
