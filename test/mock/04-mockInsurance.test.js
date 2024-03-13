@@ -6,7 +6,7 @@ import { buildRequestParameters } from '../../mock/mockController.js'
 import insuranceContractArtifact from '../../build/artifacts/contracts/mock/mockAutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
 import params from '../../mock/mockInsuranceParams.js'
 
-describe('Smart Contract: mockAutomatedFunctionsConsumer', async () => {
+describe('(LOCAL) Smart Contract: mockAutomatedFunctionsConsumer', async () => {
     let insuranceContract;
     let signer;
 

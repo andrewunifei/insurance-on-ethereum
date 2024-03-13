@@ -30,7 +30,7 @@ contract InsuranceAPI {
             msg.sender,
             _institutionName
         );
-        institutions[msg.sender].push(i); // Talvez eu queira apenas amarzenar o endereço. O que for mais fãcil para manipular o contrato futuramente
+        institutions[msg.sender].push(i);
         // usedAddresses.push(msg.sender);
 
         emit InstitutionCreated(address(i));

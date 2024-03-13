@@ -14,7 +14,7 @@ async function decodeEthereumHex(str) {
     return decodedCBOR;
 };
 
-describe('Module: Controller', async () => {
+describe('(LOCAL) Module: Controller', async () => {
     const config = {
         computation: '../rules/computation.js',
         args: ["44.34", "10.99"],

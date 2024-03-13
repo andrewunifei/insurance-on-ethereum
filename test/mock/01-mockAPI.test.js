@@ -3,7 +3,7 @@ import hh from 'hardhat';
 const { ethers } = hh;
 import APIArtifact from '../../build/artifacts/contracts/mock/mockInsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' }
 
-describe('Smart Contract: mockInsuranceAPI', async () => {
+describe('(LOCAL) Smart Contract: mockInsuranceAPI', async () => {
     let APIContract;
     let signer;
     let gasUsedDeploying;

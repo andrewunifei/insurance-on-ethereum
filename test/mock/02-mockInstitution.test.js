@@ -4,7 +4,7 @@ const { ethers } = hh;
 import institutionArtifact from '../../build/artifacts/contracts/mock/mockInstitution.sol/Institution.json' assert { type: 'json' }
 import insuranceContractParams from '../../mock/mockInsuranceParams.js'
 
-describe('Smart Contract: mockInstitution', async () => {
+describe('(LOCAL) Smart Contract: mockInstitution', async () => {
     let institutionContract;
     let signer;
 

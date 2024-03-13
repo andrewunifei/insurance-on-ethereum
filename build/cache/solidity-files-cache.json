@@ -724,8 +724,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/InsuranceAPI.sol": {
-      "lastModificationDate": 1710258913422,
-      "contentHash": "2454354e3ac8ff2afa5625af6b868952",
+      "lastModificationDate": 1710369818278,
+      "contentHash": "fd9356aa9b7e53aa8bd1ee8ca8e707f5",
       "sourceName": "contracts/InsuranceAPI.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -843,8 +843,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockInsuranceAPI.sol": {
-      "lastModificationDate": 1709727507812,
-      "contentHash": "0f59259aa5ed1b2c02a6dc6ea0141f16",
+      "lastModificationDate": 1710369827006,
+      "contentHash": "4f5ed4423ca45070dea56fad225c4664",
       "sourceName": "contracts/mock/mockInsuranceAPI.sol",
       "solcConfig": {
         "version": "0.8.19",
