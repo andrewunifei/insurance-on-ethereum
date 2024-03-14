@@ -10,7 +10,7 @@ contract Institution{
     address immutable public im_owner;
     string public institutionName;
     string[] public infoKeys;
-    mapping (string => string) info;
+    mapping (string => string) public info;
     mapping (address => bool) public whitelist;
     mapping (address => AutomatedFunctionsConsumer[]) public contracts; // Antes era mapping address => address[]
 
