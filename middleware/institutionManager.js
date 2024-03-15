@@ -19,16 +19,16 @@ async function createInsuranceContract(institution, params) {
         params.linkTokenAddress,
         params.registrarAddress,
         params.gaslimit
-    )
+    );
 
     // const tx = await institution.createInsuranceContract.apply(
     //     institution, Object.values(params)
     // );
 
-    console.log(`Insurance Contract creation: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
-    const receipt = tx.wait(1)
+    console.log(`Insurance Contract creation: waiting 1 block for transaction ${tx.hash} to be confirmed...`);
+    const receipt = tx.wait(1);
 
-    return receipt
+    return receipt;
 }
 
 /**

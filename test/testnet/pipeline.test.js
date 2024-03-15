@@ -100,10 +100,10 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             insuranceParams = {
                 signer: signer.address,
                 farmer: farmerAddr,
-                hudityLimit: 50,
+                humidityLimit: 50,
                 sampleMaxSize: 5,
-                reparationValue: BigInt(reparationValue),
-                inteval: 3 * 60,
+                reparationValue,
+                interval: 3 * 60, // 3 Minutos
                 router: blockchain.sepolia.chainlinkRouterAddress,
                 subscriptionId,
                 registryAddress: blockchain.sepolia.chainlinkRegistryAddress,
@@ -138,7 +138,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
 
         it('Should send Ether to the Institution correctly', async () => {
-            const institutionBalance = await institution.contractBalance();
+            let institutionBalance = await institution.contractBalance();
             if(String(institutionBalance) !== String(reparationValue)){
                 const tx = await signer.sendTransaction(
                     {
@@ -147,13 +147,12 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                     }
                 );
                 await tx.wait(1);
-                const institutionBalance = await institution.contractBalance();
+                institutionBalance = await institution.contractBalance();
                 expect(institutionBalance).to.equal(reparationValue);
             }
         });
 
         it('Should deploy a new Insurance Contract through the Institution successfully', async () => {
-            console.log(Object.values(insuranceParams));
             insuranceContract = await helpers.fetchInsuranceContract(
                 signer, 
                 institution, 

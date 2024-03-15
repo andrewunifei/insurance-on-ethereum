@@ -127,7 +127,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     fulfillGasLimit = _fulfillGasLimit;
     sepoliaLINKAddress = _sepoliaLINKAddress;
     sepoliaRegistrarAddress = _sepoliaRegistrarAddress;
-    emit upkeepCreated(address(c_upkeep));
     lastUpkeepTimeStamp = block.timestamp;
   }
 
@@ -138,6 +137,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
       c_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress, upkeepFundAmount); 
       LinkTokenInterface(sepoliaLINKAddress).approve(address(c_upkeep), upkeepFundAmount);
       c_upkeep.fund();
+      emit upkeepCreated(address(c_upkeep));
   }
 
   /**
