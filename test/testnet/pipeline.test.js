@@ -21,6 +21,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
     // Parâmetros
     const institutionName = 'Capital Expansion LTDA';
     const farmerAddr = '0xF91CA466849f1f53D12ACb40F7245dA43Af4A839';
+    const reparationValue = ethers.utils.parseEther(String(0.01));
     const institutionInfo = [
         ['Code', '123456789'],
         ['Full Name', 'Capital Expansion LTDA'],
@@ -101,24 +102,27 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                 farmer: farmerAddr,
                 hudityLimit: 50,
                 sampleMaxSize: 5,
-                reparationValue: ethers.utils.parseEther(String(0.01)),
-                updateInteval: 3 * 60,
+                reparationValue: BigInt(reparationValue),
+                inteval: 3 * 60,
                 router: blockchain.sepolia.chainlinkRouterAddress,
                 subscriptionId,
-                regitry: blockchain.sepolia.chainlinkRegistryAddress,
-                sepoliaLINKAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
-                sepoliaRegistratAddress: blockchain.sepolia.chainlinkRegistrarAddress,
-                fulfillGasLimit: 300000
+                registryAddress: blockchain.sepolia.chainlinkRegistryAddress,
+                linkTokenAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
+                registrarAddress: blockchain.sepolia.chainlinkRegistrarAddress,
+                gaslimit: 300000
             };
         });
 
         it('Should register informations about the Institution correctly', async () => {
-            const tx = await institution.registerInfo(institutionInfo); // Array de array 
-            await tx.wait();
-            for (let pair of institutionInfo) {
-                await institution.info(pair[0])
-                    .then(value => expect(value).to.equal(pair[1]))
-            };
+            const verification = await institution.info('Code');
+            if(verification !== '123456789') {
+                const tx = await institution.registerInfo(institutionInfo); // Array de array 
+                await tx.wait();
+                for (let pair of institutionInfo) {
+                    await institution.info(pair[0])
+                        .then(value => expect(value).to.equal(pair[1]))
+                };
+            }
         });
 
         it('Should whitelist the farmer address successfully', async () => {
@@ -133,14 +137,30 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             expect(addrWhiteListed).to.be.true;
         });
 
-        // it('Should deploy a new Insurance Contract through the Institution successfully', async () => { 
-        //     insuranceContract = await helpers.fetchInsuranceContract(
-        //         signer, 
-        //         institution, 
-        //         insuranceParams,
-        //         'deployed/pipeline-test-insuranceContract.txt'
-        //     )
-        //     expect(insuranceContract.address.length).to.equal(42);
-        // })
+        it('Should send Ether to the Institution correctly', async () => {
+            const institutionBalance = await institution.contractBalance();
+            if(String(institutionBalance) !== String(reparationValue)){
+                const tx = await signer.sendTransaction(
+                    {
+                        to: institution.address,
+                        value: reparationValue
+                    }
+                );
+                await tx.wait(1);
+                const institutionBalance = await institution.contractBalance();
+                expect(institutionBalance).to.equal(reparationValue);
+            }
+        });
+
+        it('Should deploy a new Insurance Contract through the Institution successfully', async () => {
+            console.log(Object.values(insuranceParams));
+            insuranceContract = await helpers.fetchInsuranceContract(
+                signer, 
+                institution, 
+                insuranceParams,
+                'deployed/pipeline-test-insuranceContract.txt'
+            )
+            expect(insuranceContract.address.length).to.equal(42);
+        })
     });
 })
