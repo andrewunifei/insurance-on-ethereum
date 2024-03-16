@@ -54,4 +54,4 @@ async function createInstitution(API, name) {
     return receipt
 }
 
-export { createAPI, getAPI, createInstitution }
+export default { createAPI, getAPI, createInstitution }

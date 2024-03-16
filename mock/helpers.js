@@ -1,10 +1,11 @@
-import * as ethers from 'ethers'
-import * as APIManager from '../middleware/APIManager.js'
-import * as institutionManager from '../middleware/institutionManager.js'
-import * as insuranceContractManager from '../middleware/insuranceContractManager.js'
-import institutionArtifacts from '../build/artifacts/contracts/Institution.sol/Institution.json' assert { type: 'json' }
-import insuranceContractArtifacts from '../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
-import fs from 'node:fs/promises'
+import ethers from 'ethers';
+import APIManager from '../middleware/APIManager.js';
+import institutionManager from '../middleware/institutionManager.js';
+import insuranceContractManager from '../middleware/insuranceContractManager.js';
+import institutionArtifacts from '../build/artifacts/contracts/Institution.sol/Institution.json' assert { type: 'json' };
+import insuranceContractArtifacts from '../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' };
+import upkeepContractArtifacts from '../build/artifacts/contracts/Upkeep.sol/Upkeep.json' assert { type: 'json' };
+import fs from 'node:fs/promises';
 
 /**
  * Lê e retorna o endereço gravado no arquivo de parâmetro.
@@ -154,9 +155,32 @@ async function fetchInsuranceContract(signer, institution, params, path) {
     return insuranceContract
 }
 
+async function fetchUpkeep(signer, insuranceContract, upkeepFundAmount=0, path) {
+    const filename = path.split('/').slice(-1)[0];
+    let upkeepAddress = await getAddress(path);
+
+    if(upkeepAddress.length === 0) {
+        console.log(`${filename} empty. Creating a new upkeep...`);
+        const receipt = await insuranceContractManager.createUpkeep(insuranceContract, upkeepFundAmount);
+        upkeepAddress = receipt.events[0].args[0];
+        await fs.writeFileFile(path, upkeepAddress);
+        console.log(`✅ New Chainlink Functions Upkeep created! Its address was saved to ${filename}`);
+    }
+
+    const upkeepContract = new ethers.Contract(
+        upkeepAddress,
+        upkeepContractArtifacts.abi,
+        signer
+    );
+
+    return upkeepContract;
+}
+
+// ** TODO: Implementar fetchUpkeep() ** <-------- (!!!)
+
 // ** TODO: Implementar essa função usando fs-extra **
 // async function clearAll() {
 
 // }
 
-export default { fetchAPI, fetchInstitution, fetchSubscriptionId, fetchInsuranceContract }
+export default { fetchAPI, fetchInstitution, fetchSubscriptionId, fetchInsuranceContract, fetchUpkeep }

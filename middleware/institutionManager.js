@@ -34,14 +34,14 @@ async function createInsuranceContract(institution, params) {
 /**
  * Adiciona o endereço na rede Ethereum do fazendeiro na lista branca da instituição
  * @param {ethers.BaseContract} institution 
- * @param {string} farmerAddress 
+ * @param {string} farmerAddr 
  * @returns {Object} Recibo da transação
  */
-async function whitelistFarmer(institution, farmerAddress) {
-    const tx = await institution.whitelistAddr(farmerAddress)
+async function whitelistFarmer(institution, farmerAddr) {
+    const tx = await institution.whitelistAddr(farmerAddr)
     console.log(`Adding to whitelist: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
     const receipt = await tx.wait(1)
-    console.log(`✅ Farmer ${farmerAddress} added to whitelist of institution ${institution.address}`)
+    console.log(`✅ Farmer ${farmerAddr} added to whitelist of institution ${institution.address}`)
 
     return receipt
 }
@@ -49,14 +49,14 @@ async function whitelistFarmer(institution, farmerAddress) {
 /**
  * Adiciona o endereço na rede Ethereum do fazendeiro na lista branca da instituição
  * @param {ethers.BaseContract} institution 
- * @param {string} farmerAddress 
+ * @param {string} farmerAddr 
  * @returns {Object} Recibo da transação
  */
-async function blacklistFarmer(institution, farmerAddress) {
-    const tx = await institution.blacklistAddr(farmerAddress)
+async function blacklistFarmer(institution, farmerAddr) {
+    const tx = await institution.blacklistAddr(farmerAddr)
     console.log(`Removing from whitelist: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
     const receipt = await tx.wait(1)
-    console.log(`✅ Farmer ${farmerAddress} removed from whitelist of institution ${institution.address}`)
+    console.log(`✅ Farmer ${farmerAddr} removed from whitelist of institution ${institution.address}`)
 
     return receipt
 }
@@ -81,4 +81,4 @@ async function fundInstitution(signer, institution, amount) {
     return receipt
 }
 
-export { createInsuranceContract, whitelistFarmer, blacklistFarmer, fundInstitution }
+export default { createInsuranceContract, whitelistFarmer, blacklistFarmer, fundInstitution }

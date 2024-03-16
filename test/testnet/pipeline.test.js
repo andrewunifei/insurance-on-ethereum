@@ -4,7 +4,10 @@ import blockchain from '../../middleware/blockchain.js';
 import chainlinkFunctions from '../../middleware/chainlinkFunctions.js'
 import { expect } from 'chai';
 import helpers from '../../mock/helpers.js';
-import APIArtifact from '../../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' };
+import institutionManager from '../../middleware/institutionManager.js'
+import insuranceContractManager from '../../middleware/insuranceContractManager.js'
+import APIArtifacts from '../../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' };
+import LINKArtifacts from '../../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json' assert { type: 'json' };
 
 describe('(TESTNET) Deployment Pipeline', async () => {
     // Interações com a Blockchain
@@ -12,7 +15,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
     let provider;
 
     // Contratos
-    let API, institution, insuranceContract;
+    let API, institution, insuranceContract, upkeep, LINK;
 
     // Chainlink Functions
     let manager;
@@ -46,7 +49,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
     describe('InsuranceAPI', async () => {
         it('Should deploy the API contract to Sepolia Testnet successfully', async () => {
             const pathToFile = path.resolve('deployed/pipeline-test-API.txt');
-            API = await helpers.fetchAPI(signer, pathToFile, APIArtifact);
+            API = await helpers.fetchAPI(signer, pathToFile, APIArtifacts);
             expect(API.address.length).to.equal(42);
         });
 
@@ -129,8 +132,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             let addrWhiteListed = await institution.whitelist(farmerAddr);
 
             if(!addrWhiteListed) {
-                const tx = await institution.whitelistAddr(farmerAddr);
-                await tx.wait();
+                await institutionManager.whitelistFarmer(institution, farmerAddr);
                 addrWhiteListed = await institution.whitelist(farmerAddr);
             }
             
@@ -140,16 +142,10 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         it('Should send Ether to the Institution correctly', async () => {
             let institutionBalance = await institution.contractBalance();
             if(String(institutionBalance) !== String(reparationValue)){
-                const tx = await signer.sendTransaction(
-                    {
-                        to: institution.address,
-                        value: reparationValue
-                    }
-                );
-                await tx.wait(1);
+                await institutionManager.fundInstitution(signer, institution, 0.01);
                 institutionBalance = await institution.contractBalance();
-                expect(institutionBalance).to.equal(reparationValue);
-            }
+            };
+            expect(institutionBalance).to.equal(reparationValue);
         });
 
         it('Should deploy a new Insurance Contract through the Institution successfully', async () => {
@@ -158,8 +154,63 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                 institution, 
                 insuranceParams,
                 'deployed/pipeline-test-insuranceContract.txt'
-            )
+            );
             expect(insuranceContract.address.length).to.equal(42);
         })
+    });
+
+    describe('Insurance Contract', async () => {
+        before(async () => {
+            const LINKFactory = new ethers.ContractFactory(
+                LINKArtifacts.abi,
+                LINKArtifacts.bytecode,
+                signer 
+            );
+            LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress);
+        })
+        it('Should add Insurance Contract to Chainlink Functions subscription', async () => {
+            let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
+            let verification = subscriptionInfo.consumers.includes(insuranceContract.address);
+            if(!verification){
+                await insuranceContractManager.addInsuranceToSub(manager, subscriptionId, insuranceContract.address);
+                subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
+                verification = subscriptionInfo.consumers.includes(insuranceContract.address);
+            };
+            expect(verification).to.be.true;
+        });
+
+        it('Should be properly funded with 10 LINK', async () => {
+            const LINKAmount = ethers.utils.parseEther(String(10)); // eth --> wei
+            let LINKBalance = await LINK.balanceOf(insuranceContract.address);
+            if(LINKBalance.lt(LINKAmount)) {
+                const diff = LINKAmount.sub(LINKBalance);
+                await LINK.transfer(insuranceContract.address, diff);
+            }
+            else if(LINKBalance.gt(LINKAmount)) {
+                const diff = LINKBalance.sub(LINKAmount);
+                console.log(diff);
+                await LINK.approve(institution.address, diff); 
+                await LINK.transferFrom(insuranceContract.address, institution.address, diff);
+            }
+            else {
+                await LINK.transfer(insuranceContract.address, LINKAmount);
+            }
+            LINKBalance = await LINK.balanceOf(insuranceContract.address);
+            expect(LINKBalance).to.equal(LINKAmount);
+        });
+
+        it('Should create an upkeep through Insurance Contract successfully', async () => {
+            const upkeepFundAmount = ethers.utils.parseEther(String(10));
+            const LINKBalance = await LINK.balanceOf(insuranceContract.address);
+            if(String(LINKBalance) === String(upkeepFundAmount)){
+                upkeep = await helpers.fetchUpkeep(
+                    signer, 
+                    insuranceContract, 
+                    upkeepFundAmount, 
+                    'deployed/pipeline-test-upkeep.txt'
+                );
+            };
+            expect(upkeep.address.length).to.equal(42);
+        });
     });
 })
