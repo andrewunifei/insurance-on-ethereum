@@ -9,7 +9,7 @@ async function addInsuranceToSub(manager, subscriptionId, insuranceContractAddr)
 }
 
 async function createUpkeep(insuranceContract, upkeepFundAmount) {
-    const tx = insuranceContract.createUpkeep(upkeepFundAmount);
+    const tx = await insuranceContract.createUpkeep(upkeepFundAmount);
     console.log(`Upkeep Contract creation: waiting 1 block for transaction ${tx.hash} to be confirmed...`);
     const receipt = await tx.wait(1);
 

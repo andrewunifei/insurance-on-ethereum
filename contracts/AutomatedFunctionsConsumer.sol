@@ -130,6 +130,14 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     lastUpkeepTimeStamp = block.timestamp;
   }
 
+  /**
+   * @notice Função para aprovar a movimentação de LINK para fora desse contrato
+   * @param amount Quantidade de LINK que será retirada desse contrato
+   */
+  function approveLINK(uint96 amount) public onlyOwner {
+    LinkTokenInterface(sepoliaLINKAddress).approve(msg.sender, amount);
+  }
+
   // Se eu não me engano eu movi a lógica da criação do upkeep para dentro do contrato
   // porque eu quero que o contrato seja capaz de controlar a upkeep (pausar por exemplo)
   // não sei se é possível fazer isso se a upkeep é criada usando JavaScript

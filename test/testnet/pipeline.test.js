@@ -141,6 +141,8 @@ describe('(TESTNET) Deployment Pipeline', async () => {
 
         it('Should send Ether to the Institution correctly', async () => {
             let institutionBalance = await institution.contractBalance();
+
+            // ARRUMAR ISSO: MESMO PROBLEMA COM A TRANSFERENCIA DE LINK
             if(String(institutionBalance) !== String(reparationValue)){
                 await institutionManager.fundInstitution(signer, institution, 0.01);
                 institutionBalance = await institution.contractBalance();
@@ -188,12 +190,9 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             }
             else if(LINKBalance.gt(LINKAmount)) {
                 const diff = LINKBalance.sub(LINKAmount);
-                console.log(diff);
-                await LINK.approve(institution.address, diff); 
+                console.log(diff)
+                await insuranceContract.approveLINK(diff);
                 await LINK.transferFrom(insuranceContract.address, institution.address, diff);
-            }
-            else {
-                await LINK.transfer(insuranceContract.address, LINKAmount);
             }
             LINKBalance = await LINK.balanceOf(insuranceContract.address);
             expect(LINKBalance).to.equal(LINKAmount);
@@ -202,6 +201,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         it('Should create an upkeep through Insurance Contract successfully', async () => {
             const upkeepFundAmount = ethers.utils.parseEther(String(10));
             const LINKBalance = await LINK.balanceOf(insuranceContract.address);
+            expect(String(LINKBalance) === String(upkeepFundAmount)).to.be.true;
             if(String(LINKBalance) === String(upkeepFundAmount)){
                 upkeep = await helpers.fetchUpkeep(
                     signer, 
@@ -209,8 +209,8 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                     upkeepFundAmount, 
                     'deployed/pipeline-test-upkeep.txt'
                 );
-            };
-            expect(upkeep.address.length).to.equal(42);
+                expect(upkeep.address.length).to.equal(42);
+            }
         });
     });
 })
