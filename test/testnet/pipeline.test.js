@@ -6,6 +6,7 @@ import { expect } from 'chai';
 import helpers from '../../mock/helpers.js';
 import institutionManager from '../../middleware/institutionManager.js'
 import insuranceContractManager from '../../middleware/insuranceContractManager.js'
+import insuranceContractArtifacts from '../../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' };
 import APIArtifacts from '../../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' };
 import LINKArtifacts from '../../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json' assert { type: 'json' };
 
@@ -181,25 +182,26 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             expect(verification).to.be.true;
         });
 
-        it('Should be properly funded with 10 LINK', async () => {
-            const LINKAmount = ethers.utils.parseEther(String(10)); // eth --> wei
+        it('Should be properly funded with 1 LINK', async () => {
+            const LINKAmount = ethers.utils.parseEther(String(1)); // eth --> wei
             let LINKBalance = await LINK.balanceOf(insuranceContract.address);
             if(LINKBalance.lt(LINKAmount)) {
                 const diff = LINKAmount.sub(LINKBalance);
-                await LINK.transfer(insuranceContract.address, diff);
+                const tx = await LINK.transfer(insuranceContract.address, diff);
+                await tx.wait();
             }
             else if(LINKBalance.gt(LINKAmount)) {
                 const diff = LINKBalance.sub(LINKAmount);
-                console.log(diff)
                 await insuranceContract.approveLINK(diff);
-                await LINK.transferFrom(insuranceContract.address, institution.address, diff);
+                const tx = await LINK.transferFrom(insuranceContract.address, signer.address, diff);
+                await tx.wait();
             }
             LINKBalance = await LINK.balanceOf(insuranceContract.address);
             expect(LINKBalance).to.equal(LINKAmount);
         });
 
         it('Should create an upkeep through Insurance Contract successfully', async () => {
-            const upkeepFundAmount = ethers.utils.parseEther(String(10));
+            const upkeepFundAmount = ethers.utils.parseEther(String(1));
             const LINKBalance = await LINK.balanceOf(insuranceContract.address);
             expect(String(LINKBalance) === String(upkeepFundAmount)).to.be.true;
             if(String(LINKBalance) === String(upkeepFundAmount)){
@@ -212,5 +214,13 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                 expect(upkeep.address.length).to.equal(42);
             }
         });
+
+        // it('Should return my LINK funds', async () => {
+        //     const amount = ethers.utils.parseEther(String(1));
+        //     await insuranceContract.approveLINK(amount);
+        //     const tx = await LINK.transferFrom(insuranceContract.address, signer.address, amount);
+        //     const receipt = await tx.wait();
+        //     console.log(receipt);
+        // })
     });
 })

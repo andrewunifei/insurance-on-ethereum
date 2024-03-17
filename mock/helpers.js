@@ -162,8 +162,8 @@ async function fetchUpkeep(signer, insuranceContract, upkeepFundAmount=0, path) 
     if(upkeepAddress.length === 0) {
         console.log(`${filename} empty. Creating a new upkeep...`);
         const receipt = await insuranceContractManager.createUpkeep(insuranceContract, upkeepFundAmount);
-        upkeepAddress = receipt.events[0].args[0];
-        await fs.writeFileFile(path, upkeepAddress);
+        upkeepAddress = receipt.events[receipt.events.length - 1].args[0];
+        await fs.writeFile(path, upkeepAddress);
         console.log(`✅ New Chainlink Functions Upkeep created! Its address was saved to ${filename}`);
     }
 
