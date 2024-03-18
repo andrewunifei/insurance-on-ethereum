@@ -24,6 +24,8 @@ interface UpkeepInterface {
 contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, AutomationCompatibleInterface {
   using FunctionsRequest for FunctionsRequest.Request;
 
+  address public deployer;
+
   // Configuração Chainlink Functions
   bytes   public  requestCBOR; // Concise Binary Object Representation para transferência de dados
   bytes32 public  latestRequestId;
@@ -53,7 +55,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   uint256 public  s_responseCounter;
   uint8   private controlFlag;
 
-  address public  institution;
   address public  farmer;
   address public  upkeepContract;
 
@@ -62,6 +63,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   event Response(bytes32 indexed requestId, bytes response, bytes err);
   event RequestRevertedWithErrorMsg(string reason);
   event RequestRevertedWithoutErrorMsg(bytes data);
+  event LINKsRetrieved(uint256 upkeepId);
 
   // Valores para regras de negócio
   uint256   public  reparationValue;
@@ -116,7 +118,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     address _sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
     uint32 _fulfillGasLimit
   ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
-    institution = _deployer;
+    deployer = _deployer;
     farmer = _farmer;
     humidityLimit = _humidityLimit; 
     sampleMaxSize = _sampleMaxSize;
@@ -138,9 +140,12 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     LinkTokenInterface(sepoliaLINKAddress).approve(msg.sender, amount);
   }
 
-  // Se eu não me engano eu movi a lógica da criação do upkeep para dentro do contrato
-  // porque eu quero que o contrato seja capaz de controlar a upkeep (pausar por exemplo)
-  // não sei se é possível fazer isso se a upkeep é criada usando JavaScript
+  /**
+   * @notice Função para criar um Chainlink Automation Upkeep
+   * @notice A lógica da criação do upkeep estã dentro do contrato 
+   * @notice Isso porque o contrato seja capaz de controlar a upkeep (pausar por exemplo)
+   * @param upkeepFundAmount Os fundos para o funcionamento da Upkeep
+   */
   function createUpkeep(uint96 upkeepFundAmount) public {
       c_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress, upkeepFundAmount); 
       LinkTokenInterface(sepoliaLINKAddress).approve(address(c_upkeep), upkeepFundAmount);
@@ -149,12 +154,19 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   }
 
   /**
-   * @notice Registrando um novo upkeep
+   * @notice Para registrar uma nova Upkeep
    */
   function registerUpkeep(RegistrationParams calldata params) public {
     upkeepId = UpkeepInterface(address(c_upkeep)).register(params);
 
     emit upkeepRegistered(upkeepId);
+  }
+
+  function retrieveLINKs() private {
+    registry.withdrawFunds(upkeepId, deployer);
+    registry.cancelUpkeep(upkeepId);
+
+    emit LINKsRetrieved(upkeepId);
   }
 
   /**
@@ -251,7 +263,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
         emit RequestRevertedWithoutErrorMsg(data);
       }
 
-      registry.pauseUpkeep(upkeepId);
+      retrieveLINKs();
     }
   }
 
@@ -263,7 +275,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     }
     else{
       // Transfere para a conta da instituição
-      (bool sent, /* bytes memory data */) = payable(institution).call{value: address(this).balance}("");
+      (bool sent, /* bytes memory data */) = payable(deployer).call{value: address(this).balance}("");
       require(sent, "Erro ao retornar os fundos para a instituicao");
     }
   }

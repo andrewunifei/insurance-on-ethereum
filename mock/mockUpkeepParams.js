@@ -13,4 +13,4 @@ const upkeepParams = {
     amount: ethers.utils.parseEther(String(5)) // LINK --> Juels
 }
 
-export default upkeepParams
+export default upkeepParams;

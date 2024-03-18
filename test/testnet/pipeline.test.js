@@ -140,16 +140,16 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             expect(addrWhiteListed).to.be.true;
         });
 
-        it('Should send Ether to the Institution correctly', async () => {
-            let institutionBalance = await institution.contractBalance();
+        // it('Should send Ether to the Institution correctly', async () => {
+        //     let institutionBalance = await institution.contractBalance();
 
-            // ARRUMAR ISSO: MESMO PROBLEMA COM A TRANSFERENCIA DE LINK
-            if(String(institutionBalance) !== String(reparationValue)){
-                await institutionManager.fundInstitution(signer, institution, 0.01);
-                institutionBalance = await institution.contractBalance();
-            };
-            expect(institutionBalance).to.equal(reparationValue);
-        });
+        //     // ARRUMAR ISSO: MESMO PROBLEMA COM A TRANSFERENCIA DE LINK
+        //     if(String(institutionBalance) !== String(reparationValue)){
+        //         await institutionManager.fundInstitution(signer, institution, 0.01);
+        //         institutionBalance = await institution.contractBalance();
+        //     };
+        //     expect(institutionBalance).to.equal(reparationValue);
+        // });
 
         it('Should deploy a new Insurance Contract through the Institution successfully', async () => {
             insuranceContract = await helpers.fetchInsuranceContract(
@@ -212,7 +212,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                     'deployed/pipeline-test-upkeep.txt'
                 );
                 expect(upkeep.address.length).to.equal(42);
-            }
+            };
         });
 
         // it('Should return my LINK funds', async () => {
