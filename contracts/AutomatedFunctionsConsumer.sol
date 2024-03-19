@@ -63,7 +63,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   event Response(bytes32 indexed requestId, bytes response, bytes err);
   event RequestRevertedWithErrorMsg(string reason);
   event RequestRevertedWithoutErrorMsg(bytes data);
-  event LINKsRetrieved(uint256 upkeepId);
+  event LINKsRetrieved(uint96 amountRetrieved);
 
   // Valores para regras de negócio
   uint256   public  reparationValue;
@@ -163,10 +163,11 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   }
 
   function retrieveLINKs() private {
+    uint96 upkeepBalance = registry.getBalance(upkeepId);
     registry.withdrawFunds(upkeepId, deployer);
     registry.cancelUpkeep(upkeepId);
 
-    emit LINKsRetrieved(upkeepId);
+    emit LINKsRetrieved(upkeepBalance);
   }
 
   /**

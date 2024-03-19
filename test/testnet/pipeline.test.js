@@ -36,6 +36,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         ['Phone', '+00 000000000'],
     ];
     let insuranceParams;
+    let upkeepParams;
 
     before(async () => {
         const payload = await blockchain.interaction(
@@ -140,16 +141,17 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             expect(addrWhiteListed).to.be.true;
         });
 
-        // it('Should send Ether to the Institution correctly', async () => {
-        //     let institutionBalance = await institution.contractBalance();
+        it('Should send Ether to the Institution correctly', async () => {
+            let institutionBalance = await institution.contractBalance();
 
-        //     // ARRUMAR ISSO: MESMO PROBLEMA COM A TRANSFERENCIA DE LINK
-        //     if(String(institutionBalance) !== String(reparationValue)){
-        //         await institutionManager.fundInstitution(signer, institution, 0.01);
-        //         institutionBalance = await institution.contractBalance();
-        //     };
-        //     expect(institutionBalance).to.equal(reparationValue);
-        // });
+            // ARRUMAR ISSO: MESMO PROBLEMA COM A TRANSFERENCIA DE LINK
+            if(String(institutionBalance) !== String(reparationValue)){
+                const tx = await institutionManager.fundInstitution(signer, institution, 0.01);
+                await tx.wait();
+                institutionBalance = await institution.contractBalance();
+            };
+            expect(institutionBalance).to.equal(reparationValue);
+        });
 
         it('Should deploy a new Insurance Contract through the Institution successfully', async () => {
             insuranceContract = await helpers.fetchInsuranceContract(
@@ -170,7 +172,8 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                 signer 
             );
             LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress);
-        })
+        });
+
         it('Should add Insurance Contract to Chainlink Functions subscription', async () => {
             let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
             let verification = subscriptionInfo.consumers.includes(insuranceContract.address);
@@ -200,19 +203,49 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             expect(LINKBalance).to.equal(LINKAmount);
         });
 
-        it('Should create an upkeep through Insurance Contract successfully', async () => {
-            const upkeepFundAmount = ethers.utils.parseEther(String(1));
-            const LINKBalance = await LINK.balanceOf(insuranceContract.address);
-            expect(String(LINKBalance) === String(upkeepFundAmount)).to.be.true;
-            if(String(LINKBalance) === String(upkeepFundAmount)){
-                upkeep = await helpers.fetchUpkeep(
-                    signer, 
-                    insuranceContract, 
-                    upkeepFundAmount, 
-                    'deployed/pipeline-test-upkeep.txt'
-                );
-                expect(upkeep.address.length).to.equal(42);
-            };
+        describe('Upkeep', async () => {
+            before(async () => {
+                upkeepParams = {
+                    name: 'upkeep-pipeline-test',
+                    encryptedEmail: ethers.utils.hexlify([]),
+                    upkeepContract: insuranceContract.address, // insuranceContractAddress
+                    gasLimit: 300000,
+                    adminAddress: signer.address, // Deployer
+                    triggerType: 0,
+                    checkData: ethers.utils.hexlify([]),
+                    triggerConfig: ethers.utils.hexlify([]),
+                    offchainConfig: ethers.utils.hexlify([]),
+                    amount: ethers.utils.parseEther(String(1)) // LINK --> Juels
+                };
+            });
+
+            it('Should create an upkeep through Insurance Contract successfully and fund it with 1 LINK', async () => {
+                const upkeepFundAmount = ethers.utils.parseEther(String(1));
+                const LINKBalance = await LINK.balanceOf(insuranceContract.address);
+                expect(String(LINKBalance) === String(upkeepFundAmount)).to.be.true;
+                if(String(LINKBalance) === String(upkeepFundAmount)){
+                    upkeep = await helpers.fetchUpkeep(
+                        signer, 
+                        insuranceContract, 
+                        upkeepFundAmount, 
+                        'deployed/pipeline-test-upkeep.txt'
+                    );
+                    expect(upkeep.address.length).to.equal(42);
+                };
+            });
+
+            it('Should register the created upkeep successfully', async () => {
+                // console.log(upkeepParams);
+                // const tx =  await upkeep.register(upkeepParams);
+                // const receipt = await tx.wait();
+                // console.log(receipt);
+                let tx;
+                await expect(
+                    tx = await insuranceContract.registerUpkeep(upkeepParams)
+                ).to.emit(insuranceContract, 'upkeepRegistered'); 
+                const receipt = await tx.wait();
+                console.log(receipt);
+            });
         });
 
         // it('Should return my LINK funds', async () => {
