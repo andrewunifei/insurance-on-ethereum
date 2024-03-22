@@ -26,17 +26,17 @@ contract Upkeep {
         i_amount = amount;
     }
 
-    function fund() public {
-        LinkTokenInterface(i_link).transferFrom(msg.sender, address(this), i_amount);
+    function fund(address caller) public {
+        LinkTokenInterface(i_link).transferFrom(caller, address(this), i_amount);
     } 
 
-    function register(RegistrationParams calldata params) external returns (uint256) {
+    function register(RegistrationParams calldata params, address caller) external returns (uint256) {
         LinkTokenInterface(i_link).approve(i_registrar, params.amount);
 
         uint256 upkeepId = AutomationRegistrarInterface(i_registrar).registerUpkeep(params);
 
         if (upkeepId != 0) {
-            activeUpkeeps[msg.sender].push(upkeepId);
+            activeUpkeeps[caller].push(upkeepId);
 
             return upkeepId;
         } else {

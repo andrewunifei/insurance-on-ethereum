@@ -11,7 +11,7 @@ import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interface
 import "hardhat/console.sol"; // Comentar essa linha 
 
 interface UpkeepInterface {
-  function register(RegistrationParams calldata params) external returns (uint256);
+  function register(RegistrationParams calldata params, address caller) external returns (uint256);
 }
 
 /**
@@ -56,7 +56,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   uint8   private controlFlag;
 
   address public  farmer;
-  address public  upkeepContract;
 
   error UnexpectedRequestID(bytes32 requestId);
 
@@ -90,8 +89,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Reverte se chamado por qualquer um menos o repositório de automação.
    */
   modifier onlyAllowed() {
-      if (msg.sender != owner() && msg.sender != upkeepContract)
-          revert NotAllowedCaller(msg.sender, owner(), upkeepContract);
+      if (msg.sender != owner() && msg.sender != address(c_upkeep))
+          revert NotAllowedCaller(msg.sender, owner(), address(c_upkeep));
       _;
   }
 
@@ -116,7 +115,10 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     address _registry,
     address _sepoliaLINKAddress, // Aqui para LinkTokenInterface
     address _sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
-    uint32 _fulfillGasLimit
+    uint32 _fulfillGasLimit,
+    bytes32 _donID,
+    bytes memory _requestCBOR,
+    string memory _computationJS
   ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
     deployer = _deployer;
     farmer = _farmer;
@@ -130,6 +132,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     sepoliaLINKAddress = _sepoliaLINKAddress;
     sepoliaRegistrarAddress = _sepoliaRegistrarAddress;
     lastUpkeepTimeStamp = block.timestamp;
+    donID = _donID;
+    requestCBOR = _requestCBOR;
+    computationJS = _computationJS;
   }
 
   /**
@@ -149,7 +154,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   function createUpkeep(uint96 upkeepFundAmount) public {
       c_upkeep = new Upkeep(sepoliaLINKAddress, sepoliaRegistrarAddress, upkeepFundAmount); 
       LinkTokenInterface(sepoliaLINKAddress).approve(address(c_upkeep), upkeepFundAmount);
-      c_upkeep.fund();
+      c_upkeep.fund(address(this));
       emit upkeepCreated(address(c_upkeep));
   }
 
@@ -157,7 +162,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Para registrar uma nova Upkeep
    */
   function registerUpkeep(RegistrationParams calldata params) public {
-    upkeepId = UpkeepInterface(address(c_upkeep)).register(params);
+    upkeepId = UpkeepInterface(address(c_upkeep)).register(params, address(this));
 
     emit upkeepRegistered(upkeepId);
   }
@@ -171,30 +176,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   }
 
   /**
-   * @notice Muda o estado do contrato para armazenar o objeto FunctionsRequest.Request codificado em CBOR
-   * @notice Essas informações são enviados para a `performUpkeep` quando esta é chamada
-   * 
-   * @param newRequestCBOR Bytes representando o objeto FunctionsRequest.Request codificado em CBOR
-   * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos para cobranças de requisições
-   * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
-   * @param _donID Novo ID do job
-   * @param _updateInterval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
-   */
-  function setRequest(
-    bytes calldata newRequestCBOR,
-    uint64 _subscriptionId,
-    uint32 _fulfillGasLimit,
-    bytes32 _donID,
-    uint256 _updateInterval
-  ) external onlyOwner {
-    requestCBOR = newRequestCBOR;
-    subscriptionId = _subscriptionId;
-    fulfillGasLimit = _fulfillGasLimit;
-    donID = _donID;
-    updateInterval = _updateInterval;
-  }
-
-  /**
    * @notice Usado por Chainlink Automation para checar se `performUpkeep` deve ser chamada
    */
   function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory performData) {
@@ -203,6 +184,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     return (upkeepNeeded, performData);
   }
 
+  // Testar chamar essa função com outra carteira além do deployer
   /**
    * @notice Chamada por Chainlink Automation para realizar uma requisição através da Chainlink Functions
    */
@@ -281,6 +263,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     }
   }
 
+  // Evento para testes
+  event responseString(string responseAsString);
+
   /**
    * @notice Callback chamada quando a Rede Descentralizada de Oráculos termina a requisição
    *
@@ -292,13 +277,12 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     latestResponse = response;
     latestError = err;
     responseCounter = responseCounter + 1;
+    string memory responseAsString = string(response); 
 
     if(controlFlag == 0){
       // converter para string com abi.encodePacked() se possível com bytes
       // Essa conversão vai depender do tipo de dado retornado
       // Porque se o bytes não representar ASCII a conversão é inútil
-      string memory responseAsString = string(response); 
-  
 
       // Armazena no array as amostras de dados
       sampleStorage.push(responseAsString);
@@ -311,6 +295,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
       verifyIndex(); // remover
     }
 
+    emit responseString(responseAsString);
     emit OCRResponse(requestId, response, err);
   }
 

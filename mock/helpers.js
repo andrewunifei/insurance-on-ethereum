@@ -134,7 +134,7 @@ async function fetchSubscriptionId(manager, institutionAddr, path) {
  * @param {string} path
  * @returns {Promise<ethers.BaseContract>}
  */
-async function fetchInsuranceContract(signer, institution, params, path) {
+async function fetchInsuranceContract(signer, institution, params=null, path) {
     const filename = path.split("/").slice(-1)[0]
     let insuranceContractAddress = await getAddress(path)
 

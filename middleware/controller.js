@@ -1,6 +1,5 @@
 import * as ethers from 'ethers'
 import blockchain from './blockchain.js'
-import insuranceArtifacts from '../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' }
 import {
     SecretsManager,
     simulateScript,
@@ -11,24 +10,12 @@ import {
     CodeLanguage,
 } from '@chainlink/functions-toolkit'
 
-const insuranceContractAddress = '' // Mock value
-
-async function setDonHostedSecrets(secrets, parameters) {
-    const donId = parameters.donId
-    const signer = parameters.signer
-
-    // IMPORTANTE: Esses parâmetros devem ser passados para essa função através de `parameters` 
-    // DON-Hosted Secrets
-    const gatewayUrls = [
-        "https://01.functions-gateway.testnet.chain.link/",
-        "https://02.functions-gateway.testnet.chain.link/"
-    ]
-    const slotId = 0
-    const minutesUntilExpiration = 60
-    // ****************************************************************************************
+ // DON-Hosted Secrets
+async function setDonHostedSecrets(signer, parameters, ) {
+    const { secrets, donId, slotId, minutesUntilExpiration, gatewayUrls } = parameters;
 
     // Request
-    console.log("Initializing setting of DON Hosted Secrets...\n")
+    console.log("Initializing setting of DON Hosted Secrets...\n");
 
     // Encripta a chave da API
     const secretsManager = new SecretsManager(
@@ -37,9 +24,9 @@ async function setDonHostedSecrets(secrets, parameters) {
             functionsRouterAddress: blockchain.sepolia.chainlinkRouterAddress,
             donId
         }
-    )
-    await secretsManager.initialize()
-    const encryptedSecrets = await secretsManager.encryptSecrets(secrets)
+    );
+    await secretsManager.initialize();
+    const encryptedSecrets = await secretsManager.encryptSecrets(secrets);
 
     // Carrega a encriptação para o DON 
     console.log(`Upload encrypted secret to gateways ${gatewayUrls}. slotId ${slotId}. Expiration in minutes: ${expirationTimeMinutes}`)
@@ -50,85 +37,53 @@ async function setDonHostedSecrets(secrets, parameters) {
             slotId,
             minutesUntilExpiration
         }
-    )
+    );
 
-    if(!uploadResult.success){
+    if(!uploadResult.success) {
         throw new Error(`Failed to upload encrypted secrets to ${gatewayUrls}`);
-    }
+    };
     console.log(`\n✅ Secrets uploaded properly to gateways ${gatewayUrls}! Gateways response: `, uploadResult);
 
-    const donHostedSecretsVersion = parseInt(uploadResult.version)
+    const donHostedSecretsVersion = parseInt(uploadResult.version);
     const donHostedEncryptedSecretsReference = secretsManager.buildDONHostedEncryptedSecretsReference(
         {
             slotId,
             version: donHostedSecretsVersion
         }
-    )
+    );
 
-    return donHostedEncryptedSecretsReference
+    return donHostedEncryptedSecretsReference;
 }
 
-async function buildRequestParameters(config) {
-    /*
-        IMPORTANTE: As partes comentadas dizem respeito a mecânica antiga
-        que buscava um contrato já instanciado 
-        e após a construção do CBOR imediatamente chamava a setRequest do contrato
-    */
+async function buildRequestParameters(signer, config, donParams={}) {
+    let donHostedEncryptedSecretsReference;
+    let secretsLocation;
 
-    // const explorerUrl = blockchain.sepoliaExplorerURL
-    const { signer } = await blockchain.interaction(
-        process.env.HARDHAT_ACCOUNT_PRIVATE_KEY,
-        process.env.HARDHAT_RPC_URL
-    )
-
-    // IMPORTANTE: Esses parâmetros devem ser passados para essa função, e não definidos por ela
-    // const computation = '../rules/computation.js'
-    // const args = ["44.34", "10.99"]
-    // const gasLimit = 300000
-    // const secrets = { apiKey: process.env.OPEN_WEATHER_API_KEY }
-    // const donId = 'fun-ethereum-sepolia-1'
-    // *****************************************************************************************
-
-    const parameters = {
-        donId: config.donId,
-        signer
+    if(Object.keys(donParams).length !== 0) {
+        donHostedEncryptedSecretsReference = await setDonHostedSecrets(signer, donParams,);
+        secretsLocation = Location.DONHosted;
     }
-
-    const donHostedEncryptedSecretsReference = await setDonHostedSecrets(config.secrets, parameters)
+    else {
+        donHostedEncryptedSecretsReference = null;
+        secretsLocation = null;
+    }
 
     const requestCBOR = buildRequestCBOR(
         {
             codeLocation: Location.Inline,
             codeLanguage: CodeLanguage.JavaScript,
-            secretsLocation: Location.DONHosted,
-            source: config.computation,
+            secretsLocation,
+            source: config.computationPath,
             encryptedSecretsReference: donHostedEncryptedSecretsReference,
-            args: config.args,
-            bytesArgs: []
+            args: config.args | null,
+            bytesArgs: null
         }
-    )
+    );
 
     return { 
         requestCBOR,
-        subscriptionId: config.subscriptionId,
-        gasLimit,
-        formatedDonId: ethers.utils.formatBytes32String(config.donId)
-     }
-
-    // const insuranceContract = new ethers.Contract(
-    //     insuranceContractAddress,
-    //     insuranceArtifacts.abi, 
-    //     signer
-    // )
-    //
-    // const tx = insuranceContract.setRequest(
-    //     requestCBOR,
-    //     subscriptionId,
-    //     gasLimit: config.gasLimit,
-    //     ethers.utils.formatBytes32String(donId)
-    // )
-
-    // console.log(`\n✅ Automated Functions request settings updated! Transaction hash ${tx.hash} - Check the explorer ${explorerUrl}/tx/${tx.hash}`);
+        formatedDonId: ethers.utils.formatBytes32String(donParams.donId)
+     };
 }
 
-export { buildRequestParameters }
+export default { buildRequestParameters }

@@ -61,6 +61,11 @@
           "internalType": "struct RegistrationParams",
           "name": "params",
           "type": "tuple"
+        },
+        {
+          "internalType": "address",
+          "name": "caller",
+          "type": "address"
         }
       ],
       "name": "register",

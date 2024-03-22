@@ -5,10 +5,12 @@ import chainlinkFunctions from '../../middleware/chainlinkFunctions.js'
 import { expect } from 'chai';
 import helpers from '../../mock/helpers.js';
 import institutionManager from '../../middleware/institutionManager.js'
-import insuranceContractManager from '../../middleware/insuranceContractManager.js'
-import insuranceContractArtifacts from '../../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' };
 import APIArtifacts from '../../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' };
 import LINKArtifacts from '../../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json' assert { type: 'json' };
+import fsSync from 'node:fs';
+import buildRequestParameters from '../../middleware/controller.js';
+import config from '../../mock/mockBuildRequestConfig.js';
+import donParams from '../../mock/mockDonParams.js'
 
 describe('(TESTNET) Deployment Pipeline', async () => {
     // Interações com a Blockchain
@@ -73,17 +75,18 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
 
         it('Should CREATE a Chainlink Functions subscription successfully', async () => {
+            const pathToFile = path.resolve('deployed/pipeline-test-subscriptionId.txt');
             subscriptionId = await helpers.fetchSubscriptionId(
                 manager, 
                 institution.address,
-                'deployed/pipeline-test-subscriptionId.txt'
+                pathToFile
             );
           
             expect(subscriptionId).to.be.greaterThan(0);
         });
 
         it('Should FUND the Chainlink Functions subscription correctly', async () => {
-            const juelsAmount = String(ethers.utils.parseEther(String(1))); // 1 LINK
+            const juelsAmount = String(ethers.utils.parseEther(String(10))); // 1 LINK
             let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
 
             if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
@@ -102,6 +105,14 @@ describe('(TESTNET) Deployment Pipeline', async () => {
 
     describe('Institution', async () => {
         before(async () => {
+            const payload = await buildRequestParameters(
+                signer, 
+                config,
+                donParams
+            );
+            const donId = paylaod.formatedDonId;
+            const requestCBOR = payload.requestCBOR
+            const computationJS = '';
             insuranceParams = {
                 signer: signer.address,
                 farmer: farmerAddr,
@@ -114,7 +125,10 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                 registryAddress: blockchain.sepolia.chainlinkRegistryAddress,
                 linkTokenAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
                 registrarAddress: blockchain.sepolia.chainlinkRegistrarAddress,
-                gaslimit: 300000
+                gaslimit: 300000,
+                donId,
+                requestCBOR,
+                computationJS
             };
         });
 
@@ -142,15 +156,18 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
 
         it('Should send Ether to the Institution correctly', async () => {
-            let institutionBalance = await institution.contractBalance();
+            const pathToFile = path.resolve('deployed/pipeline-test-insuranceContract.txt');
+            const exists = fsSync.existsSync(pathToFile);
+            if(!exists) {
+                let institutionBalance = await institution.contractBalance();
 
-            // ARRUMAR ISSO: MESMO PROBLEMA COM A TRANSFERENCIA DE LINK
-            if(String(institutionBalance) !== String(reparationValue)){
-                const tx = await institutionManager.fundInstitution(signer, institution, 0.01);
-                await tx.wait();
-                institutionBalance = await institution.contractBalance();
+                // ARRUMAR ISSO: MESMO PROBLEMA COM A TRANSFERENCIA DE LINK
+                if(String(institutionBalance) !== String(reparationValue)){
+                    await institutionManager.fundInstitution(signer, institution, 0.01);
+                    institutionBalance = await institution.contractBalance();
+                };
+                expect(institutionBalance).to.equal(reparationValue);
             };
-            expect(institutionBalance).to.equal(reparationValue);
         });
 
         it('Should deploy a new Insurance Contract through the Institution successfully', async () => {
@@ -161,7 +178,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                 'deployed/pipeline-test-insuranceContract.txt'
             );
             expect(insuranceContract.address.length).to.equal(42);
-        })
+        });
     });
 
     describe('Insurance Contract', async () => {
@@ -185,8 +202,8 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             expect(verification).to.be.true;
         });
 
-        it('Should be properly funded with 1 LINK', async () => {
-            const LINKAmount = ethers.utils.parseEther(String(1)); // eth --> wei
+        it('Should be properly funded with 10 LINK', async () => {
+            const LINKAmount = ethers.utils.parseEther(String(10)); // eth --> wei
             let LINKBalance = await LINK.balanceOf(insuranceContract.address);
             if(LINKBalance.lt(LINKAmount)) {
                 const diff = LINKAmount.sub(LINKBalance);
@@ -215,12 +232,12 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                     checkData: ethers.utils.hexlify([]),
                     triggerConfig: ethers.utils.hexlify([]),
                     offchainConfig: ethers.utils.hexlify([]),
-                    amount: ethers.utils.parseEther(String(1)) // LINK --> Juels
+                    amount: ethers.utils.parseEther(String(10)) // LINK --> Juels
                 };
             });
 
-            it('Should create an upkeep through Insurance Contract successfully and fund it with 1 LINK', async () => {
-                const upkeepFundAmount = ethers.utils.parseEther(String(1));
+            it('Should create an upkeep through Insurance Contract successfully and fund it with 10 LINK', async () => {
+                const upkeepFundAmount = ethers.utils.parseEther(String(10));
                 const LINKBalance = await LINK.balanceOf(insuranceContract.address);
                 expect(String(LINKBalance) === String(upkeepFundAmount)).to.be.true;
                 if(String(LINKBalance) === String(upkeepFundAmount)){
@@ -235,25 +252,12 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             });
 
             it('Should register the created upkeep successfully', async () => {
-                // console.log(upkeepParams);
-                // const tx =  await upkeep.register(upkeepParams);
-                // const receipt = await tx.wait();
-                // console.log(receipt);
                 let tx;
                 await expect(
                     tx = await insuranceContract.registerUpkeep(upkeepParams)
                 ).to.emit(insuranceContract, 'upkeepRegistered'); 
-                const receipt = await tx.wait();
-                console.log(receipt);
+                await tx.wait();
             });
         });
-
-        // it('Should return my LINK funds', async () => {
-        //     const amount = ethers.utils.parseEther(String(1));
-        //     await insuranceContract.approveLINK(amount);
-        //     const tx = await LINK.transferFrom(insuranceContract.address, signer.address, amount);
-        //     const receipt = await tx.wait();
-        //     console.log(receipt);
-        // })
     });
 })
