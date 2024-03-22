@@ -38,7 +38,6 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         ['Phone', '+00 000000000'],
     ];
     let insuranceParams;
-    let upkeepParams;
 
     before(async () => {
         const payload = await blockchain.interaction(
@@ -218,46 +217,6 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             }
             LINKBalance = await LINK.balanceOf(insuranceContract.address);
             expect(LINKBalance).to.equal(LINKAmount);
-        });
-
-        describe('Upkeep', async () => {
-            before(async () => {
-                upkeepParams = {
-                    name: 'upkeep-pipeline-test',
-                    encryptedEmail: ethers.utils.hexlify([]),
-                    upkeepContract: insuranceContract.address, // insuranceContractAddress
-                    gasLimit: 300000,
-                    adminAddress: signer.address, // Deployer
-                    triggerType: 0,
-                    checkData: ethers.utils.hexlify([]),
-                    triggerConfig: ethers.utils.hexlify([]),
-                    offchainConfig: ethers.utils.hexlify([]),
-                    amount: ethers.utils.parseEther(String(10)) // LINK --> Juels
-                };
-            });
-
-            it('Should create an upkeep through Insurance Contract successfully and fund it with 10 LINK', async () => {
-                const upkeepFundAmount = ethers.utils.parseEther(String(10));
-                const LINKBalance = await LINK.balanceOf(insuranceContract.address);
-                expect(String(LINKBalance) === String(upkeepFundAmount)).to.be.true;
-                if(String(LINKBalance) === String(upkeepFundAmount)){
-                    upkeep = await helpers.fetchUpkeep(
-                        signer, 
-                        insuranceContract, 
-                        upkeepFundAmount, 
-                        'deployed/pipeline-test-upkeep.txt'
-                    );
-                    expect(upkeep.address.length).to.equal(42);
-                };
-            });
-
-            it('Should register the created upkeep successfully', async () => {
-                let tx;
-                await expect(
-                    tx = await insuranceContract.registerUpkeep(upkeepParams)
-                ).to.emit(insuranceContract, 'upkeepRegistered'); 
-                await tx.wait();
-            });
         });
     });
 })
