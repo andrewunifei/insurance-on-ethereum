@@ -15,7 +15,7 @@ interface IAutomationRegistryConsumer {
 }
 
 /**
- * @notive Upkeep parameters
+ * @notice Upkeep parameters
  */
 struct RegistrationParams {
     string  name;

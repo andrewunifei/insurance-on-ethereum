@@ -9,4 +9,4 @@ const donParams = {
     ]
 };
 
-export default { donParams };
+export { donParams };

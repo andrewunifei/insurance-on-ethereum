@@ -1,4 +1,6 @@
 import * as ethers from 'ethers'
+import fs from 'node:fs/promises';
+import path from 'path';
 import blockchain from './blockchain.js'
 import {
     SecretsManager,
@@ -11,7 +13,7 @@ import {
 } from '@chainlink/functions-toolkit'
 
  // DON-Hosted Secrets
-async function setDonHostedSecrets(signer, parameters, ) {
+async function setDonHostedSecrets(signer, parameters) {
     const { secrets, donId, slotId, minutesUntilExpiration, gatewayUrls } = parameters;
 
     // Request
@@ -29,7 +31,7 @@ async function setDonHostedSecrets(signer, parameters, ) {
     const encryptedSecrets = await secretsManager.encryptSecrets(secrets);
 
     // Carrega a encriptação para o DON 
-    console.log(`Upload encrypted secret to gateways ${gatewayUrls}. slotId ${slotId}. Expiration in minutes: ${expirationTimeMinutes}`)
+    console.log(`Upload encrypted secret to gateways ${gatewayUrls}. slotId ${slotId}. Expiration in minutes: ${minutesUntilExpiration}`)
     const uploadResult = await secretsManager.uploadEncryptedSecretsToDON(
         {
             encryptedSecretsHexstring: encryptedSecrets.encryptedSecrets,
@@ -60,7 +62,7 @@ async function buildRequestParameters(signer, config, donParams={}) {
     let secretsLocation;
 
     if(Object.keys(donParams).length !== 0) {
-        donHostedEncryptedSecretsReference = await setDonHostedSecrets(signer, donParams,);
+        donHostedEncryptedSecretsReference = await setDonHostedSecrets(signer, donParams);
         secretsLocation = Location.DONHosted;
     }
     else {
@@ -68,14 +70,18 @@ async function buildRequestParameters(signer, config, donParams={}) {
         secretsLocation = null;
     }
 
+    const pathToFile = path.resolve(config.computationPath);
+    const readSource = await fs.readFile(pathToFile);
+    const source = readSource.toString();
+
     const requestCBOR = buildRequestCBOR(
         {
             codeLocation: Location.Inline,
-            codeLanguage: CodeLanguage.JavaScript,
             secretsLocation,
-            source: config.computationPath,
+            codeLanguage: CodeLanguage.JavaScript,
+            source,
             encryptedSecretsReference: donHostedEncryptedSecretsReference,
-            args: config.args | null,
+            args: config.args,
             bytesArgs: null
         }
     );

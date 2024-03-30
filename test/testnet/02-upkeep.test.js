@@ -1,27 +1,41 @@
 import ethers from 'ethers';
 import { expect } from 'chai';
+import blockchain from '../../middleware/blockchain.js';
 import helpers from '../../mock/helpers.js';
 import path from 'path';
 import fs from 'node:fs/promises';
 import LINKArtifacts from '../../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json' assert { type: 'json' };
 import insuranceContractArtifacts from '../../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' };
+import upkeepContractArtifacts from '../../build/artifacts/contracts/Upkeep.sol/Upkeep.json' assert { type: 'json' };
+import fsSync from 'node:fs';
 
 describe('(CHAINLINK) Upkeep', async () => {
+    // Interação com a blockchain
+    let signer;
+
     // Parametros
     let upkeepParams;
 
     // Contratos
-    let LINK, insuranceContract;
+    let LINK, insuranceContract, upkeep;
 
     before(async () => {
-        const buffer = await fs.readFile(path)
-        const insuranceContractAddress = buffer.toString()
+        const pathToFile = path.resolve('deployed/pipeline-test-insuranceContract.txt');
+        const buffer = await fs.readFile(pathToFile);
+        const insuranceContractAddress = buffer.toString();
+
+        const payload = await blockchain.interaction(
+            process.env.SEPOLIA_ACCOUNT_PRIVATE_KEY,
+            process.env.ETHEREUM_SEPOLIA_RPC_URL
+        );
+
+        signer = payload.signer;
 
         upkeepParams = {
-            name: 'upkeep-pipeline-test',
+            name: 'automation-of-project-test-1',
             encryptedEmail: ethers.utils.hexlify([]),
             upkeepContract: insuranceContractAddress, // insuranceContractAddress
-            gasLimit: 300000,
+            gasLimit: 2000000,
             adminAddress: signer.address, // Deployer
             triggerType: 0,
             checkData: ethers.utils.hexlify([]),
@@ -45,17 +59,21 @@ describe('(CHAINLINK) Upkeep', async () => {
     });
 
     it('Should create an upkeep through Insurance Contract successfully and fund it with 10 LINK', async () => {
-        const LINKAmount = ethers.utils.parseEther(String(10));
-        const LINKBalance = await LINK.balanceOf(insuranceContract.address);
-        expect(String(LINKBalance) === String(LINKAmount)).to.be.true;
-        if(String(LINKBalance) === String(LINKAmount)){
-            upkeep = await helpers.fetchUpkeep(
-                signer, 
-                insuranceContract, 
-                LINKAmount, 
-                'deployed/pipeline-test-upkeep.txt'
-            );
-            expect(upkeep.address.length).to.equal(42);
+        const pathToFile = path.resolve('deployed/pipeline-test-upkeep.txt');
+        const exists = fsSync.existsSync(pathToFile);
+        if(!exists) {
+            const LINKAmount = ethers.utils.parseEther(String(10));
+            const LINKBalance = await LINK.balanceOf(insuranceContract.address);
+            expect(String(LINKBalance) === String(LINKAmount)).to.be.true;
+            if(String(LINKBalance) === String(LINKAmount)){
+                upkeep = await helpers.fetchUpkeep(
+                    signer, 
+                    insuranceContract, 
+                    LINKAmount, 
+                    'deployed/pipeline-test-upkeep.txt'
+                );
+                expect(upkeep.address.length).to.equal(42);
+            };
         };
     });
 

@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/AutomatedFunctionsConsumer.sol": {
-      "lastModificationDate": 1711040845164,
-      "contentHash": "e80788d8b9fe773b3a0df0e8edc399a5",
+      "lastModificationDate": 1711823741407,
+      "contentHash": "4d9234b00fc0525670c05b233a46fb67",
       "sourceName": "contracts/AutomatedFunctionsConsumer.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -36,8 +36,7 @@
         "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol",
         "./AutomationUtils.sol",
         "./Upkeep.sol",
-        "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol",
-        "hardhat/console.sol"
+        "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol"
       ],
       "versionPragmas": [
         "^0.8.7"
@@ -685,8 +684,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/Institution.sol": {
-      "lastModificationDate": 1711042127766,
-      "contentHash": "79d38ed04c86ccd765064f9dba6a257d",
+      "lastModificationDate": 1711820086587,
+      "contentHash": "dfffe486cbe16f0c2236ab377e48ad2f",
       "sourceName": "contracts/Institution.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -724,8 +723,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/InsuranceAPI.sol": {
-      "lastModificationDate": 1710369818278,
-      "contentHash": "fd9356aa9b7e53aa8bd1ee8ca8e707f5",
+      "lastModificationDate": 1711145167150,
+      "contentHash": "c617ea4e4784827645dccc0506af5105",
       "sourceName": "contracts/InsuranceAPI.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -881,8 +880,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/AutomationUtils.sol": {
-      "lastModificationDate": 1706024275196,
-      "contentHash": "ead50125269d352ae9dd2e606c85d3e8",
+      "lastModificationDate": 1711370917020,
+      "contentHash": "03e29d82ff9991c336966bd6e3adcae3",
       "sourceName": "contracts/AutomationUtils.sol",
       "solcConfig": {
         "version": "0.8.19",

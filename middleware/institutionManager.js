@@ -14,11 +14,14 @@ async function createInsuranceContract(institution, params) {
         params.reparationValue,
         params.interval,
         params.router,
-        params.subscriptionId,
+        //params.subscriptionId,
         params.registryAddress,
         params.linkTokenAddress,
         params.registrarAddress,
-        params.gaslimit
+        params.gaslimit,
+        params.donId
+        // params.requestCBOR,
+        // params.computationJS
     );
 
     // const tx = await institution.createInsuranceContract.apply(

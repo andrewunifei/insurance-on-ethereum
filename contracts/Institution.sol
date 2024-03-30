@@ -70,14 +70,14 @@ contract Institution{
         // string memory _lat,
         // string memory _lon,
         address router,
-        uint64 _subscriptionId,
+        //uint64 _subscriptionId,
         address _registry, //Era: IAutomationRegistryConsumer _registry
         address _sepoliaLINKAddress,
         address _sepoliaRegistrarAddress,
         uint32 _fulfillGasLimit,
-        bytes23 _donID,
-        bytes memory _requestCBOR,
-        string memory _computationJS    
+        bytes32 _donID
+        // bytes memory _requestCBOR,
+        // string memory _computationJS    
     ) external {
         require(whitelist[_farmer], "Endereco nao esta na lista branca");
         // require(_reparationValue <= address(this).balance, "Sem fundos suficiente para financiar o contrato");
@@ -92,14 +92,14 @@ contract Institution{
             _reparationValue,
             _updateInterval,
             router,
-            _subscriptionId,
+            //_subscriptionId,
             _registry,
             _sepoliaLINKAddress,
             _sepoliaRegistrarAddress,
             _fulfillGasLimit,
-            _donID,
-            _requestCBOR,
-            _computationJS            
+            _donID
+            // _requestCBOR,
+            // _computationJS            
         );
         contracts[_farmer].push(c);
 

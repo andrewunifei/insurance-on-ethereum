@@ -13,11 +13,18 @@ async function main() {
         insuranceContractArtifacts.abi,
         provider
     );
-    const topic = 'responseString';
+    // const topic = 'OCRResponse';
+    const topic = 'asNum';
 
-    console.log(`\n🌀 Listening for events on topic \"${topic}\"...\n`);
-    insuranceContract.on(topic, (response) => {
-        console.log(response);
+    console.log(`\n🌀 Listening for events on topic \"${topic}\" for Insurance Contract ${insuranceContractAddress}...\n`);
+    insuranceContract.on(topic, (requestId, result, err, event) => {
+        const res = {
+            requestId,
+            result,
+            err,
+            data: event
+        };
+        console.log(JSON.stringify(res));
     });
 }
 

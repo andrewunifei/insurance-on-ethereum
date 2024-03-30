@@ -8,7 +8,8 @@ import {AutomationCompatibleInterface} from "@chainlink/contracts/src/v0.8/autom
 import {IAutomationRegistryConsumer, RegistrationParams} from "./AutomationUtils.sol";
 import {Upkeep} from "./Upkeep.sol";
 import {LinkTokenInterface} from "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol";
-import "hardhat/console.sol"; // Comentar essa linha 
+import "@openzeppelin/contracts/utils/Strings.sol";
+// import "hardhat/console.sol"; // Comentar essa linha 
 
 interface UpkeepInterface {
   function register(RegistrationParams calldata params, address caller) external returns (uint256);
@@ -42,7 +43,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   Upkeep  public  c_upkeep;
   uint256 public  upkeepId;
   bytes   public  request;
-  uint32  public  gasLimit;
+  // uint32  public  gasLimit;
   bytes32 public  donID;
   uint256 public  lastUpkeepTimeStamp;
   uint256 public  upkeepCounter;
@@ -50,7 +51,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   bytes32 public  s_lastRequestId;
   bytes   public  s_lastResponse;
   bytes   public  s_lastError;
-  uint256 public  s_upkeepCounter;
   uint256 public  s_requestCounter;
   uint256 public  s_responseCounter;
   uint8   private controlFlag;
@@ -69,7 +69,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   uint256   public  humidityLimit;
   uint256   public  sampleMaxSize;
   string[]  public  sampleStorage;
-  string    private computationJS; // calculo da computacao do indice
+  string    private metricJS; // calculo da computacao do indice
 
   // Variável para armazenar a média das amostras
   uint256 private mean;
@@ -79,7 +79,15 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
         address caller,
         address owner,
         address automationRegistry
-    );
+  );
+
+  // event notAllowed(
+  //       address caller,
+  //       address owner,
+  //       address automationRegistry
+  // );
+
+  event sender(address sndr);
 
   event OCRResponse(bytes32 indexed requestId, bytes result, bytes err);
   event upkeepRegistered(uint256 upkeepId);
@@ -89,8 +97,10 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @notice Reverte se chamado por qualquer um menos o repositório de automação.
    */
   modifier onlyAllowed() {
-      if (msg.sender != owner() && msg.sender != address(c_upkeep))
-          revert NotAllowedCaller(msg.sender, owner(), address(c_upkeep));
+      if (msg.sender != owner() && msg.sender != address(c_upkeep) && msg.sender != address(this)){
+        //emit notAllowed(msg.sender, owner(), address(c_upkeep));
+        revert NotAllowedCaller(msg.sender, owner(), address(c_upkeep));
+      }
       _;
   }
 
@@ -99,7 +109,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    *
    * @param _humidityLimit O índice limite de comparação
    * @param router O contrato do oráculo interface do Chainlink Functions
-   * @param _subscriptionId O ID da subscrição na Rede Descentralizada de Oráculos (DON) para cobranças de requisições
    * @param _fulfillGasLimit Máximo de gás permitido para chamar a função `handleOracleFulfillment`
    * @param _updateInterval O intervalo de tempo que a Chainlink Automation deve chamar a `performUpkeep`
    */
@@ -111,14 +120,14 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     uint256 _reparationValue,
     uint256 _updateInterval,
     address router,
-    uint64 _subscriptionId,
+    //uint64 _subscriptionId,
     address _registry,
     address _sepoliaLINKAddress, // Aqui para LinkTokenInterface
     address _sepoliaRegistrarAddress, // Aqui para AutomationRegistrarInterface
     uint32 _fulfillGasLimit,
     bytes32 _donID,
-    bytes memory _requestCBOR,
-    string memory _computationJS
+    // bytes memory _requestCBOR
+    string memory _metricJS
   ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
     deployer = _deployer;
     farmer = _farmer;
@@ -126,15 +135,20 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
     updateInterval = _updateInterval;
-    subscriptionId = _subscriptionId;
+    //subscriptionId = _subscriptionId;
     registry = IAutomationRegistryConsumer(_registry);
     fulfillGasLimit = _fulfillGasLimit;
     sepoliaLINKAddress = _sepoliaLINKAddress;
     sepoliaRegistrarAddress = _sepoliaRegistrarAddress;
     lastUpkeepTimeStamp = block.timestamp;
     donID = _donID;
+    // requestCBOR = _requestCBOR;
+    metricJS = _metricJS;
+  }
+
+  function setCBOR(bytes memory _requestCBOR, uint64 _subscriptionId) external {
     requestCBOR = _requestCBOR;
-    computationJS = _computationJS;
+    subscriptionId = _subscriptionId;
   }
 
   /**
@@ -167,42 +181,54 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     emit upkeepRegistered(upkeepId);
   }
 
-  function retrieveLINKs() private {
-    uint96 upkeepBalance = registry.getBalance(upkeepId);
-    registry.withdrawFunds(upkeepId, deployer);
-    registry.cancelUpkeep(upkeepId);
+  // function retrieveLINKs() private {
+  //   uint96 upkeepBalance = registry.getBalance(upkeepId);
+  //   registry.withdrawFunds(upkeepId, deployer);
+  //   registry.cancelUpkeep(upkeepId);
 
-    emit LINKsRetrieved(upkeepBalance);
-  }
+  //   emit LINKsRetrieved(upkeepBalance);
+  // }
 
+  event performCalled(uint256 counter);
   /**
    * @notice Usado por Chainlink Automation para checar se `performUpkeep` deve ser chamada
    */
-  function checkUpkeep(bytes memory) public view override returns (bool upkeepNeeded, bytes memory performData) {
+  function checkUpkeep(
+    bytes calldata /* checkData */
+  )
+    external
+    view
+    override
+    returns (bool upkeepNeeded, bytes memory /* performData */)
+  {
     upkeepNeeded = (block.timestamp - lastUpkeepTimeStamp) > updateInterval;
-
-    return (upkeepNeeded, performData);
   }
+
+  // function performUpkeep(bytes calldata /* performData */) external override {
+  //   lastUpkeepTimeStamp = block.timestamp;
+  //   uint256 counter = 1;
+  //   emit performCalled(counter);
+  //       // We don't use the performData in this example. The performData is generated by the Automation Node's call to your checkUpkeep function
+  // }
 
   // Testar chamar essa função com outra carteira além do deployer
   /**
    * @notice Chamada por Chainlink Automation para realizar uma requisição através da Chainlink Functions
    */
-  function performUpkeep(bytes calldata) external onlyAllowed override {
+  function performUpkeep(bytes calldata) external override { // removi o onlyAllowed
     require(upkeepId != 0, "Upkeep not registered");
-    (bool upkeepNeeded, ) = checkUpkeep("");
-    require(upkeepNeeded, "Time interval not met");
+    // (bool upkeepNeeded, ) = checkUpkeep("");
+    // require(upkeepNeeded, "Time interval not met");
     lastUpkeepTimeStamp = block.timestamp;
     upkeepCounter = upkeepCounter + 1;
 
     // Se a quantidade de amostras não é o suficiente, coleta nova amostra:
     if(sampleMaxSize > sampleStorage.length){
-      s_upkeepCounter = s_upkeepCounter + 1;
       try i_router.sendRequest(
           subscriptionId, 
           requestCBOR,
           FunctionsRequest.REQUEST_DATA_VERSION,
-          gasLimit,
+          fulfillGasLimit,
           donID
       )
       returns (bytes32 requestId) {
@@ -223,17 +249,16 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
       req.initializeRequest(
         FunctionsRequest.Location.Inline, 
         FunctionsRequest.CodeLanguage.JavaScript, 
-        computationJS
+        metricJS
       );
       req.setArgs(sampleStorage);
       bytes memory encodedCBOR = req.encodeCBOR();
 
-      s_upkeepCounter = s_upkeepCounter + 1;
       try i_router.sendRequest(
           subscriptionId, 
           encodedCBOR,
           FunctionsRequest.REQUEST_DATA_VERSION,
-          gasLimit,
+          fulfillGasLimit,
           donID
       )
       returns (bytes32 requestId) {
@@ -246,7 +271,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
         emit RequestRevertedWithoutErrorMsg(data);
       }
 
-      retrieveLINKs();
+      //retrieveLINKs();
     }
   }
 
@@ -264,7 +289,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   }
 
   // Evento para testes
-  event responseString(string responseAsString);
+  event asNum(bytes num);
 
   /**
    * @notice Callback chamada quando a Rede Descentralizada de Oráculos termina a requisição
@@ -274,28 +299,39 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @param err Erro do código fonte ou do pipeline de execução da requisição
    */
   function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
-    latestResponse = response;
-    latestError = err;
-    responseCounter = responseCounter + 1;
-    string memory responseAsString = string(response); 
+    // latestResponse = response;
+    // latestError = err;
+    // responseCounter = responseCounter + 1;
+    // string memory responseAsString = string(response); 
 
-    if(controlFlag == 0){
-      // converter para string com abi.encodePacked() se possível com bytes
-      // Essa conversão vai depender do tipo de dado retornado
-      // Porque se o bytes não representar ASCII a conversão é inútil
+    // if(controlFlag == 0){
+    //   // converter para string com abi.encodePacked() se possível com bytes
+    //   // Essa conversão vai depender do tipo de dado retornado
+    //   // Porque se o bytes não representar ASCII a conversão é inútil
 
-      // Armazena no array as amostras de dados
+    //   // Armazena no array as amostras de dados
+    //   sampleStorage.push(responseAsString);
+    // }
+    // else{
+    //   // Refazer isso para que a rede Chainlink realize uma computação do índice mais complexo do que a média
+    //   // Essa computação do índice deve ser com base na literatura científica
+    //   mean = uint256(bytes32(response)); // remover
+
+    //   verifyIndex(); // remover
+    // }
+
+    // emit responseString(responseAsString);
+
+    if(controlFlag == 0) {
+      uint256 num = uint256(bytes32(response));
+      string memory responseAsString = Strings.toString(num);
       sampleStorage.push(responseAsString);
     }
-    else{
-      // Refazer isso para que a rede Chainlink realize uma computação do índice mais complexo do que a média
-      // Essa computação do índice deve ser com base na literatura científica
-      mean = uint256(bytes32(response)); // remover
-
-      verifyIndex(); // remover
+    else {
+      emit asNum(response);
+      // mean = uint256(bytes32(response));
+      // verifyIndex();
     }
-
-    emit responseString(responseAsString);
     emit OCRResponse(requestId, response, err);
   }
 

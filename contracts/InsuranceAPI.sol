@@ -5,8 +5,8 @@ import "./Institution.sol";
 
 contract InsuranceAPI {
     mapping (address => Institution[]) private institutions;
-    mapping (address => uint256) public donators;
-    address[] public donatorsAddresses;
+    // mapping (address => uint256) public donators;
+    // address[] public donatorsAddresses;
     address public immutable im_owner;
 
     event InstitutionCreated(address institutionAddress);
@@ -40,25 +40,25 @@ contract InsuranceAPI {
         return institutions[msg.sender];
     }
 
-    function donate() public payable {
-        donators[msg.sender] += msg.value;
-        donatorsAddresses.push(msg.sender);
-    }
+    // function donate() public payable {
+    //     donators[msg.sender] += msg.value;
+    //     donatorsAddresses.push(msg.sender);
+    // }
 
-    function getAllDonators() public view returns (address[] memory){
-        return donatorsAddresses;
-    }
+    // function getAllDonators() public view returns (address[] memory){
+    //     return donatorsAddresses;
+    // }
 
-    receive() external payable {
-        donate();
-    }
+    // receive() external payable {
+    //     donate();
+    // }
 
-    fallback() external payable {
-        donate();
-    }
+    // fallback() external payable {
+    //     donate();
+    // }
 
-    function withdraw() external owner {
-        (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
-        require(callStatus, "Withdraw failed.");
-    }
+    // function withdraw() external owner {
+    //     (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
+    //     require(callStatus, "Withdraw failed.");
+    // }
 }
