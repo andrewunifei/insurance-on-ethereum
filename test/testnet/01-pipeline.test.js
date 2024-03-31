@@ -5,18 +5,15 @@ import chainlinkFunctions from '../../middleware/chainlinkFunctions.js'
 import { expect } from 'chai';
 import helpers from '../../mock/helpers.js';
 import institutionManager from '../../middleware/institutionManager.js';
-import insuranceContractManager from '../../middleware/insuranceContractManager.js';
 import APIArtifacts from '../../build/artifacts/contracts/InsuranceAPI.sol/InsuranceAPI.json' assert { type: 'json' };
 import LINKArtifacts from '../../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json' assert { type: 'json' };
 import fsSync from 'node:fs';
 import controller from '../../middleware/controller.js';
-import { config } from '../../mock/mockBuildRequestConfig.js';
-import { donParams } from '../../mock/mockDonParams.js'
+import dataParamters from '../../mock/mockDataParameters.js';
 
 describe('(TESTNET) Deployment Pipeline', async () => {
     // Interações com a Blockchain
     let signer;
-    let provider;
 
     // Contratos
     let API, institution, insuranceContract, upkeep, LINK;
@@ -28,17 +25,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
     // Parâmetros
     const institutionName = 'Capital Expansion LTDA';
     const farmerAddr = '0xF91CA466849f1f53D12ACb40F7245dA43Af4A839';
-    const reparationValue = ethers.utils.parseEther(String(0.001));
-    const institutionInfo = [
-        ['Code', '123456789'],
-        ['Full Name', 'Capital Expansion LTDA'],
-        ['Short name', 'CE'],
-        ['Address', 'Wall St'],
-        ['State', 'New York'],
-        ['Email', 'contact@ce.com'],
-        ['Phone', '+00 000000000'],
-    ];
-    let insuranceParams;
+    const reparationValue = 0.001;
 
     before(async () => {
         const payload = await blockchain.interaction(
@@ -66,34 +53,34 @@ describe('(TESTNET) Deployment Pipeline', async () => {
     });
 
     describe('Institution', async () => {
-        before(async () => {
-            // const payload = await controller.buildRequestParameters(
-            //     signer, 
-            //     config,
-            //     donParams
-            // );
-            // const donId = payload.formatedDonId;
-            // const requestCBOR = payload.requestCBOR
-            // const computationJS = '';
-            const donId = ethers.utils.formatBytes32String(donParams.donId);
-            insuranceParams = {
-                signer: signer.address,
-                farmer: farmerAddr,
-                humidityLimit: 50,
-                sampleMaxSize: 5,
-                reparationValue,
-                interval: 3 * 60, // 3 Minutos
-                router: blockchain.sepolia.chainlinkRouterAddress,
-                // subscriptionId,
-                registryAddress: blockchain.sepolia.chainlinkRegistryAddress,
-                linkTokenAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
-                registrarAddress: blockchain.sepolia.chainlinkRegistrarAddress,
-                gaslimit: 300000,
-                donId
-                // requestCBOR,
-                // computationJS
-            };
-        });
+        // before(async () => {
+        //     // const payload = await controller.buildRequestParameters(
+        //     //     signer, 
+        //     //     config,
+        //     //     donParams
+        //     // );
+        //     // const donId = payload.formatedDonId;
+        //     // const requestCBOR = payload.requestCBOR
+        //     // const computationJS = '';
+        //     const donId = ethers.utils.formatBytes32String(donParams.donId);
+        //     insuranceParams = {
+        //         signer: signer.address,
+        //         farmer: farmerAddr,
+        //         humidityLimit: 50,
+        //         sampleMaxSize: 5,
+        //         reparationValue,
+        //         interval: 3 * 60, // 3 Minutos
+        //         router: blockchain.sepolia.chainlinkRouterAddress,
+        //         // subscriptionId,
+        //         registryAddress: blockchain.sepolia.chainlinkRegistryAddress,
+        //         linkTokenAddress: blockchain.sepolia.chainlinkLinkTokenAddress,
+        //         registrarAddress: blockchain.sepolia.chainlinkRegistrarAddress,
+        //         gaslimit: 300000,
+        //         donId
+        //         // requestCBOR,
+        //         // computationJS
+        //     };
+        // });
 
         it('Should register informations about the Institution correctly', async () => {
             const verification = await institution.info('Code');
@@ -119,17 +106,18 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
 
         it('Should send Ether to the Institution correctly', async () => {
+            const weiReparationValue = ethers.utils.parseEther(String(reparationValue))
             const pathToFile = path.resolve('deployed/pipeline-test-insuranceContract.txt');
             const exists = fsSync.existsSync(pathToFile);
             if(!exists) {
                 let institutionBalance = await institution.contractBalance();
 
                 // ARRUMAR ISSO: MESMO PROBLEMA COM A TRANSFERENCIA DE LINK
-                if(String(institutionBalance) !== String(reparationValue)){
-                    await institutionManager.fundInstitution(signer, institution, 0.001);
+                if(String(institutionBalance) !== String(weiReparationValue)){
+                    await institutionManager.fundInstitution(signer, institution, reparationValue);
                     institutionBalance = await institution.contractBalance();
                 };
-                expect(institutionBalance).to.equal(reparationValue);
+                expect(institutionBalance).to.equal(weiReparationValue);
             };
         });
 
@@ -137,7 +125,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             insuranceContract = await helpers.fetchInsuranceContract(
                 signer, 
                 institution, 
-                insuranceParams,
+                dataParamters.insuranceParams,
                 'deployed/pipeline-test-insuranceContract.txt'
             );
             expect(insuranceContract.address.length).to.equal(42);
@@ -157,7 +145,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             const pathToFile = path.resolve('deployed/pipeline-test-subscriptionId.txt');
             subscriptionId = await helpers.fetchSubscriptionId(
                 manager, 
-                insuranceContract.address,
+                institution.address,
                 pathToFile
             );
           
@@ -181,7 +169,14 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             expect(subscriptionInfo.balance).to.equal(juelsAmount);
         });
 
-        it('Should set the CBOR & Subscription ID correctly', async () => {
+        it('Should set the Subscription ID correctly in the Insurance Contract', async () => {
+            const tx = await insuranceContract.setSubscriptionId(requestCBOR, subscriptionId);
+            await tx.wait();
+            const smartContractSubIdValue = await insuranceContract.subscriptionId();
+            expect(smartContractSubIdValue).to.equal(subscriptionId);
+        });
+
+        it('Should set the requestCBOR correctly in the Insurance Contract', async () => {
             const payload = await controller.buildRequestParameters(
                 signer, 
                 config,
@@ -189,9 +184,10 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             );
             const requestCBOR = payload.requestCBOR
 
-            const tx = await insuranceContract.setCBOR(requestCBOR, subscriptionId);
-            const receipt = await tx.wait();
-            console.log(receipt);
+            const tx = await insuranceContract.setCBOR(requestCBOR);
+            await tx.wait();
+            const smartContractCBORValue = await insuranceContract.requestCBOR();
+            console.log(smartContractCBORValue);
         });
     });
 
@@ -205,18 +201,18 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress);
         });
 
-        // it('Should add Insurance Contract to Chainlink Functions subscription', async () => {
-        //     let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
-        //     let verification = subscriptionInfo.consumers.includes(insuranceContract.address);
-        //     if(!verification){
-        //         await insuranceContractManager.addInsuranceToSub(manager, subscriptionId, insuranceContract.address);
-        //         subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
-        //         verification = subscriptionInfo.consumers.includes(insuranceContract.address);
-        //     };
-        //     expect(verification).to.be.true;
-        // });
+        it('Should add Insurance Contract to Chainlink Functions subscription', async () => {
+            let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
+            let verification = subscriptionInfo.consumers.includes(insuranceContract.address);
+            if(!verification){
+                await insuranceContractManager.addInsuranceToSub(manager, subscriptionId, insuranceContract.address);
+                subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
+                verification = subscriptionInfo.consumers.includes(insuranceContract.address);
+            };
+            expect(verification).to.be.true;
+        });
 
-        it('Should be properly funded with 10 LINK', async () => {
+        it('Should be properly funded with 10 LINK to be able to create upkeep', async () => {
             const LINKAmount = ethers.utils.parseEther(String(10)); // eth --> wei
             let LINKBalance = await LINK.balanceOf(insuranceContract.address);
             if(LINKBalance.lt(LINKAmount)) {
