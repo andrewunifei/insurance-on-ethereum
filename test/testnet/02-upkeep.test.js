@@ -6,13 +6,14 @@ import path from 'path';
 import fs from 'node:fs/promises';
 import LINKArtifacts from '../../build/artifacts/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol/LinkTokenInterface.json' assert { type: 'json' };
 import insuranceContractArtifacts from '../../build/artifacts/contracts/AutomatedFunctionsConsumer.sol/AutomatedFunctionsConsumer.json' assert { type: 'json' };
-import upkeepContractArtifacts from '../../build/artifacts/contracts/Upkeep.sol/Upkeep.json' assert { type: 'json' };
 import fsSync from 'node:fs';
-import dataParamters from '../../mock/mockDataParameters.js';
 
 describe('(CHAINLINK) Upkeep', async () => {
     // Interação com a blockchain
     let signer;
+
+    // Parâmetros
+    let upkeepParams;
 
     // Contratos
     let LINK, insuranceContract, upkeep;
@@ -29,7 +30,18 @@ describe('(CHAINLINK) Upkeep', async () => {
 
         signer = payload.signer;
 
-
+        upkeepParams = {
+            name:           'automation-of-project-test-1',
+            encryptedEmail: ethers.utils.hexlify([]),
+            upkeepContract: insuranceContractAddress, // insuranceContractAddress
+            gasLimit:       1000000,
+            adminAddress:   signer.address, // Deployer
+            triggerType:    0,
+            checkData:      ethers.utils.hexlify([]),
+            triggerConfig:  ethers.utils.hexlify([]),
+            offchainConfig: ethers.utils.hexlify([]),
+            amount:         ethers.utils.parseEther(String(10)) // LINK --> Juels
+        };
 
         insuranceContract = new ethers.Contract(
             insuranceContractAddress,
@@ -67,7 +79,7 @@ describe('(CHAINLINK) Upkeep', async () => {
     it('Should register the created upkeep successfully', async () => {
         let tx;
         await expect(
-            tx = await insuranceContract.registerUpkeep(dataParamters.upkeepParams)
+            tx = await insuranceContract.registerUpkeep(upkeepParams)
         ).to.emit(insuranceContract, 'upkeepRegistered'); 
         await tx.wait();
     });

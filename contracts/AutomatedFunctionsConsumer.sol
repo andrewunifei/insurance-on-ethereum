@@ -71,7 +71,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   string    private metricJS; // Cálculo da computação do índice
 
   // Variável para armazenar a média das amostras
-  uint256 private mean;
+  uint256 private avg;
 
   // Erro retornado se um agente não permitido chamar performUpkeep
   error NotAllowedCaller(
@@ -138,6 +138,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     lastUpkeepTimeStamp = block.timestamp;
     donID = _donID;
     metricJS = _metricJS;
+    controlFlag = 0;
   }
 
   /**
@@ -213,7 +214,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   /**
    * @notice Chamada por Chainlink Automation para realizar uma requisição através da Chainlink Functions
    */
-  function performUpkeep(bytes calldata) external override onlyAllowed { // removi o onlyAllowed
+  function performUpkeep(bytes calldata) external override { // removi o onlyAllowed
     require(upkeepId != 0, "Upkeep not registered");
     // (bool upkeepNeeded, ) = checkUpkeep("");
     // require(upkeepNeeded, "Time interval not met");
@@ -273,21 +274,25 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     }
   }
 
+  // Evento para testes
+  event avgCalculated(uint256 num);
+  event convertedResponse(string converted);
+  event addressPaid(address paid);
+
   function verifyIndex() internal {
-    if(mean < humidityLimit){
+    if(avg < humidityLimit){
       // Transfere para a conta do agricultor
       (bool sent, /* bytes memory data */) = payable(farmer).call{value: address(this).balance}("");
       require(sent, "Erro ao pagar a indenizacao");
+      emit addressPaid(farmer);
     }
     else{
       // Transfere para a conta da instituição
       (bool sent, /* bytes memory data */) = payable(deployer).call{value: address(this).balance}("");
       require(sent, "Erro ao retornar os fundos para a instituicao");
+      emit addressPaid(deployer);
     }
   }
-
-  // Evento para testes
-  event asNum(bytes num);
 
   /**
    * @notice Callback chamada quando a Rede Descentralizada de Oráculos termina a requisição
@@ -302,35 +307,19 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     // responseCounter = responseCounter + 1;
     // string memory responseAsString = string(response); 
 
-    // if(controlFlag == 0){
-    //   // converter para string com abi.encodePacked() se possível com bytes
-    //   // Essa conversão vai depender do tipo de dado retornado
-    //   // Porque se o bytes não representar ASCII a conversão é inútil
-
-    //   // Armazena no array as amostras de dados
-    //   sampleStorage.push(responseAsString);
-    // }
-    // else{
-    //   // Refazer isso para que a rede Chainlink realize uma computação do índice mais complexo do que a média
-    //   // Essa computação do índice deve ser com base na literatura científica
-    //   mean = uint256(bytes32(response)); // remover
-
-    //   verifyIndex(); // remover
-    // }
-
-    // emit responseString(responseAsString);
-
     if(controlFlag == 0) {
       uint256 num = uint256(bytes32(response));
       string memory responseAsString = Strings.toString(num);
       sampleStorage.push(responseAsString);
+      emit OCRResponse(requestId, response, err);
     }
     else {
-      emit asNum(response);
-      // mean = uint256(bytes32(response));
-      // verifyIndex();
+      // Converter a resposta para uint antes de enviar para o evento
+      avg = uint256(bytes32(response));
+      emit avgCalculated(avg);
+      verifyIndex();
     }
-    emit OCRResponse(requestId, response, err);
+    
   }
 
   // Consultar o balanço do contrato

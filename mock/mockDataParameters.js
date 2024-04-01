@@ -1,12 +1,19 @@
 import ethers from 'ethers';
+import path from 'path';
 import fs from 'node:fs/promises';
-import blockchain from '../../middleware/blockchain.js';
+import blockchain from '../middleware/blockchain.js';
 
-const reparationValue = 0.001
+const farmerAddr = '0xF91CA466849f1f53D12ACb40F7245dA43Af4A839';
+const reparationValue = 0.001;
 
 const pathToFile = path.resolve('rules/metric.js');
 const readSource = await fs.readFile(pathToFile);
 const source = readSource.toString();
+
+const { signer } = await blockchain.interaction(
+    process.env.SEPOLIA_ACCOUNT_PRIVATE_KEY,
+    process.env.ETHEREUM_SEPOLIA_RPC_URL
+);
 
 const config = {
     computationPath:'rules/computation.js',
@@ -24,7 +31,7 @@ const donParams = {
     ]
 };
 
-const info = [
+const institutionInfo = [
     ['Code', '123456789'],
     ['Full Name', 'Capital Expansion LTDA'],
     ['Short name', 'CE'],
@@ -39,9 +46,9 @@ const insuranceParams = {
     signer:             signer.address,
     farmer:             farmerAddr,
     humidityLimit:      50,
-    sampleMaxSize:      5,
+    sampleMaxSize:      2,
     reparationValue:    ethers.utils.parseEther(String(reparationValue)),
-    interval:           3 * 60,
+    interval:           2 * 60,
     router:             blockchain.sepolia.chainlinkRouterAddress,
     registryAddress:    blockchain.sepolia.chainlinkRegistryAddress,
     linkTokenAddress:   blockchain.sepolia.chainlinkLinkTokenAddress,
@@ -51,17 +58,4 @@ const insuranceParams = {
     metricJS:           source
 };
 
-const upkeepParams = {
-    name:           'automation-of-project-test-1',
-    encryptedEmail: ethers.utils.hexlify([]),
-    upkeepContract: insuranceContractAddress, // insuranceContractAddress
-    gasLimit:       1000000,
-    adminAddress:   signer.address, // Deployer
-    triggerType:    0,
-    checkData:      ethers.utils.hexlify([]),
-    triggerConfig:  ethers.utils.hexlify([]),
-    offchainConfig: ethers.utils.hexlify([]),
-    amount:         ethers.utils.parseEther(String(10)) // LINK --> Juels
-};
-
-export default { config, donParams, info, upkeepParams, insuranceParams };
+export default { config, donParams, institutionInfo, insuranceParams, farmerAddr };
