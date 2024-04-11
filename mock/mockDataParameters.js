@@ -43,19 +43,19 @@ const institutionInfo = [
 ];
 
 const insuranceParams = {
-    signer:             signer.address,
-    farmer:             farmerAddr,
-    humidityLimit:      50,
-    sampleMaxSize:      2,
-    reparationValue:    ethers.utils.parseEther(String(reparationValue)),
-    interval:           2 * 60,
+    signer:             signer.address, // Endereço da carteira da instituição
+    farmer:             farmerAddr, // Endereço do fazendeiro
+    humidityLimit:      50, // Limite de umidade
+    sampleMaxSize:      2, // Número de amostras a ser coletado
+    reparationValue:    ethers.utils.parseEther(String(reparationValue)), // Valor da indenização
+    interval:           2 * 60, // Intervalo entre a busca por amostra
     router:             blockchain.sepolia.chainlinkRouterAddress,
     registryAddress:    blockchain.sepolia.chainlinkRegistryAddress,
     linkTokenAddress:   blockchain.sepolia.chainlinkLinkTokenAddress,
     registrarAddress:   blockchain.sepolia.chainlinkRegistrarAddress,
     gaslimit:           300000,
     donId:              ethers.utils.formatBytes32String(donParams.donId),
-    metricJS:           source
+    metricJS:           source // String com o código para cálculo do índice em função das amostras
 };
 
 export default { config, donParams, institutionInfo, insuranceParams, farmerAddr };

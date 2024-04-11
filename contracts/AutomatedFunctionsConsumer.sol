@@ -92,6 +92,11 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   event upkeepRegistered(uint256 upkeepId);
   event upkeepCreated(address upkeepAddress);
 
+  event avgCalculated(uint256 num);
+  event convertedResponse(string converted);
+  event addressPaid(address paid);
+  event upkeepCanceled(uint256 upkeepId);
+
   /**
    * @notice Reverte se chamado por qualquer um menos o repositório de automação.
    */
@@ -242,42 +247,41 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     }
     // Se a quantidade de amostras é o suficiente:
     else{ 
-      controlFlag = 1;
+      if(controlFlag == 0) {
+        controlFlag = 1;
 
-      FunctionsRequest.Request memory req;
-      req.initializeRequest(
-        FunctionsRequest.Location.Inline, 
-        FunctionsRequest.CodeLanguage.JavaScript, 
-        metricJS
-      );
-      req.setArgs(sampleStorage);
-      bytes memory encodedCBOR = req.encodeCBOR();
+        FunctionsRequest.Request memory req;
+        req.initializeRequest(
+          FunctionsRequest.Location.Inline, 
+          FunctionsRequest.CodeLanguage.JavaScript, 
+          metricJS
+        );
+        req.setArgs(sampleStorage);
+        bytes memory encodedCBOR = req.encodeCBOR();
 
-      try i_router.sendRequest(
-          subscriptionId, 
-          encodedCBOR,
-          FunctionsRequest.REQUEST_DATA_VERSION,
-          fulfillGasLimit,
-          donID
-      )
-      returns (bytes32 requestId) {
-        s_lastRequestId = requestId;
-        s_requestCounter = s_requestCounter + 1;
-        emit RequestSent(requestId);
-      } catch Error(string memory reason) {
-        emit RequestRevertedWithErrorMsg(reason);
-      } catch (bytes memory data) {
-        emit RequestRevertedWithoutErrorMsg(data);
+        try i_router.sendRequest(
+            subscriptionId, 
+            encodedCBOR,
+            FunctionsRequest.REQUEST_DATA_VERSION,
+            fulfillGasLimit,
+            donID
+        )
+        returns (bytes32 requestId) {
+          s_lastRequestId = requestId;
+          s_requestCounter = s_requestCounter + 1;
+          emit RequestSent(requestId);
+        } catch Error(string memory reason) {
+          emit RequestRevertedWithErrorMsg(reason);
+        } catch (bytes memory data) {
+          emit RequestRevertedWithoutErrorMsg(data);
+        }
       }
-
-      //retrieveLINKs();
+      else {
+        emit upkeepCanceled(upkeepId);
+        registry.cancelUpkeep(upkeepId);
+      }
     }
   }
-
-  // Evento para testes
-  event avgCalculated(uint256 num);
-  event convertedResponse(string converted);
-  event addressPaid(address paid);
 
   function verifyIndex() internal {
     if(avg < humidityLimit){
@@ -311,7 +315,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
       uint256 num = uint256(bytes32(response));
       string memory responseAsString = Strings.toString(num);
       sampleStorage.push(responseAsString);
-      emit OCRResponse(requestId, response, err);
+      emit convertedResponse(responseAsString);
+      // emit OCRResponse(requestId, response, err);
     }
     else {
       // Converter a resposta para uint antes de enviar para o evento
@@ -319,7 +324,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
       emit avgCalculated(avg);
       verifyIndex();
     }
-    
   }
 
   // Consultar o balanço do contrato

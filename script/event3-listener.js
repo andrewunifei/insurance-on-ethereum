@@ -6,7 +6,7 @@ import insuranceContractArtifacts from '../build/artifacts/contracts/AutomatedFu
 async function main() {
     let insuranceContract;
     let insuranceContractAddress
-    const topic = 'convertedResponse';
+    const topic = 'addressPaid';
 
     console.log('\n🟡 Event Listener initiated. Trying to fetch address of deployed Insurance Contract...')
     try {
@@ -27,9 +27,9 @@ async function main() {
 
     console.log(`\n🌀 Listening for events on topic \"${topic}\" for Insurance Contract ${insuranceContractAddress}...\n`);
     try {
-        insuranceContract.on(topic, (converted, event) => {
-        console.log( `Valor da amostra de umidade coletada: ${converted}`);
-        })
+        insuranceContract.on(topic, (paid, event) => {
+            console.log(`Compensation paid to Address ${paid}`);
+        });
     }
     catch(e) {
         console.log(`❌ Listener stopped unexpectedly. Reason: ${e}`)

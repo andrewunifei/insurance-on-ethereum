@@ -115,7 +115,6 @@ describe('(TESTNET) Deployment Pipeline', async () => {
             const pathToFile = path.resolve('deployed/pipeline-test-subscriptionId.txt');
             subscriptionId = await helpers.fetchSubscriptionId(
                 manager, 
-                institution.address,
                 pathToFile
             );
           
@@ -137,6 +136,28 @@ describe('(TESTNET) Deployment Pipeline', async () => {
 
             subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
             expect(subscriptionInfo.balance).to.equal(juelsAmount);
+        });
+    });
+
+    describe('Insurance Contract', async () => {
+        before(async () => {
+            const LINKFactory = new ethers.ContractFactory(
+                LINKArtifacts.abi,
+                LINKArtifacts.bytecode,
+                signer 
+            );
+            LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress);
+        });
+
+        it('Should add Insurance Contract to Chainlink Functions subscription', async () => {
+            let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
+            let verification = subscriptionInfo.consumers.includes(insuranceContract.address);
+            if(!verification){
+                await insuranceContractManager.addInsuranceToSub(manager, subscriptionId, insuranceContract.address);
+                subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
+                verification = subscriptionInfo.consumers.includes(insuranceContract.address);
+            };
+            expect(verification).to.be.true;
         });
 
         it('Should set the Subscription ID correctly in the Insurance Contract', async () => {
@@ -162,28 +183,6 @@ describe('(TESTNET) Deployment Pipeline', async () => {
                 smartContractCBORValue = await insuranceContract.requestCBOR();
                 expect(smartContractCBORValue).to.equal(payload.requestCBOR);
             }
-        });
-    });
-
-    describe('Insurance Contract', async () => {
-        before(async () => {
-            const LINKFactory = new ethers.ContractFactory(
-                LINKArtifacts.abi,
-                LINKArtifacts.bytecode,
-                signer 
-            );
-            LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress);
-        });
-
-        it('Should add Insurance Contract to Chainlink Functions subscription', async () => {
-            let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
-            let verification = subscriptionInfo.consumers.includes(insuranceContract.address);
-            if(!verification){
-                await insuranceContractManager.addInsuranceToSub(manager, subscriptionId, insuranceContract.address);
-                subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
-                verification = subscriptionInfo.consumers.includes(insuranceContract.address);
-            };
-            expect(verification).to.be.true;
         });
 
         it('Should be properly funded with 10 LINK to be able to fund upkeep', async () => {

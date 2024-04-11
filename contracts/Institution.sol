@@ -12,6 +12,7 @@ contract Institution{
     string[] public infoKeys;
     mapping (string => string) public info;
     mapping (address => bool) public whitelist;
+    mapping (address => bool) public blacklist;
     mapping (address => AutomatedFunctionsConsumer[]) public contracts; // Antes era mapping address => address[]
 
     event InsuranceContractCreated(address insuranceContractAddress);
@@ -57,6 +58,7 @@ contract Institution{
      */
     function blacklistAddr(address _farmerAddr) external {
         whitelist[_farmerAddr] = false;
+        blacklist[_farmerAddr] = true;
     }
 
     // Criar um contrato agrícola

@@ -103,17 +103,16 @@ async function fetchInstitution(signer, API, name, path) {
  * Se nenhum id existe no arquivo ${filename}, realiza uma inscrição em Chainlink Functions e retona o id.
  * Caso necessário escreve o endereço da nova instituição no arquivo ${filename} 
  * @param {SubscriptionManager} manager 
- * @param {string} institutionAddr 
  * @param {string} path
  * @returns {Promise<number>}
  */
-async function fetchSubscriptionId(manager, institutionAddr, path) {
+async function fetchSubscriptionId(manager, path) {
     const filename = path.split("/").slice(-1)[0]
     let subscriptionId = await getAddress(path)
 
     if(subscriptionId.length === 0){
         console.log(`${filename} empty. Creating a new subscription...`)
-        subscriptionId = await manager.createSubscription(institutionAddr)
+        subscriptionId = await manager.createSubscription()
         await fs.writeFile(path, String(subscriptionId))
         console.log(`✅ New Chainlink subscription created! Its ID was saved to ${filename}`)
 

@@ -6,7 +6,7 @@ import insuranceContractArtifacts from '../build/artifacts/contracts/AutomatedFu
 async function main() {
     let insuranceContract;
     let insuranceContractAddress
-    const topic = 'convertedResponse';
+    const topic = 'avgCalculated';
 
     console.log('\n🟡 Event Listener initiated. Trying to fetch address of deployed Insurance Contract...')
     try {
@@ -27,8 +27,12 @@ async function main() {
 
     console.log(`\n🌀 Listening for events on topic \"${topic}\" for Insurance Contract ${insuranceContractAddress}...\n`);
     try {
-        insuranceContract.on(topic, (converted, event) => {
-        console.log( `Valor da amostra de umidade coletada: ${converted}`);
+        // insuranceContract.on(topic, (requestId, result, err, event) => {
+        //     console.log(JSON.stringify(result));
+        // });
+
+        insuranceContract.on(topic, (num, event) => {
+            console.log(`Valor da média da umidade no período estipulado: ${Number(num._hex)}`);
         })
     }
     catch(e) {
