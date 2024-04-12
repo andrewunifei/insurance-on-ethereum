@@ -4,9 +4,7 @@ pragma solidity ^0.8.7;
 import "./Institution.sol";
 
 contract InsuranceAPI {
-    mapping (address => Institution[]) private institutions;
-    // mapping (address => uint256) public donators;
-    // address[] public donatorsAddresses;
+    mapping (address => Institution[]) public institutions;
     address public immutable im_owner;
 
     event InstitutionCreated(address institutionAddress);

@@ -2,7 +2,7 @@
 
 import styles from "./page.module.css";
 import React from "react";
-import { Modal, Button } from "antd";
+import { Modal, Button } from 'antd';
 import { ethers}  from "ethers";
 
 export default function Home() {
@@ -21,8 +21,13 @@ export default function Home() {
           setProvider(_provider);
         }
         const accounts = await _provider.send("eth_accounts", []); 
-        const modal = (accounts.length == 0) ? true : false; 
-        setIsModalOpen(modal);
+        if(accounts.length ==! 0) {
+          setIsModalOpen(false);
+          setSigner(_provider.getSigner());
+        }
+        else {
+          setIsModalOpen(true);
+        }
       }
     }
     handleModal();
@@ -48,25 +53,25 @@ export default function Home() {
   }
 
   function handleButton() {
-    console.log(signer._isSigner)
+    console.log(signer)
   }
 
   return (
-      <div>
-        < Modal 
-          title="Carteira MetaMask"
-          open={isModalOpen} 
-          okText={'Conectar'}
-          onOk={handleConnection}
-          confirmLoading={confirmLoading}
-          onCancel={handleCancel}
-          closable={false}
-        >
-          <p>É necessário a extensão carteira MetaMask para interagir com essa aplicação.</p>
-          <br />
-          <p><span id={styles.conn}>Conecte-se</span> ou instale a carteira no link <a id={styles.link} href="https://metamask.io" target="_blank">https://metamask.io</a></p>
-        </ Modal>
-        <Button type="primary" onClick={handleButton}>click</Button>
-      </div>
+    <div>
+      < Modal 
+        title="Carteira MetaMask"
+        open={isModalOpen} 
+        okText={'Conectar'}
+        onOk={handleConnection}
+        confirmLoading={confirmLoading}
+        onCancel={handleCancel}
+        closable={false}
+      >
+        <p>É necessário a extensão carteira MetaMask para interagir com essa aplicação.</p>
+        <br />
+        <p><span id={styles.conn}>Conecte-se</span> ou instale a carteira no link <a id={styles.link} href="https://metamask.io" target="_blank">https://metamask.io</a></p>
+      </ Modal>
+      <Button type="primary" onClick={handleButton}>click</Button>
+    </div>  
   );
 }
