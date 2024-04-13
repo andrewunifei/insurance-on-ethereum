@@ -12,7 +12,6 @@ export function SignerWrapper({children}) {
     const [provider, setProvider] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(null);
     const [confirmLoading, setConfirmLoading] = useState(false);
-    const [accounts, setAccounts] = useState(0);
 
     useEffect(() => {
         async function handleModal() {
@@ -27,7 +26,6 @@ export function SignerWrapper({children}) {
             if(_accounts.length ==! 0) {
               setSigner(_provider.getSigner());
               setIsModalOpen(false);
-              setAccounts(_accounts);
             }
             else {
               setIsModalOpen(true);
@@ -62,7 +60,6 @@ export function SignerWrapper({children}) {
         window.ethereum.on("accountsChanged", (accounts) => {
           if(accounts.length === 0) setSigner(null);
         });
-        console.log('testing')
       }
     }, [provider])
 
@@ -71,7 +68,6 @@ export function SignerWrapper({children}) {
             signer,
             setSigner,
             setIsModalOpen,
-            accounts,
             provider
         }}>
         < Modal 

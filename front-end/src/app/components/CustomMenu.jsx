@@ -7,8 +7,9 @@ import { Menu, Button, ConfigProvider } from 'antd';
 import { useSignerContext } from "@/context";
 
 export default function CustomMenu() {
-    const { signer, setIsModalOpen, accounts } = useSignerContext(); 
+    const { signer, setIsModalOpen } = useSignerContext(); 
     const [buttonState, setButtonState] = React.useState(false);
+    const [buttonInnerText, setButtonInnerText] = React.useState("Conectar MetaMask");
     const pathname = usePathname()
     const items = [
         {
@@ -28,22 +29,31 @@ export default function CustomMenu() {
             label: (
                 <ConfigProvider
                 theme={{
-                    components: {
-                    Button: {
-                        borderColorDisabled: '#001628'
+                    token: {
+                        colorTextDisabled:'rgba(255 , 255, 255, 1)'
                     },
+                    components: {
+                        Button: {
+                            borderColorDisabled: '#fff',
+                        },
                     },
                 }}
                 >
-                    <Button type="primary" onClick={handleButton} disabled={buttonState}  >Conectar MetaMask</Button>
+                    <Button type="primary" onClick={handleButton} disabled={buttonState}>{buttonInnerText}</Button>
                 </ConfigProvider>
             )
         }
     ];
 
     React.useEffect(() => {
-        console.log(signer);
-        signer ? setButtonState(true) : setButtonState(false);
+        if(signer) {
+            setButtonState(true)
+            setButtonInnerText("Você está conectado!")
+        } 
+        else {
+            setButtonState(false);
+            setButtonInnerText("Conectar MetaMask")
+        }
     }, [signer])
 
     function handleButton() {
