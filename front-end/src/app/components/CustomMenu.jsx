@@ -24,25 +24,6 @@ export default function CustomMenu() {
             key: '/farmer',
             label: <Link href='/farmer'>Área do Fazendeiro</Link>,
         },
-        {
-            key: 4,
-            label: (
-                <ConfigProvider
-                theme={{
-                    token: {
-                        colorTextDisabled:'rgba(255 , 255, 255, 1)'
-                    },
-                    components: {
-                        Button: {
-                            borderColorDisabled: '#fff',
-                        },
-                    },
-                }}
-                >
-                    <Button type="primary" onClick={handleButton} disabled={buttonState}>{buttonInnerText}</Button>
-                </ConfigProvider>
-            )
-        }
     ];
 
     React.useEffect(() => {
@@ -60,16 +41,37 @@ export default function CustomMenu() {
         setIsModalOpen(true);
     }
 
+
     return (
-        <Menu 
-            theme="dark"
-            mode="horizontal"
-            items={items}
-            selectedKeys={[pathname]}
+        <div
             style={{
-            flex: 1,
-            minWidth: 0,
+                display: "flex",
+                width: "1000vw",
             }}
-        />
+        >
+            <Menu 
+                theme="dark"
+                mode="horizontal"
+                items={items}
+                selectedKeys={[pathname]}
+                style={{ flex: 1, minWidth: 0 }}
+            />
+            <div style={{marginLeft: "auto"}}>
+                <ConfigProvider
+                theme={{
+                    token: {
+                        colorTextDisabled:'rgba(255 , 255, 255, 1)'
+                    },
+                    components: {
+                        Button: {
+                            borderColorDisabled: '#fff',
+                        },
+                    },
+                }}
+                >
+                    <Button type="primary" onClick={handleButton} disabled={buttonState}>{buttonInnerText}</Button>
+                </ConfigProvider>
+            </div>
+        </div>
     )
 }
