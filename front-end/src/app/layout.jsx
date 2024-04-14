@@ -2,7 +2,7 @@
 
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Layout, theme } from 'antd';
+import { Layout } from 'antd';
 const { Header, Content, Footer } = Layout;
 import { SignerWrapper } from '@/context';
 import CustomMenu from "./components/CustomMenu/CustomMenu";
@@ -15,10 +15,6 @@ const inter = Inter({ subsets: ["latin"] });
 // };
 
 export default function RootLayout({ children }) {
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
   return (
     <html lang="en">
       <body className={inter.className}>
@@ -35,15 +31,15 @@ export default function RootLayout({ children }) {
             </Header>
             <Content
               style={{
-                padding: '25px 25px',
+                padding: '25px 0',
               }}
             >
               <div
                 style={{
-                  background: colorBgContainer,
+                  background: "#fff",
                   minHeight: 280,
                   padding: 24,
-                  borderRadius: borderRadiusLG,
+                  borderRadius: 20,
                 }}
               >
                 {children}
