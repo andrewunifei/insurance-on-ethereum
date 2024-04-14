@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/nextjs-registry": "^1.0.0",
     "@metamask/detect-provider": "^2.0.0",
     "ethers": "^5.7.2",
     "next": "14.1.4",

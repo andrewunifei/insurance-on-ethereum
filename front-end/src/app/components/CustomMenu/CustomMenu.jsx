@@ -28,7 +28,11 @@ export default function CustomMenu() {
         },
     ];
 
+    const filter = new RegExp('/[^/]*');
+    const pathnameFiltered = filter.exec(pathname)[0];
+
     React.useEffect(() => {
+        console.log(signer)
         if(signer) {
             setButtonState(true)
             setButtonInnerText("Você está conectado!")
@@ -54,7 +58,7 @@ export default function CustomMenu() {
                 theme="dark"
                 mode="horizontal"
                 items={items}
-                selectedKeys={[pathname]}
+                selectedKeys={[pathnameFiltered]}
                 style={{ flex: 1, minWidth: 0 }}
             />
             <div style={{marginLeft: "auto"}}>

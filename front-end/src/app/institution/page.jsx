@@ -6,6 +6,7 @@ import mountInsuranceAPI from "@/utils/InsuranceAPI.sol/mountInsuranceAPI";
 import mountInstitution from "@/utils/Institution.sol/mountInstitution";
 import { ethers }  from "ethers";
 import { Card, Button, Space, Flex } from 'antd';
+import Link from 'next/link';
 
 export default function Institution() {
     const { signer } = useSignerContext();
@@ -44,34 +45,43 @@ export default function Institution() {
                                 })
                             }
                             const _children = array.map((val) => (
-                                createElement(
-                                    "p",
-                                    {
-                                        key: val['info'],
-                                        id: val['info']
-                                    },
-                                    createElement(
-                                        'span',
-                                        {style: {fontWeight: 'bold'}}, 
-                                        `${val['index']}:`
-                                    ),
-                                    ` ${val['info']}`
-                                )
+                                <p
+                                    key={val['info']}
+                                    id={val['info']}
+                                >
+                                    <span 
+                                        style={{fontWeight: 'bold'}}
+                                    >
+                                        {`${val['index']}: `}
+                                    </span>
+                                    {val['info']}
+                                </p>
                             ));
                             _cards.push(
                                 (
                                     <Card 
-                                        key={1}  
+                                        key={institutionAddress}
+                                        id={institutionAddress}
                                         loading={false}
                                         title={_children[1].props.id}
-                                        extra={<a href="#">Explorar</a>}
+                                        extra={
+                                            <Link 
+                                                href={{
+                                                    pathname: "/institution/explore",
+                                                    query: {
+                                                        address: institutionAddress
+                                                    }
+                                                }}
+                                            >
+                                                Explorar
+                                            </Link>
+                                        }
                                         style={{ width: 300 }}
                                     >
                                         {_children}
                                     </Card>
                                 )
                             )
-                            if(container.current) container.current.removeChild(container.current.children[0]);
                         }
                         setCards(_cards)
                         setInstitutions(_institutions);
@@ -84,23 +94,30 @@ export default function Institution() {
         }
         fetchInstitutions();        
     }, [signer])
+
+    useEffect(() => {
+        const element = document.getElementById("remove-me");
+        if(cards && element) element.remove();
+    }, [cards])
     
     return (
-        <Space direction="vertical" size={16}>
+        <Space direction="vertical" size={16} >
             <Button type="primary">
                 Criar nova Instituição
             </Button>
-            <Flex wrap="wrap" gap="large" justify="flex-start" align="center" ref={container}>
-                <Card 
-                    title={"Carregando..."}
-                    extra={<a href="#">Explorar</a>}
-                    loading={true}
-                    style={{
-                        visibility: 'visible',
-                        width: 300
-                    }}
-                >
-                </Card>
+            <Flex wrap="wrap" gap="large" justify="flex-start" align="center" ref={container} >
+                <div id={"remove-me"}>
+                    <Card 
+                        title={"Carregando..."}
+                        extra={<Link href="#">Explorar</Link>}
+                        loading={true}
+                        style={{
+                            visibility: 'visible',
+                            width: 300
+                        }}
+                    >
+                    </Card>
+                </div>
                 {cards}
             </Flex>
         </Space>
