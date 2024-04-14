@@ -80,7 +80,7 @@ export function SignerWrapper({children}) {
             closable={false}
         >
           <div style={{display: 'flex',justifyContent: 'center'}}>
-          <Image
+            <Image
               src="/metamask.svg"
               width={100}
               height={100}

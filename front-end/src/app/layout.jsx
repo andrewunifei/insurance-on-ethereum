@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
       <Suspense fallback={<Loading />}>
       <AntdRegistry>
         <SignerWrapper>
-          <Layout style={{height:"100vh"}}>
+          <Layout style={{height:"100vh", background: "#001628"}}>
             <Header
               style={{
                 display: 'flex',
@@ -36,15 +36,22 @@ export default function RootLayout({ children }) {
             </Header>
             <Content
               style={{
-                padding: '25px 0 0 0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: "center",
+                width: '100vw',
+                borderStyle: "solid"
               }}
             >
               <div
                 style={{
                   background: "#fff",
-                  height: '100vh',
+                  height: '83vh',
                   padding: 40,
-                  borderRadius: 20,
+                  borderRadius: "10px 10px 0 0",
+                  borderStyle: "solid",
+                  display: "flex",
+                  width: '100vw',
                 }}
               >
                 {children}
@@ -53,7 +60,9 @@ export default function RootLayout({ children }) {
             <Footer
               style={{
                 textAlign: 'center',
-                background: '#fff'
+                background: '#fff',
+                color: "#001628",
+                borderRadius: "0 0 10px 10px",
               }}
             >
               Insurance on Ethereum • {new Date().getFullYear()}

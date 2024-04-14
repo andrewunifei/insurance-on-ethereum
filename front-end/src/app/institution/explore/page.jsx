@@ -14,6 +14,17 @@ export default function Expore({ searchParams }) {
     }, [])
 
     return (
-        <h1>{institution ? institution.address : 'Haro'}</h1>
+        <p>
+            <span style={{fontWeight: 'bold'}}>Endereço da Instituição </span>
+            <a style={{
+                fontStyle: 'italic',
+                color: '#6089cc'
+                }}
+                href={`https://etherscan.io/address/${institution ? institution.address : ''}`}
+                target='_blank'
+            >
+                {institution ? institution.address : ''}
+            </a>
+        </p>
     )
 }

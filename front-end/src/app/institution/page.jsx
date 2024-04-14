@@ -5,12 +5,14 @@ import { useEffect, useState, createElement, createRef } from "react";
 import mountInsuranceAPI from "@/utils/InsuranceAPI.sol/mountInsuranceAPI";
 import mountInstitution from "@/utils/Institution.sol/mountInstitution";
 import { ethers }  from "ethers";
-import { Card, Button, Space, Flex } from 'antd';
+import { Card, Button, Space, Flex, Divider } from 'antd';
 import Link from 'next/link';
+import RegisterInstitution from "../components/RegisterInstitution/RegisterInstitution";
 
 export default function Institution() {
     const { signer } = useSignerContext();
     const [ institutions, setInstitutions ] = useState(null);
+    const [ drawerStatus, setDrawerStatus ] = useState(false);
     const [ cards, setCards ]  = useState(null);
     const container = createRef();
     const infoKeys = [
@@ -76,7 +78,10 @@ export default function Institution() {
                                                 Explorar
                                             </Link>
                                         }
-                                        style={{ width: 300 }}
+                                        style={{
+                                            width: 300,
+                                            boxShadow: "5px 8px 24px 5px rgba(208, 216, 243, 0.6)"
+                                        }}
                                     >
                                         {_children}
                                     </Card>
@@ -99,12 +104,21 @@ export default function Institution() {
         const element = document.getElementById("remove-me");
         if(cards && element) element.remove();
     }, [cards])
+
+    function handleCreate() {
+        setDrawerStatus(true);
+    }
     
     return (
-        <Space direction="vertical" size={16} >
-            <Button type="primary">
+        <Space direction="vertical" size={16} style={{width: '100vw'}} >
+            <RegisterInstitution 
+                open={drawerStatus}
+                setOpen={setDrawerStatus}
+            />
+            <Button type="primary" onClick={handleCreate}>
                 Criar nova Instituição
             </Button>
+            <Divider style={{margin: "0", color: "black"}} />
             <Flex wrap="wrap" gap="large" justify="flex-start" align="center" ref={container} >
                 <div id={"remove-me"}>
                     <Card 
@@ -113,7 +127,8 @@ export default function Institution() {
                         loading={true}
                         style={{
                             visibility: 'visible',
-                            width: 300
+                            width: 300,
+                            boxShadow: "5px 8px 24px 5px rgba(208, 216, 243, 0.6)" 
                         }}
                     >
                     </Card>
