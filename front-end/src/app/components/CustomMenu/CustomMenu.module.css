@@ -1,0 +1,13 @@
+#connectButton {
+    background: #f8841e;
+    color: #fff;
+}
+
+#connectButton:hover {
+    background: rgb(224, 98, 35);
+    color: #fff;
+}
+
+#connectButtonDisabled {
+    background: #001628;
+}

@@ -7,7 +7,7 @@ const { Header, Content, Footer } = Layout;
 import Link from 'next/link';
 import { SignerWrapper } from '@/context';
 import { usePathname } from 'next/navigation'
-import CustomMenu from "./components/CustomMenu";
+import CustomMenu from "./components/CustomMenu/CustomMenu";
 
 const inter = Inter({ subsets: ["latin"] });
 

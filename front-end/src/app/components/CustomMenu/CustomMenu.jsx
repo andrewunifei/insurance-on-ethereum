@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation'
 import { Menu, Button, ConfigProvider } from 'antd';
 import { useSignerContext } from "@/context";
+import styles from './CustomMenu.module.css'
+import { WalletOutlined } from '@ant-design/icons'
 
 export default function CustomMenu() {
     const { signer, setIsModalOpen } = useSignerContext(); 
@@ -46,7 +48,7 @@ export default function CustomMenu() {
         <div
             style={{
                 display: "flex",
-                width: "1000vw",
+                width: "100vw",
             }}
         >
             <Menu 
@@ -60,7 +62,7 @@ export default function CustomMenu() {
                 <ConfigProvider
                 theme={{
                     token: {
-                        colorTextDisabled:'rgba(255 , 255, 255, 1)'
+                        colorTextDisabled: 'rgba(255 , 255, 255, 1)',
                     },
                     components: {
                         Button: {
@@ -69,7 +71,15 @@ export default function CustomMenu() {
                     },
                 }}
                 >
-                    <Button type="primary" onClick={handleButton} disabled={buttonState}>{buttonInnerText}</Button>
+                    <Button 
+                        type="primary"
+                        onClick={handleButton}
+                        disabled={buttonState}
+                        id={buttonState ? styles.connectButtonDisabled : styles.connectButton}
+                        icon={<WalletOutlined />}
+                    >
+                        {buttonInnerText}
+                    </Button>
                 </ConfigProvider>
             </div>
         </div>

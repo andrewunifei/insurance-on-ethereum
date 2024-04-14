@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { Modal } from 'antd';
 import styles from "./context.module.css";
 import { ethers }  from "ethers";
+import Image from 'next/image'
 
 const SignerContext = createContext(null);
 
@@ -79,6 +80,13 @@ export function SignerWrapper({children}) {
             onCancel={handleCancel}
             closable={false}
         >
+          <div style={{display: 'flex',justifyContent: 'center'}}>
+          <Image
+              src="/metamask.svg"
+              width={100}
+              height={100}
+            /> 
+            </div>
             <p>É necessário a extensão carteira MetaMask para interagir com essa aplicação.</p>
             <br />
             <p><span id={styles.conn}>Conecte-se</span> ou instale a carteira no link <a id={styles.link} href="https://metamask.io" target="_blank">https://metamask.io</a></p>
