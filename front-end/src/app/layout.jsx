@@ -2,11 +2,9 @@
 
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Breadcrumb, Layout, Menu, Modal, Button, theme } from 'antd';
+import { Layout, theme } from 'antd';
 const { Header, Content, Footer } = Layout;
-import Link from 'next/link';
 import { SignerWrapper } from '@/context';
-import { usePathname } from 'next/navigation'
 import CustomMenu from "./components/CustomMenu/CustomMenu";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -17,26 +15,9 @@ const inter = Inter({ subsets: ["latin"] });
 // };
 
 export default function RootLayout({ children }) {
-  const items = [
-    {
-      key: '/',
-      label: <Link href='/'>Início</Link>,
-    },
-    {
-      key: '/institution',
-      label: <Link href='/institution'>Área da Instituição</Link>
-    },
-    {
-      key: '/farmer',
-      label: <Link href='/farmer'>Área do Fazendeiro</Link>,
-    },
-  ];
-
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const pathname = usePathname()
-
 
   return (
     <html lang="en">
@@ -50,16 +31,6 @@ export default function RootLayout({ children }) {
               }}
             >
               <div className="demo-logo" />
-              {/* <Menu 
-                theme="dark"
-                mode="horizontal"
-                items={items}
-                selectedKeys={[pathname]}
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                }}
-              /> */}
               <CustomMenu />
             </Header>
             <Content

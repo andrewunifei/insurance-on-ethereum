@@ -43,7 +43,6 @@ export default function CustomMenu() {
         setIsModalOpen(true);
     }
 
-
     return (
         <div
             style={{

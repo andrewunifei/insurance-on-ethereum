@@ -68,8 +68,7 @@ export function SignerWrapper({children}) {
         <SignerContext.Provider value={{
             signer,
             setSigner,
-            setIsModalOpen,
-            provider
+            setIsModalOpen
         }}>
         < Modal 
             title="Carteira MetaMask"
