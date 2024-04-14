@@ -9,6 +9,7 @@ import { Card, Button, Space, Flex, Divider } from 'antd';
 import Link from 'next/link';
 import RegisterInstitution from "../components/RegisterInstitution/RegisterInstitution";
 
+
 export default function Institution() {
     const { signer } = useSignerContext();
     const [ institutions, setInstitutions ] = useState(null);
@@ -71,7 +72,8 @@ export default function Institution() {
                                                 href={{
                                                     pathname: "/institution/explore",
                                                     query: {
-                                                        address: institutionAddress
+                                                        address: institutionAddress,
+                                                        name: _children[1].props.id
                                                     }
                                                 }}
                                             >
@@ -115,9 +117,11 @@ export default function Institution() {
                 open={drawerStatus}
                 setOpen={setDrawerStatus}
             />
-            <Button type="primary" onClick={handleCreate}>
-                Criar nova Instituição
-            </Button>
+            <Flex gap="small" wrap="wrap">
+                <Button type="primary" onClick={handleCreate}>
+                    Criar nova Instituição
+                </Button>
+            </Flex>
             <Divider style={{margin: "0", color: "black"}} />
             <Flex wrap="wrap" gap="large" justify="flex-start" align="center" ref={container} >
                 <div id={"remove-me"}>

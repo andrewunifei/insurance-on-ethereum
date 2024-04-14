@@ -1,0 +1,8 @@
+#etherScan {
+    font-style: italic;
+    color: #6089cc;
+}
+
+#etherScan:hover {
+    color: #426192;
+}
