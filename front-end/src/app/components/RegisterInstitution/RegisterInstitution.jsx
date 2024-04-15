@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
-import { PlusOutlined } from '@ant-design/icons';
-import { Button, Col, DatePicker, Drawer, Form, Input, Row, Select, Space } from 'antd';
+import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import { Button, Col, Tag, Drawer, Form, Input, Row, Select, Space } from 'antd';
 
 const { Option } = Select;
+
+const customizeRequiredMark = (label, { required }) => (
+  <>
+    {required ? <Tag color="magenta">Obrigatório</Tag> : <Tag color="warning">Opcional</Tag>}
+    {label}
+  </>
+);
 
 export default function RegisterInstitution({open, setOpen}) {
   function onClose() {
@@ -34,86 +41,131 @@ export default function RegisterInstitution({open, setOpen}) {
           </Space>
         }
       >
-        <Form layout="vertical" hideRequiredMark>
+        <Form layout="vertical" requiredMark={customizeRequiredMark}>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="name"
-                label="Name"
-                rules={[{ required: true, message: 'Please enter user name' }]}
+                name="id"
+                label="ID"
+                rules={[{ required: true, message: 'ID é um campo obrigatório' }]}
               >
-                <Input placeholder="Please enter user name" />
+                <Input placeholder="Identifica uma instituição" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                name="url"
-                label="Url"
-                rules={[{ required: true, message: 'Please enter url' }]}
-              >
-                <Input
-                  style={{ width: '100%' }}
-                  addonBefore="http://"
-                  addonAfter=".com"
-                  placeholder="Please enter url"
-                />
+                <Form.Item
+                  name="name"
+                  label="Nome"
+                  rules={[{ required: true, message: 'Nome é um campo obrigatório' }]}
+                >
+                <Input placeholder="Nome da instituição" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+                <Form.Item
+                  name="email"
+                  label="E-mail"
+                  rules={[{ required: true, message: 'E-mail é um campo obrigatório' }]}
+                >
+                <Input placeholder="E-mail oficial para contato" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+                <Form.Item
+                  name="site"
+                  label="Site"
+                  rules={[{ required: false }]}
+                >
+                <Input placeholder="Site oficial da instituição" />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="owner"
-                label="Owner"
-                rules={[{ required: true, message: 'Please select an owner' }]}
+                name="capital"
+                label="Capital"
+                rules={[{ required: true, message: 'Capital é um campo obrigatório' }]}
               >
-                <Select placeholder="Please select an owner">
-                  <Option value="xiao">Xiaoxiao Fu</Option>
-                  <Option value="mao">Maomao Zhou</Option>
+                <Select placeholder="Selecione o tipo de capital">
+                  <Option value="privado">Privado</Option>
+                  <Option value="publico">Público</Option>
                 </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
-                name="type"
-                label="Type"
-                rules={[{ required: true, message: 'Please choose the type' }]}
+                name="origem"
+                label="Espaço de existência"
+                rules={[{ required: true, message: 'Espaço é um campo obrigatório' }]}
               >
-                <Select placeholder="Please choose the type">
-                  <Option value="private">Private</Option>
-                  <Option value="public">Public</Option>
+                <Select placeholder="Espaço de existência da instituição">
+                  <Option value="fisicao">Físico</Option>
+                  <Option value="virtual">Virtual</Option>
                 </Select>
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
-                name="approver"
-                label="Approver"
-                rules={[{ required: true, message: 'Please choose the approver' }]}
-              >
-                <Select placeholder="Please choose the approver">
-                  <Option value="jack">Jack Ma</Option>
-                  <Option value="tom">Tom Liu</Option>
-                </Select>
+                <Form.Item
+                  name="endereco"
+                  label="Endereço físico"
+                  rules={[{ required: false }]}
+                >
+                <Input placeholder="Endereço físico da instituiçãoo" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+                <Form.Item
+                  name="estado"
+                  label="Estado nacional"
+                  rules={[{ required: false }]}
+                >
+                <Input placeholder="Estado nacional que reside" />
               </Form.Item>
             </Col>
           </Row>
           <Row gutter={16}>
             <Col span={24}>
-              <Form.Item
-                name="description"
-                label="Description"
-                rules={[
-                  {
-                    required: true,
-                    message: 'please enter url description',
-                  },
-                ]}
-              >
-                <Input.TextArea rows={4} placeholder="please enter url description" />
-              </Form.Item>
+              <Form.List name="users">
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }) => (
+                    <div>
+                      <Button danger onClick={() => remove(name)} style={{marginBottom: 5}}>Remover</Button>
+                      <Row gutter={16}>
+                        <Col span={12}>
+                            <Form.Item
+                              name="atributo"
+                              label=""
+                              rules={[{ required: true, message: "Atributo é um campo obrigatório" }]}
+                            >
+                            <Input placeholder="Artibuto" />
+                          </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <Form.Item
+                              name="valor"
+                              label=""
+                              rules={[{ required: true, message: "Valor é um campo obrigatório" }]}
+                            >
+                            <Input placeholder="Valor" />
+                          </Form.Item>
+                        </Col>
+                      </Row>
+                    </div>
+                  ))}
+                  <Form.Item>
+                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                      Adicionar informações extra
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
             </Col>
           </Row>
         </Form>

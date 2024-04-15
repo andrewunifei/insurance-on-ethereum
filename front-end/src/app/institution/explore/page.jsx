@@ -69,13 +69,8 @@ export default function Expore({ searchParams }) {
                                 display: 'flex',
                                 alignItems: 'center'
                             }}>
-                                <span style={{color: 'grey'}}>Balanço </span>
-                                <Image
-                                    src="/ethereum.svg"
-                                    width={15}
-                                    height={15}
-                                /> 
-                                9.31 ETH
+                                <Image src="/ethereum.svg" width={15} height={15} /> 
+                                <span><span style={{color: 'grey'}}> Balanço </span>9.31 ETH</span>
                             </p>
                             <p style={{
                                 border: 'solid', 
@@ -183,7 +178,7 @@ export default function Expore({ searchParams }) {
                             alignItems: 'flex-start'
                         }}>
                             <span style={{marginBottom: 8, color: 'grey'}}>
-                                Adicionar à Lista Branca <Tooltip title="O endereço da carteira do fazendeiro precisa estar na lista branca como pré-requisito para iniciar um Contrato de Seguro." color='cyan' key='branca'>
+                                Adicionar à Lista Branca <Tooltip title="O endereço da carteira do fazendeiro precisa estar na lista branca como pré-requisito para iniciar um Contrato de Seguro." key='branca'>
                                 <QuestionCircleOutlined /></Tooltip>
                             </span>
                             <Space.Compact style={{ width: '100%' }}>
@@ -198,7 +193,7 @@ export default function Expore({ searchParams }) {
                             alignItems: 'flex-start'
                         }}>
                             <span style={{marginBottom: 8, color: 'grey'}}>
-                                Adicionar à Lista Negra <Tooltip title="A carteira do fazendeiro" color='cyan' key='branca'>
+                                Adicionar à Lista Negra <Tooltip title="Endereços de carteira nesta lista são de usuários com comportamentos ruins." key='branca'>
                                 <QuestionCircleOutlined /></Tooltip>
                             </span>
                             <Space.Compact>
