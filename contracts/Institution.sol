@@ -50,6 +50,7 @@ contract Institution{
      */
     function whitelistAddr(address _farmerAddr) external {
         whitelist[_farmerAddr] = true;
+        blacklist[_farmerAddr] = false;
     }
 
     /**

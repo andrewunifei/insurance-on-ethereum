@@ -48,7 +48,7 @@ export default function RootLayout({ children }) {
                   background: "#fff",
                   height: '83vh',
                   padding: 40,
-                  borderRadius: "10px 10px 0 0",
+                  borderRadius: "16px 16px 0 0",
                   borderStyle: "solid",
                   display: "flex",
                   width: '100vw',
