@@ -89,7 +89,7 @@ export default function Expore({ searchParams }) {
                                     href={`https://sepolia.etherscan.io/address/${institution ? institution.address : ''}`}
                                     target='_blank'
                                 >
-                                    {institution ? institution.address : ''}
+                                    {institution ? institution.address : 'buscando...'}
                                 </Link>
                             </p>
                         </Space>
@@ -141,7 +141,7 @@ export default function Expore({ searchParams }) {
                                 href={`https://sepolia.etherscan.io/address/${owner ? owner : ''}`}
                                 target='_blank'
                             >
-                                {owner ? owner : null}
+                                {owner ? owner : 'Buscando...'}
                             </Link>
 
                         </p>
