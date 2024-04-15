@@ -12,6 +12,7 @@ import styles from './page.module.css'
 import Image from 'next/image'
 
 const colors1 = ['#6253E1', '#04BEFE'];
+const colors2 = ['#001628', '#027ea8']
 const getHoverColors = (colors) =>
   colors.map((color) => new TinyColor(color).lighten(5).toString());
 const getActiveColors = (colors) =>
@@ -40,7 +41,20 @@ export default function Expore({ searchParams }) {
         <>
             <Space direction="vertical" size={16} style={{width: '100vw'}} >
                 <Flex gap="large" wrap="wrap" align="center" >
-                    <h1 style={{fontStyle: 'italic', color: '#001628'}}>{searchParams.name}</h1>
+                    <h1 style={{
+                        backgroundColor: 'white'
+
+                    }}>
+                        <span style={{
+                            fontStyle: 'italic',
+                            backgroundImage: `linear-gradient(135deg, ${colors2.join(', ')})`, 
+                            backgroundClip: 'text',
+                            color: 'transparent',
+                            backgroundSize: '100%' 
+                        }}>
+                        {searchParams.name}
+                        </span>
+                    </h1>
                     <div style={{
                         marginLeft: "auto", 
                         display: "flex",

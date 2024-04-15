@@ -1,13 +1,20 @@
 "use client"
 
 import { useSignerContext } from "@/context";
-import { useEffect, useState, createElement, createRef } from "react";
+import { useEffect, useState, createRef } from "react";
 import mountInsuranceAPI from "@/utils/InsuranceAPI.sol/mountInsuranceAPI";
 import mountInstitution from "@/utils/Institution.sol/mountInstitution";
 import { ethers }  from "ethers";
-import { Card, Button, Space, Flex, Divider } from 'antd';
+import { Card, Button, Space, Flex, Divider, ConfigProvider } from 'antd';
+import { TinyColor } from '@ctrl/tinycolor';
 import Link from 'next/link';
 import RegisterInstitution from "../components/RegisterInstitution/RegisterInstitution";
+
+const colors1 = ['#6253E1', '#04BEFE'];
+const getHoverColors = (colors) =>
+  colors.map((color) => new TinyColor(color).lighten(5).toString());
+const getActiveColors = (colors) =>
+  colors.map((color) => new TinyColor(color).darken(5).toString());
 
 
 export default function Institution() {
@@ -118,9 +125,21 @@ export default function Institution() {
                 setOpen={setDrawerStatus}
             />
             <Flex gap="small" wrap="wrap">
-                <Button type="primary" onClick={handleCreate}>
-                    Criar nova Instituição
-                </Button>
+            <ConfigProvider
+                        theme={{
+                            components: {
+                            Button: {
+                                colorPrimary: `linear-gradient(135deg, ${colors1.join(', ')})`,
+                                colorPrimaryHover: `linear-gradient(135deg, ${getHoverColors(colors1).join(', ')})`,
+                                colorPrimaryActive: `linear-gradient(135deg, ${getActiveColors(colors1).join(', ')})`,
+                                lineWidth: 0,
+                            },
+                            },
+                    }}>
+                        <Button type="primary" onClick={handleCreate}>
+                        Criar Instituição
+                        </Button>
+                    </ConfigProvider>
             </Flex>
             <Divider style={{margin: "0", color: "black"}} />
             <Flex wrap="wrap" gap="large" justify="flex-start" align="center" ref={container} >
