@@ -154,7 +154,7 @@ export default function Expore({ searchParams }) {
                             flexDirection: 'column',
                             alignItems: 'flex-start'
                         }}>
-                            <span style={{marginBottom: 8, fontWeight: 'bold', color: 'grey'}}>
+                            <span style={{marginBottom: 8, color: 'grey'}}>
                                 Adicionar balanço à Instituição
                             </span>
                             <Space.Compact style={{ width: '100%' }}>
@@ -168,7 +168,7 @@ export default function Expore({ searchParams }) {
                             flexDirection: 'column',
                             alignItems: 'flex-start'
                         }}>
-                            <span style={{marginBottom: 8, fontWeight: 'bold', color: 'grey'}}>
+                            <span style={{marginBottom: 8, color: 'grey'}}>
                                 Sacar balanço da Instituição
                             </span>
                             <Space.Compact style={{ width: '100%' }}>
@@ -182,7 +182,7 @@ export default function Expore({ searchParams }) {
                             flexDirection: 'column',
                             alignItems: 'flex-start'
                         }}>
-                            <span style={{marginBottom: 8, fontWeight: 'bold', color: 'grey'}}>
+                            <span style={{marginBottom: 8, color: 'grey'}}>
                                 Adicionar à Lista Branca <Tooltip title="O endereço da carteira do fazendeiro precisa estar na lista branca como pré-requisito para iniciar um Contrato de Seguro." color='cyan' key='branca'>
                                 <QuestionCircleOutlined /></Tooltip>
                             </span>
@@ -197,7 +197,7 @@ export default function Expore({ searchParams }) {
                             flexDirection: 'column',
                             alignItems: 'flex-start'
                         }}>
-                            <span style={{marginBottom: 8, fontWeight: 'bold', color: 'grey'}}>
+                            <span style={{marginBottom: 8, color: 'grey'}}>
                                 Adicionar à Lista Negra <Tooltip title="A carteira do fazendeiro" color='cyan' key='branca'>
                                 <QuestionCircleOutlined /></Tooltip>
                             </span>
