@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.0",
+    "@ctrl/tinycolor": "^4.1.0",
     "@metamask/detect-provider": "^2.0.0",
     "ethers": "^5.7.2",
     "next": "14.1.4",

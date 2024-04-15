@@ -5,10 +5,17 @@ import mountInstitution from "@/utils/Institution.sol/mountInstitution";
 import { useSignerContext } from "@/context";
 import { useEffect, useState } from "react";
 import { ArrowLeftOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Button, Flex, Divider, Space, Row, Col, Input, Tooltip, Watermark } from 'antd';
+import { Button, Flex, Divider, Space, Row, Col, Input, Tooltip, ConfigProvider } from 'antd';
+import { TinyColor } from '@ctrl/tinycolor';
 import Link from 'next/link';
 import styles from './page.module.css'
 import Image from 'next/image'
+
+const colors1 = ['#6253E1', '#04BEFE'];
+const getHoverColors = (colors) =>
+  colors.map((color) => new TinyColor(color).lighten(5).toString());
+const getActiveColors = (colors) =>
+  colors.map((color) => new TinyColor(color).darken(5).toString());
 
 export default function Expore({ searchParams }) {
     const institutionAddress = searchParams.address
@@ -21,17 +28,19 @@ export default function Expore({ searchParams }) {
         const _institution = mountInstitution(signer, institutionAddress);
         setInstitution(_institution);
         async function getOwner() {
-            const _owner = await _institution.im_owner();
-            setOwner(_owner);
+            if(signer) {
+                const _owner = await _institution.im_owner();
+                setOwner(_owner);
+            }
         };
         getOwner();
-    }, [])
+    }, [signer])
 
     return (
         <>
             <Space direction="vertical" size={16} style={{width: '100vw'}} >
                 <Flex gap="large" wrap="wrap" align="center" >
-                    <h1 style={{fontStyle: 'italic', color: 'grey'}}>{searchParams.name}</h1>
+                    <h1 style={{fontStyle: 'italic', color: '#001628'}}>{searchParams.name}</h1>
                     <div style={{
                         marginLeft: "auto", 
                         display: "flex",
@@ -46,7 +55,7 @@ export default function Expore({ searchParams }) {
                                 display: 'flex',
                                 alignItems: 'center'
                             }}>
-                                Balanço:
+                                <span style={{color: 'grey'}}>Balanço </span>
                                 <Image
                                     src="/ethereum.svg"
                                     width={15}
@@ -60,7 +69,7 @@ export default function Expore({ searchParams }) {
                                 borderRadius: 5,
                                 borderColor: '#F0F0F0'
                             }}>
-                                <span >Endereço: </span>
+                                <span style={{color: 'grey'}}>Endereço </span>
                                 <Link 
                                     id={styles.etherScan}
                                     href={`https://sepolia.etherscan.io/address/${institution ? institution.address : ''}`}
@@ -77,7 +86,21 @@ export default function Expore({ searchParams }) {
 
                 <Flex gap="small" wrap="wrap" align="center" >
                     <Button onClick={() => {router.back()}} icon={<ArrowLeftOutlined />}>Voltar</Button>
-                    <Button type="primary">Iniciar novo Contrato de Seguro</Button>
+                    <ConfigProvider
+                        theme={{
+                            components: {
+                            Button: {
+                                colorPrimary: `linear-gradient(135deg, ${colors1.join(', ')})`,
+                                colorPrimaryHover: `linear-gradient(135deg, ${getHoverColors(colors1).join(', ')})`,
+                                colorPrimaryActive: `linear-gradient(135deg, ${getActiveColors(colors1).join(', ')})`,
+                                lineWidth: 0,
+                            },
+                            },
+                    }}>
+                        <Button type="primary" >
+                        Iniciar novo Contrato de Seguro
+                        </Button>
+                    </ConfigProvider>
                 </Flex>
                 
                 <div style={{
@@ -96,8 +119,9 @@ export default function Expore({ searchParams }) {
                         </h2>
                         <p>
                             <span style={{
-                                visibility: (owner ? 'visible' : 'hidden')
-                            }}>Carteira controladora: </span>
+                                visibility: (owner ? 'visible' : 'hidden'),
+                                color: 'grey'
+                            }}>Carteira controladora </span>
                             <Link 
                                 id={styles.etherScan}
                                 href={`https://sepolia.etherscan.io/address/${owner ? owner : ''}`}
@@ -116,7 +140,7 @@ export default function Expore({ searchParams }) {
                             flexDirection: 'column',
                             alignItems: 'flex-start'
                         }}>
-                            <span style={{marginBottom: 8, fontWeight: 'bold'}}>
+                            <span style={{marginBottom: 8, fontWeight: 'bold', color: 'grey'}}>
                                 Adicionar balanço à Instituição
                             </span>
                             <Space.Compact style={{ width: '100%' }}>
@@ -130,7 +154,7 @@ export default function Expore({ searchParams }) {
                             flexDirection: 'column',
                             alignItems: 'flex-start'
                         }}>
-                            <span style={{marginBottom: 8, fontWeight: 'bold'}}>
+                            <span style={{marginBottom: 8, fontWeight: 'bold', color: 'grey'}}>
                                 Sacar balanço da Instituição
                             </span>
                             <Space.Compact style={{ width: '100%' }}>
@@ -144,7 +168,7 @@ export default function Expore({ searchParams }) {
                             flexDirection: 'column',
                             alignItems: 'flex-start'
                         }}>
-                            <span style={{marginBottom: 8, fontWeight: 'bold'}}>
+                            <span style={{marginBottom: 8, fontWeight: 'bold', color: 'grey'}}>
                                 Adicionar à Lista Branca <Tooltip title="O endereço da carteira do fazendeiro precisa estar na lista branca como pré-requisito para iniciar um Contrato de Seguro." color='cyan' key='branca'>
                                 <QuestionCircleOutlined /></Tooltip>
                             </span>
@@ -159,7 +183,7 @@ export default function Expore({ searchParams }) {
                             flexDirection: 'column',
                             alignItems: 'flex-start'
                         }}>
-                            <span style={{marginBottom: 8, fontWeight: 'bold'}}>
+                            <span style={{marginBottom: 8, fontWeight: 'bold', color: 'grey'}}>
                                 Adicionar à Lista Negra <Tooltip title="A carteira do fazendeiro" color='cyan' key='branca'>
                                 <QuestionCircleOutlined /></Tooltip>
                             </span>
