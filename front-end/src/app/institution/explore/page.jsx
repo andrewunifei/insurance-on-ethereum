@@ -4,11 +4,13 @@ import { useRouter } from 'next/navigation'
 import mountInstitution from "@/utils/Institution.sol/mountInstitution";
 import { useSignerContext } from "@/context";
 import { useEffect, useState } from "react";
-import { ArrowLeftOutlined } from '@ant-design/icons';
-import { Button, Flex, Divider, Space, Row, Col, Input, Typography } from 'antd';
+import { ArrowLeftOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+import { Button, Flex, Divider, Space, Row, Col, Input, Typography, Tooltip } from 'antd';
 import Link from 'next/link';
 import styles from './page.module.css'
 import Image from 'next/image'
+
+const { Paragraph, Text } = Typography;
 
 export default function Expore({ searchParams }) {
     const institutionAddress = searchParams.address
@@ -83,43 +85,83 @@ export default function Expore({ searchParams }) {
                         Painel de Controle
                     </h2>
                 <Row style={{display: 'flex', justifyItems: 'center'}} >
-                    <Col span={8} style={{ 
+                    <Col span={6} style={{ 
                         padding: 35, 
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start'}}
                     >
-                        <Typography.Title level={5}>Adicionar balanço à Instituição</Typography.Title>
+                        <Text keyboard style={{marginBottom: 8}}>
+                            Adicionar balanço à Instituição
+                        </Text>
                         <Space.Compact style={{ width: '100%' }}>
                             <Input prefix="Ξ" placeholder="Ether" />
                             <Button type="primary">Adicionar</Button>
                         </Space.Compact>
                     </Col>
-                    <Col span={8} style={{
+                    <Col span={6} style={{
                         padding: 35, 
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start'}}
                     >
-                        <Typography.Title level={5}>Adicionar fazendeiro à Lista Branca</Typography.Title>
+                        <Text keyboard style={{marginBottom: 8}}>
+                            Sacar balanço da Instituição
+                        </Text>
+
                         <Space.Compact style={{ width: '100%' }}>
-                            <Input placeholder="Endereço" />
+                            <Input prefix="Ξ" placeholder="Ether" />
+                            <Button type="primary">Sacar</Button>
+                        </Space.Compact>
+                    </Col>
+                    <Col span={6} style={{ 
+                        padding: 35, 
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start'}}
+                    >
+                        <Text keyboard style={{marginBottom: 8}}>
+                            Adicionar à Lista Branca <Tooltip title="O endereço da carteira do fazendeiro precisa estar na lista branca como pré-requisito para iniciar um Contrato de Seguro." color='cyan' key='branca'>
+                            <QuestionCircleOutlined /></Tooltip>
+                        </Text>
+                        <Space.Compact style={{ width: '100%' }}>
+                            <Input placeholder="Endereço da carteira" />
                             <Button type="primary">Adicionar</Button>
                         </Space.Compact>
                     </Col>
-                    <Col span={8} style={{ 
+                    <Col span={6} style={{ 
                         padding: 35, 
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start'}}
                     >
-                        <Typography.Title level={5}>Adicionar fazendeiro à Lista Negra</Typography.Title>
-                        <Space.Compact style={{ width: '100%' }}>
-                            <Input placeholder="Endereço" />
+                        <Text keyboard style={{marginBottom: 8}}>
+                            Adicionar à Lista Negra <Tooltip title="A carteira do fazendeiro" color='cyan' key='branca'>
+                            <QuestionCircleOutlined /></Tooltip>
+                        </Text>
+                        <Space.Compact>
+                            <Input placeholder="Endereço da carteira" />
                             <Button type="primary">Adicionar</Button>
                         </Space.Compact>
                     </Col>
                 </Row>
+            </div>
+            <div style={{
+                            border: 'solid',
+                            borderRadius: 5,
+                            borderColor: '#F0F0F0',
+                        }}>
+                    <h2 style={{
+                        borderBottom: 'solid',
+                        borderBottomColor: '#F0F0F0',
+                        borderBottomStyle: 'dotted',
+                        padding: 20
+                    }}>
+                        Contratos de Seguro Ativos
+                    </h2>
+                    <div>
+                        Test
+                    </div>
             </div>
             </Space>
         </>
