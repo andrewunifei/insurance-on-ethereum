@@ -24,8 +24,12 @@ contract Institution{
         _;
     }
 
-    constructor(address _owner) {
+    constructor(address _owner, string[2][] memory infoArray) {
         im_owner = _owner;
+        for(uint i = 0; i < infoArray.length; i++) {            
+            info[infoArray[i][0]] = infoArray[i][1];
+            infoKeys.push(infoArray[i][0]);
+        }
     }
 
     /**

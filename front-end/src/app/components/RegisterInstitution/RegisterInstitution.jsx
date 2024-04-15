@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from 'react';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Tag, Drawer, Form, Input, Row, Select, Space } from 'antd';
@@ -26,15 +28,26 @@ export default function RegisterInstitution({open, setOpen}) {
   };
 
   function dataTransformation(formObjectData) {
-    // const institutionInfo = [[x, y], [a, b], [k, l]]
+    let transformed = [];
 
-    //register(institutionInfo);
+    for(let key in formObjectData) {
+      if(key === 'users' && formObjectData['users'] == undefined) {
+        continue;
+      }
+      transformed.push([String(key), String(formObjectData[key])]);
+    };
+
+    console.log(transformed);
+
+    register(transformed);
   }
 
   function register(institutionInfo) {
     async function registerInstitution() {
-      const receipt = await insuranceAPI.createInstitution()
+      const tx = await insuranceAPI.createInstitution(institutionInfo);
+      const receipt = await tx.wait(1);
       const _newInstitutionAddress = receipt.events[0].args[0]
+      console.log(_newInstitutionAddress);
       setNewInsuranceAddress(_newInstitutionAddress);
     }
     registerInstitution();
@@ -159,6 +172,7 @@ export default function RegisterInstitution({open, setOpen}) {
                       <Row gutter={16}>
                         <Col span={12}>
                             <Form.Item
+                              key={`${key}1`}
                               name="atributo"
                               label=""
                               rules={[{ required: true, message: "Atributo é um campo obrigatório" }]}
@@ -168,6 +182,7 @@ export default function RegisterInstitution({open, setOpen}) {
                         </Col>
                         <Col span={12}>
                             <Form.Item
+                            key={`${key}2`}
                               name="valor"
                               label=""
                               rules={[{ required: true, message: "Valor é um campo obrigatório" }]}
