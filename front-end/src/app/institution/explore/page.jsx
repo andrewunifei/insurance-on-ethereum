@@ -1,15 +1,17 @@
 "use client"
 
 import { useRouter } from 'next/navigation'
+import { ethers }  from "ethers";
 import mountInstitution from "@/utils/Institution.sol/mountInstitution";
 import { useSignerContext } from "@/context";
 import { useEffect, useState } from "react";
 import { ArrowLeftOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Button, Flex, Divider, Space, Row, Col, Input, Tooltip, ConfigProvider } from 'antd';
+import { Button, Flex, Divider, Space, Row, Col, Input, Tooltip, ConfigProvider, Typography } from 'antd';
 import { TinyColor } from '@ctrl/tinycolor';
 import Link from 'next/link';
 import styles from './page.module.css'
 import Image from 'next/image'
+const { Paragraph, Text } = Typography;
 
 const colors1 = ['#6253E1', '#04BEFE'];
 const colors2 = ['#001628', '#027ea8']
@@ -19,19 +21,22 @@ const getActiveColors = (colors) =>
   colors.map((color) => new TinyColor(color).darken(5).toString());
 
 export default function Expore({ searchParams }) {
-    const institutionAddress = searchParams.address
     const { signer } = useSignerContext();
     const [ institution, setInstitution ] = useState(null);
     const [ owner, setOwner ] = useState(null);
+    const [ balance, setBalance ] = useState(null);
     const router = useRouter();
 
     useEffect(() => {
-        const _institution = mountInstitution(signer, institutionAddress);
+        const _institution = mountInstitution(signer, searchParams.address);
         setInstitution(_institution);
         async function getOwner() {
             if(signer) {
                 const _owner = await _institution.im_owner();
+                const _balanceRaw = await _institution.contractBalance();
+                const _balance = ethers.utils.formatEther(_balanceRaw);
                 setOwner(_owner);
+                setBalance(_balance);
             }
         };
         getOwner();
@@ -39,7 +44,7 @@ export default function Expore({ searchParams }) {
 
     return (
         <>
-            <Space direction="vertical" size={16} style={{width: '100vw'}} >
+            <Space direction="vertical" size={16} style={{width: '100vw', visibility: balance ? 'visible' : 'hidden' }} >
                 <Flex gap="large" wrap="wrap" align="center" >
                     <h1 style={{
                         backgroundColor: 'white'
@@ -67,10 +72,10 @@ export default function Expore({ searchParams }) {
                                 borderRadius: 5,
                                 borderColor: '#F0F0F0',
                                 display: 'flex',
-                                alignItems: 'center'
+                                alignItems: 'center',
                             }}>
                                 <Image src="/ethereum.svg" width={15} height={15} /> 
-                                <span><span style={{color: 'grey'}}> Balanço </span>9.31 ETH</span>
+                                <span><span style={{color: 'grey'}}> Balanço </span>{balance ? balance : ''} ETH</span>
                             </p>
                             <p style={{
                                 border: 'solid', 
@@ -80,11 +85,10 @@ export default function Expore({ searchParams }) {
                             }}>
                                 <span style={{color: 'grey'}}>Endereço </span>
                                 <Link 
-                                    id={styles.etherScan}
                                     href={`https://sepolia.etherscan.io/address/${institution ? institution.address : ''}`}
                                     target='_blank'
                                 >
-                                    {institution ? institution.address : 'buscando...'}
+                                    <Text copyable id={styles.etherScan} >{searchParams.address}</Text>
                                 </Link>
                             </p>
                         </Space>
@@ -128,7 +132,6 @@ export default function Expore({ searchParams }) {
                         </h2>
                         <p>
                             <span style={{
-                                visibility: (owner ? 'visible' : 'hidden'),
                                 color: 'grey'
                             }}>Carteira controladora </span>
                             <Link 
@@ -136,9 +139,13 @@ export default function Expore({ searchParams }) {
                                 href={`https://sepolia.etherscan.io/address/${owner ? owner : ''}`}
                                 target='_blank'
                             >
-                                {owner ? owner : 'Buscando...'}
+                                <Text 
+                                    copyable={(owner ? true : false)}
+                                    id={styles.etherScan}
+                                >
+                                    {owner ? owner : ''}
+                                </Text>
                             </Link>
-
                         </p>
                     </Flex>
 

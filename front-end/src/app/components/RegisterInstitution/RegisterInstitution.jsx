@@ -63,27 +63,7 @@ export default function RegisterInstitution({open, setOpen}) {
             </Col>
           </Row>
           <Row gutter={16}>
-            <Col span={12}>
-                <Form.Item
-                  name="email"
-                  label="E-mail"
-                  rules={[{ required: true, message: 'E-mail é um campo obrigatório' }]}
-                >
-                <Input placeholder="E-mail oficial para contato" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-                <Form.Item
-                  name="site"
-                  label="Site"
-                  rules={[{ required: false }]}
-                >
-                <Input placeholder="Site oficial da instituição" />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={12}>
+          <Col span={12}>
               <Form.Item
                 name="capital"
                 label="Capital"
@@ -96,6 +76,17 @@ export default function RegisterInstitution({open, setOpen}) {
               </Form.Item>
             </Col>
             <Col span={12}>
+                <Form.Item
+                  name="email"
+                  label="E-mail"
+                  rules={[{ required: true, message: 'E-mail é um campo obrigatório' }]}
+                >
+                <Input placeholder="E-mail oficial para contato" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
               <Form.Item
                 name="origem"
                 label="Espaço de existência"
@@ -105,6 +96,15 @@ export default function RegisterInstitution({open, setOpen}) {
                   <Option value="fisicao">Físico</Option>
                   <Option value="virtual">Virtual</Option>
                 </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                name="site"
+                label="Site"
+                rules={[{ required: false }]}
+              >
+                <Input placeholder="Site oficial da instituição" />
               </Form.Item>
             </Col>
           </Row>
