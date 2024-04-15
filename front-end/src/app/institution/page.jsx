@@ -2,7 +2,6 @@
 
 import { useSignerContext } from "@/context";
 import { useEffect, useState, createRef } from "react";
-import mountInsuranceAPI from "@/utils/InsuranceAPI.sol/mountInsuranceAPI";
 import mountInstitution from "@/utils/Institution.sol/mountInstitution";
 import { ethers }  from "ethers";
 import { Card, Button, Space, Flex, Divider, ConfigProvider } from 'antd';
@@ -18,7 +17,7 @@ const getActiveColors = (colors) =>
 
 
 export default function Institution() {
-    const { signer } = useSignerContext();
+    const { signer, insuranceAPI } = useSignerContext();
     const [ institutions, setInstitutions ] = useState(null);
     const [ drawerStatus, setDrawerStatus ] = useState(false);
     const [ cards, setCards ]  = useState(null);
@@ -40,8 +39,7 @@ export default function Institution() {
                 }
                 const _accounts = await _provider.send("eth_accounts", []); 
                 if(_accounts.length ==! 0) {
-                    if(signer) {
-                        const insuranceAPI = mountInsuranceAPI(signer);
+                    if(signer && insuranceAPI) {
                         const _institutions = await insuranceAPI.getAllInstitution();;
                         let _cards = [];
                         for (let institutionAddress of _institutions) {

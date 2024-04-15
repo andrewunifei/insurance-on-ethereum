@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect } from "react";
+import mountInsuranceAPI from "@/utils/InsuranceAPI.sol/mountInsuranceAPI";
 import { Modal } from 'antd';
 import styles from "./context.module.css";
 import { ethers }  from "ethers";
@@ -9,8 +10,9 @@ import Image from 'next/image'
 const SignerContext = createContext(null);
 
 export function SignerWrapper({children}) {
-    const [signer, setSigner] = useState(null);
     const [provider, setProvider] = useState(null);
+    const [signer, setSigner] = useState(null);
+    const [insuranceAPI, setInsuranceAPI] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(null);
     const [confirmLoading, setConfirmLoading] = useState(false);
 
@@ -25,8 +27,10 @@ export function SignerWrapper({children}) {
             }
             const _accounts = await _provider.send("eth_accounts", []); 
             if(_accounts.length ==! 0) {
-              setSigner(_provider.getSigner());
+              const _signer = _provider.getSigner();
+              setSigner(_signer);
               setIsModalOpen(false);
+              setInsuranceAPI(mountInsuranceAPI(_signer));
             }
             else {
               setIsModalOpen(true);
@@ -68,7 +72,8 @@ export function SignerWrapper({children}) {
         <SignerContext.Provider value={{
             signer,
             setSigner,
-            setIsModalOpen
+            setIsModalOpen,
+            insuranceAPI
         }}>
         < Modal 
             title="Carteira MetaMask"

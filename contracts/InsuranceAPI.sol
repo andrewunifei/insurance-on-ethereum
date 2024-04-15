@@ -23,11 +23,9 @@ contract InsuranceAPI {
     // Usando o mesmo endereço permite a criação de diversos contratos que representam Instituições
     // Pode ser resgatado com índice
     // No front-end talvez de pra fazer um mapeamento de nome para índice de lista equivalente
-    function createInstitution(string memory _institutionName) external {
-        Institution i = new Institution(
-            msg.sender,
-            _institutionName
-        );
+    function createInstitution(string[2][] memory _infoArray) external {
+        Institution i = new Institution(msg.sender);
+        i.registerInfo(_infoArray);
         institutions[msg.sender].push(i);
         // usedAddresses.push(msg.sender);
 

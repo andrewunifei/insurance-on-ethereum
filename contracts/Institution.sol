@@ -9,7 +9,7 @@ error NotOwner();
 contract Institution{
     address immutable public im_owner;
     string public institutionName;
-    string[] public infoKeys;
+    string[] public infoKeys; // Usar isso para retornar os valores do mapping 'info' em um loop off-chain
     mapping (string => string) public info;
     mapping (address => bool) public whitelist;
     mapping (address => bool) public blacklist;
@@ -24,9 +24,8 @@ contract Institution{
         _;
     }
 
-    constructor(address _owner, string memory _institutionName) {
+    constructor(address _owner) {
         im_owner = _owner;
-        institutionName = _institutionName;
     }
 
     /**

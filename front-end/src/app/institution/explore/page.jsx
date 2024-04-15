@@ -11,7 +11,7 @@ import { TinyColor } from '@ctrl/tinycolor';
 import Link from 'next/link';
 import styles from './page.module.css'
 import Image from 'next/image'
-const { Paragraph, Text } = Typography;
+const { Text } = Typography;
 
 const colors1 = ['#6253E1', '#04BEFE'];
 const colors2 = ['#001628', '#027ea8']
@@ -33,8 +33,8 @@ export default function Expore({ searchParams }) {
         async function getOwner() {
             if(signer) {
                 const _owner = await _institution.im_owner();
-                const _balanceRaw = await _institution.contractBalance();
-                const _balance = ethers.utils.formatEther(_balanceRaw);
+                const _balanceBigNumber = await _institution.contractBalance();
+                const _balance = ethers.utils.formatEther(_balanceBigNumber);
                 setOwner(_owner);
                 setBalance(_balance);
             }

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Tag, Drawer, Form, Input, Row, Select, Space } from 'antd';
+import { useSignerContext } from "@/context";
 
 const { Option } = Select;
 
@@ -12,12 +13,31 @@ const customizeRequiredMark = (label, { required }) => (
 );
 
 export default function RegisterInstitution({open, setOpen}) {
+  const { insuranceAPI } = useSignerContext();
+  const { newInsuranceAddress, setNewInsuranceAddress } = useState(null);
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    if(newInsuranceAddress) console.log(newInsuranceAddress);
+  }, [newInsuranceAddress]);
+
   function onClose() {
     setOpen(false)
   };
 
-  function register() {
+  function dataTransformation(formObjectData) {
+    // const institutionInfo = [[x, y], [a, b], [k, l]]
 
+    //register(institutionInfo);
+  }
+
+  function register(institutionInfo) {
+    async function registerInstitution() {
+      const receipt = await insuranceAPI.createInstitution()
+      const _newInstitutionAddress = receipt.events[0].args[0]
+      setNewInsuranceAddress(_newInstitutionAddress);
+    }
+    registerInstitution();
   };
 
   return (
@@ -35,13 +55,13 @@ export default function RegisterInstitution({open, setOpen}) {
         extra={
           <Space>
             <Button onClick={onClose}>Cancel</Button>
-            <Button onClick={register} type="primary">
+            <Button form="myForm" key="submit" htmlType="submit" type="primary" onClick={() => dataTransformation(form.getFieldsValue())}>
               Registrar
             </Button>
           </Space>
         }
       >
-        <Form layout="vertical" requiredMark={customizeRequiredMark}>
+        <Form layout="vertical" requiredMark={customizeRequiredMark} id="myForm" form={form}>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
