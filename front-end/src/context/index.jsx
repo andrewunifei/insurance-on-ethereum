@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import mountInsuranceAPI from "@/utils/InsuranceAPI.sol/mountInsuranceAPI";
-import { Modal } from 'antd';
+import { Modal, notification} from 'antd';
 import styles from "./context.module.css";
 import { ethers }  from "ethers";
 import Image from 'next/image'
@@ -15,6 +15,16 @@ export function SignerWrapper({children}) {
     const [insuranceAPI, setInsuranceAPI] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(null);
     const [confirmLoading, setConfirmLoading] = useState(false);
+
+    const [api, contextHolder] = notification.useNotification();
+
+    function openNotification(payload) {
+      api.info({
+        message: payload.message,
+        description: payload.description,
+        placement: 'topRight'
+      });
+    };
 
     useEffect(() => {
         async function handleModal() {
@@ -73,29 +83,31 @@ export function SignerWrapper({children}) {
             signer,
             setSigner,
             setIsModalOpen,
-            insuranceAPI
+            insuranceAPI,
+            openNotification
         }}>
-        < Modal 
-            title="Carteira MetaMask"
-            open={isModalOpen} 
-            okText={'Conectar'}
-            onOk={handleConnection}
-            confirmLoading={confirmLoading}
-            onCancel={handleCancel}
-            closable={false}
-        >
-          <div style={{display: 'flex',justifyContent: 'center'}}>
-            <Image
-              src="/metamask.svg"
-              width={100}
-              height={100}
-            /> 
-            </div>
-            <p>É necessário a extensão carteira MetaMask para interagir com essa aplicação.</p>
-            <br />
-            <p><span id={styles.conn}>Conecte-se</span> ou instale a carteira no link <a id={styles.link} href="https://metamask.io" target="_blank">https://metamask.io</a></p>
-        </ Modal>
-            {children}
+          {contextHolder}
+          < Modal 
+              title="Carteira MetaMask"
+              open={isModalOpen} 
+              okText={'Conectar'}
+              onOk={handleConnection}
+              confirmLoading={confirmLoading}
+              onCancel={handleCancel}
+              closable={false}
+          >
+            <div style={{display: 'flex',justifyContent: 'center'}}>
+              <Image
+                src="/metamask.svg"
+                width={100}
+                height={100}
+              /> 
+              </div>
+              <p>É necessário a extensão carteira MetaMask para interagir com essa aplicação.</p>
+              <br />
+              <p><span id={styles.conn}>Conecte-se</span> ou instale a carteira no link <a id={styles.link} href="https://metamask.io" target="_blank">https://metamask.io</a></p>
+          </ Modal>
+              {children}
         </SignerContext.Provider>
     )
 }

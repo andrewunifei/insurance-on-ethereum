@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
-import { Button, Col, Tag, Drawer, Form, Input, Row, Select, Space } from 'antd';
+import { Button, Col, Tag, Drawer, Form, Input, Row, Select, Space, message } from 'antd';
 import { useSignerContext } from "@/context";
 
 const { Option } = Select;
@@ -14,9 +14,10 @@ const customizeRequiredMark = (label, { required }) => (
   </>
 );
 
-export default function RegisterInstitution({open, setOpen}) {
-  const { insuranceAPI } = useSignerContext();
-  const { newInsuranceAddress, setNewInsuranceAddress } = useState(null);
+export default function RegisterInstitution({open, setOpen, setEmAndamento}) {
+  const { insuranceAPI, openNotification } = useSignerContext();
+  const [ newInsuranceAddress, setNewInsuranceAddress ] = useState(null);
+  const [ confirmLoading, setConfirmLoading ] = useState(false);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -44,14 +45,26 @@ export default function RegisterInstitution({open, setOpen}) {
 
   function register(institutionInfo) {
     async function registerInstitution() {
+      setEmAndamento('A criação de uma Instituição está em andamento, você será notificado...');
+      setConfirmLoading(true);
+      openNotification({
+        message: 'Criação de Instituição',
+        description: 'Foi enviada uma solicitação para a blockchain.'
+      });
       const tx = await insuranceAPI.createInstitution(institutionInfo);
       const receipt = await tx.wait(1);
-      const _newInstitutionAddress = receipt.events[0].args[0]
-      console.log(_newInstitutionAddress);
+      const _newInstitutionAddress = receipt.events[0].args[0];
+      setEmAndamento('');
+      setConfirmLoading(false);
+      openNotification({
+        message: 'Sucesso!',
+        description: 'Uma Instituição foi criada na rede Ethereum.'
+      });
       setNewInsuranceAddress(_newInstitutionAddress);
     }
     registerInstitution();
   };
+
 
   return (
     <>
@@ -68,7 +81,7 @@ export default function RegisterInstitution({open, setOpen}) {
         extra={
           <Space>
             <Button onClick={onClose}>Cancel</Button>
-            <Button form="myForm" key="submit" htmlType="submit" type="primary" onClick={() => dataTransformation(form.getFieldsValue())}>
+            <Button form="myForm" key="submit" htmlType="submit" type="primary" disabled={confirmLoading} onClick={() => dataTransformation(form.getFieldsValue())}>
               Registrar
             </Button>
           </Space>

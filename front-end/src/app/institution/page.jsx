@@ -20,12 +20,18 @@ export default function Institution() {
     const { signer, insuranceAPI } = useSignerContext();
     const [ institutions, setInstitutions ] = useState(null);
     const [ drawerStatus, setDrawerStatus ] = useState(false);
-    const [ cards, setCards ]  = useState(null);
+    const [ cards, setCards ] = useState(null);
+    const [ emAndamento, setEmAndamento] = useState('')
     const container = createRef();
     const infoKeys = [
         'id',
         'name',
         'email'
+    ];
+    const displayKeys = [
+        'ID',
+        'Nome',
+        'E-mail'
     ];
 
     useEffect(() => {
@@ -44,27 +50,22 @@ export default function Institution() {
                         let _cards = [];
                         for (let institutionAddress of _institutions) {
                             const institution = mountInstitution(signer, institutionAddress);
-                            console.log(institution)
                             let array = [];
                             for (let key of infoKeys) {
                                 const info = await institution.info(key);
-                                console.log(`HIIIII HERE: ${info}`);
-                                array.push({
-                                    index: key,
-                                    info
-                                })
+                                array.push(info);
                             }
-                            const _children = array.map((val) => (
+                            const _children = array.map((val, index) => (
                                 <p
-                                    key={val['info']}
-                                    id={val['info']}
+                                    key={val}
+                                    id={val}
                                 >
                                     <span 
-                                        style={{fontWeight: 'bold'}}
+                                        style={{fontWeight: 'bold'}} 
                                     >
-                                        {`${val['index']}: `}
+                                        {`${displayKeys[index]}: `}
                                     </span>
-                                    {val['info']}
+                                    {val}
                                 </p>
                             ));
                             _cards.push(
@@ -123,23 +124,27 @@ export default function Institution() {
             <RegisterInstitution 
                 open={drawerStatus}
                 setOpen={setDrawerStatus}
+                setEmAndamento={setEmAndamento}
             />
-            <Flex gap="small" wrap="wrap">
-            <ConfigProvider
-                        theme={{
-                            components: {
-                            Button: {
-                                colorPrimary: `linear-gradient(135deg, ${colors1.join(', ')})`,
-                                colorPrimaryHover: `linear-gradient(135deg, ${getHoverColors(colors1).join(', ')})`,
-                                colorPrimaryActive: `linear-gradient(135deg, ${getActiveColors(colors1).join(', ')})`,
-                                lineWidth: 0,
-                            },
-                            },
+            <Flex gap="large" wrap="wrap" align="center">
+                <ConfigProvider
+                    theme={{
+                        components: {
+                        Button: {
+                            colorPrimary: `linear-gradient(135deg, ${colors1.join(', ')})`,
+                            colorPrimaryHover: `linear-gradient(135deg, ${getHoverColors(colors1).join(', ')})`,
+                            colorPrimaryActive: `linear-gradient(135deg, ${getActiveColors(colors1).join(', ')})`,
+                            lineWidth: 0,
+                        },
+                        },
                     }}>
-                        <Button type="primary" onClick={handleCreate}>
-                        Criar Instituição
-                        </Button>
-                    </ConfigProvider>
+                    <Button type="primary" onClick={handleCreate}>
+                    Criar Instituição
+                    </Button>
+                </ConfigProvider>
+                <p>
+                    {emAndamento}
+                </p>
             </Flex>
             <Divider style={{margin: "0", color: "black"}} />
             <Flex wrap="wrap" gap="large" justify="flex-start" align="center" ref={container} >
