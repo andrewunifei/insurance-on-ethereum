@@ -21,16 +21,15 @@ export async function fundInstitution(
     );
     setButtonLoading(false);
     setSpinStatus(true);
-    const receipt = await tx.wait();
+    await tx.wait();
     const _balanceBigNumber = await institution.contractBalance();
     const _balance = ethers.utils.formatEther(_balanceBigNumber);
     setBalance(_balance);
     setSpinStatus(false);
     openNotification({
         message: 'Fundos adicionados com sucesso!',
-        description: `${amount} ETH adicionado ao balanço da Instituição.`
+        description: `${amount} ETH adicionados ao balanço da Instituição.`
     });
-    console.log(receipt);
 }
 
 export async function withdrawFromInstitution(
@@ -40,13 +39,13 @@ export async function withdrawFromInstitution(
         setBalance,
         setSpinStatus,
         openNotification 
-    ){
+    ) {
     const parsedAmount = ethers.utils.parseEther(String(amount)); // eth --> wei
     setButtonLoading(true);
     const tx = await institution.withdraw(parsedAmount);
     setButtonLoading(false);
     setSpinStatus(true);
-    const receipt = await tx.wait();
+    await tx.wait();
     const _balanceBigNumber = await institution.contractBalance();
     const _balance = ethers.utils.formatEther(_balanceBigNumber);
     setBalance(_balance);
@@ -55,5 +54,23 @@ export async function withdrawFromInstitution(
         message: 'Fundos retirados com sucesso!',
         description: `${amount} ETH foram retirados do balanço da Instituição.`
     });
-    console.log(receipt);
+}
+
+export async function whitelist(
+        farmerAddress, 
+        institution,
+        setButtonLoading,
+        setSpinStatus,
+        openNotification
+    ) {
+    setButtonLoading(true);
+    const tx = await institution.whitelistAddr(farmerAddress);
+    setButtonLoading(false);
+    setSpinStatus(true);
+    await tx.wait();
+    setSpinStatus(false);
+    openNotification({
+        message: 'Lista branca modificado com sucesso!',
+        description: `${farmerAddress} foi adicionado à lista branca.`
+    });
 }

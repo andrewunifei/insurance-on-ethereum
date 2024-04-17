@@ -6,12 +6,12 @@ import mountInstitution from "@/utils/Institution.sol/mountInstitution";
 import { useSignerContext } from "@/context";
 import { useEffect, useState, useRef } from "react";
 import { ArrowLeftOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Button, Flex, Divider, Space, Row, Col, Input, Tooltip, ConfigProvider, Typography, Spin } from 'antd';
+import { Button, Flex, Divider, Space, Row, Col, Input, Tooltip, ConfigProvider, Typography, Spin, Form } from 'antd';
 import { TinyColor } from '@ctrl/tinycolor';
 import Link from 'next/link';
 import styles from './page.module.css'
 import Image from 'next/image'
-import { fundInstitution, withdrawFromInstitution } from '@/app/functions/controlPanel'
+import { fundInstitution, withdrawFromInstitution, whitelist } from '@/app/functions/controlPanel'
 
 const { Text } = Typography;
 const colors1 = ['#6253E1', '#04BEFE'];
@@ -26,12 +26,41 @@ export default function Expore({ searchParams }) {
     const [ institution, setInstitution ] = useState(null);
     const [ owner, setOwner ] = useState(null);
     const [ balance, setBalance ] = useState(null);
+    const [ spinStatus, setSpinStatus ] = useState(false);
+
     const [ fundButtonLoading, setFundButtonLoading ] = useState(false);
     const [ withdrawButtonLoading, setWithdrawButtonLoading ] = useState(false);
-    const [ spinStatus, setSpinStatus ] = useState(false);
+    const [ whitelistBtnLoading, setWhitelistBtnLoading ] = useState(false);
+
     const router = useRouter();
     const fundInput = useRef('');
     const withdrawInput = useRef('');
+    const whitelistInput = useRef('');
+
+    const [form] = Form.useForm();
+
+    const onFinish = (values) => {
+        console.log('Received values of form: ', values);
+    };
+
+    const formItemLayout = {
+        labelCol: {
+          xs: {
+            span: 24,
+          },
+          sm: {
+            span: 8,
+          },
+        },
+        wrapperCol: {
+          xs: {
+            span: 24,
+          },
+          sm: {
+            span: 16,
+          },
+        },
+    };
 
     useEffect(() => {
         const _institution = mountInstitution(signer, searchParams.address);
@@ -48,10 +77,6 @@ export default function Expore({ searchParams }) {
         getOwner();
     }, [signer])
 
-    function sendFundInputValue() {
-        return fundInput.current.value;
-    }
-
     return (
         <>
             <Space 
@@ -63,6 +88,7 @@ export default function Expore({ searchParams }) {
                     backgroundColor:'#fff'
                 }}
             >
+                {/* HEADER */}
                 <Flex gap="large" wrap="wrap" align="center" >
                     <h1 style={{backgroundColor: 'white'}}>
                         <span style={{
@@ -134,7 +160,8 @@ export default function Expore({ searchParams }) {
                         <Button type="primary" >Iniciar novo Contrato de Seguro</Button>
                     </ConfigProvider>
                 </Flex>
-                
+
+                {/* PAINEL DE CONTROLE */}
                 <div style={{
                     border: 'solid',
                     borderRadius: 5,
@@ -238,8 +265,20 @@ export default function Expore({ searchParams }) {
                                 <QuestionCircleOutlined /></Tooltip>
                             </span>
                             <Space.Compact style={{ width: '100%' }}>
-                                <Input placeholder="Endereço da carteira" />
-                                <Button type="primary">Adicionar</Button>
+                                <Input ref={whitelistInput} placeholder="Endereço da carteira" />
+                                <Button 
+                                    loading={whitelistBtnLoading}
+                                    type="primary"
+                                    onClick={() => whitelist(
+                                        whitelistInput.current.input.value,
+                                        institution,
+                                        setWhitelistBtnLoading,
+                                        setSpinStatus,
+                                        openNotification
+                                    )}
+                                >
+                                        Adicionar
+                                </Button>
                             </Space.Compact>
                         </Col>
                         <Col span={6} style={{ 
@@ -259,6 +298,7 @@ export default function Expore({ searchParams }) {
                         </Col>
                     </Row>
                 </div>
+
                 <div style={{
                     border: 'solid',
                     borderRadius: 5,
@@ -275,6 +315,77 @@ export default function Expore({ searchParams }) {
                     <div>
                         Test
                     </div>
+                </div>
+                
+                {/* CONTRATO DE SEGURO */}
+                <div style={{
+                    border: 'solid',
+                    borderRadius: 5,
+                    borderColor: '#F0F0F0'
+                }}>
+                    <Flex gap="large" align="center" style={{
+                        borderBottom: 'solid',
+                        borderBottomColor: '#F0F0F0',
+                        borderBottomStyle: 'dotted',
+                        padding: 20
+                    }}>
+                        <h2>
+                            Criar novo Contrato de Seguro
+                        </h2>
+                    </Flex>
+                    {/* <div style={{
+                            padding: 20,
+                            display: 'flex',
+                            alignItems: 'center',
+                            width: '100%',
+                            border: 'solid'
+                        }}
+                    > */}
+                    <Flex align="center" justify="center" style={{padding: 20}}>
+                        <Form
+                            {...formItemLayout}
+                            form={form}
+                            name="register"
+                            onFinish={onFinish}
+                            initialValues={{
+                                residence: ['zhejiang', 'hangzhou', 'xihu'],
+                                prefix: '86',
+                            }}
+                            scrollToFirstError
+                            style={{width: 600}}
+                            >
+                            <Form.Item
+                                name="email"
+                                label="E-mail"
+                                rules={[
+                                {
+                                    type: 'email',
+                                    message: 'The input is not valid E-mail!',
+                                },
+                                {
+                                    required: true,
+                                    message: 'Please input your E-mail!',
+                                },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="password"
+                                label="Password"
+                                rules={[
+                                {
+                                    required: true,
+                                    message: 'Please input your password!',
+                                },
+                                ]}
+                                hasFeedback
+                            >
+                                <Input.Password />
+                            </Form.Item>
+                        </Form>
+                    </Flex>
                 </div>
             </Space>
         </>
