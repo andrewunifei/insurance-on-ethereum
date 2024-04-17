@@ -125,7 +125,15 @@ export default function RegisterInstitution({open, setOpen, setEmAndamento}) {
                 <Form.Item
                   name="email"
                   label="E-mail"
-                  rules={[{ required: true, message: 'E-mail é um campo obrigatório' }]}
+                  rules={[
+                      { 
+                        required: true,
+                        message: 'E-mail é um campo obrigatório' },
+                      {
+                        type: 'email',
+                        message: 'Entre com um e-mail válido!',
+                      },
+                    ]}
                 >
                 <Input placeholder="E-mail oficial para contato" />
               </Form.Item>

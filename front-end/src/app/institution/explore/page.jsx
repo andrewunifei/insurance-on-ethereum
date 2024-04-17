@@ -319,28 +319,21 @@ export default function Expore({ searchParams }) {
                 
                 {/* CONTRATO DE SEGURO */}
                 <div style={{
-                    border: 'solid',
-                    borderRadius: 5,
-                    borderColor: '#F0F0F0'
+                    borderRadius: 10,
+                    background: '#f8f8f8'
                 }}>
+                    {/* light yellow #fcfaf5' */}
                     <Flex gap="large" align="center" style={{
                         borderBottom: 'solid',
-                        borderBottomColor: '#F0F0F0',
+                        borderBottomWidth: 1,
                         borderBottomStyle: 'dotted',
+                        borderBottomColor: '#e4e4e4',
                         padding: 20
                     }}>
-                        <h2>
-                            Criar novo Contrato de Seguro
+                        <h2 style={{color: '#000'}}>
+                            Novo Contrato de Seguro
                         </h2>
                     </Flex>
-                    {/* <div style={{
-                            padding: 20,
-                            display: 'flex',
-                            alignItems: 'center',
-                            width: '100%',
-                            border: 'solid'
-                        }}
-                    > */}
                     <Flex align="center" justify="center" style={{padding: 20}}>
                         <Form
                             {...formItemLayout}
@@ -355,16 +348,38 @@ export default function Expore({ searchParams }) {
                             style={{width: 600}}
                             >
                             <Form.Item
-                                name="email"
-                                label="E-mail"
+                                name="farmer"
+                                label="Endereço do fazendeiro"
+                                rules={[
+                                    {
+                                        required: true,
+                                        message: 'Please input your E-mail!',
+                                    },
+                                ]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="reparationValue"
+                                label="Valor da indenização"
                                 rules={[
                                 {
-                                    type: 'email',
-                                    message: 'The input is not valid E-mail!',
+                                    required: true,
+                                    message: 'Please input your password!',
                                 },
+                                ]}
+                            >
+                                <Input prefix="Ξ" placeholder="Ether" />
+                            </Form.Item>
+
+                            <Form.Item
+                                name="humidityLimit"
+                                label="Limite do índice"
+                                rules={[
                                 {
                                     required: true,
-                                    message: 'Please input your E-mail!',
+                                    message: 'Please input your password!',
                                 },
                                 ]}
                             >
@@ -372,17 +387,16 @@ export default function Expore({ searchParams }) {
                             </Form.Item>
 
                             <Form.Item
-                                name="password"
-                                label="Password"
+                                name="sampleMaxSize"
+                                label="Número de amostras"
                                 rules={[
                                 {
                                     required: true,
                                     message: 'Please input your password!',
                                 },
                                 ]}
-                                hasFeedback
                             >
-                                <Input.Password />
+                                <Input />
                             </Form.Item>
                         </Form>
                     </Flex>
