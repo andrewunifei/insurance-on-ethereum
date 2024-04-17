@@ -11,6 +11,7 @@ import Link from 'next/link';
 import styles from './page.module.css'
 import Image from 'next/image'
 import { fundInstitution, withdrawFromInstitution, whitelist } from '@/app/functions/controlPanel'
+import InsuranceForm from '@/app/institution/explore/components/InsuranceForm'
 import { 
     Button, 
     Flex, 
@@ -24,7 +25,7 @@ import {
     Typography, 
     Spin, 
     Form,
-    Select } from 'antd';
+    Anchor  } from 'antd';
 
 const { Text } = Typography;
 const colors1 = ['#6253E1', '#04BEFE'];
@@ -54,38 +55,7 @@ export default function Expore({ searchParams }) {
 
     const onFinish = (values) => {
         console.log('Received values of form: ', values);
-    };
-
-    const formItemLayout = {
-        labelCol: {
-          xs: {
-            span: 24,
-          },
-          sm: {
-            span: 8,
-          },
-        },
-        wrapperCol: {
-          xs: {
-            span: 24,
-          },
-          sm: {
-            span: 16,
-          },
-        },
-    };
-
-    const tailFormItemLayout = {
-        wrapperCol: {
-            xs: {
-            span: 24,
-            offset: 0,
-            },
-            sm: {
-            span: 16,
-            offset: 8,
-            },
-        },
+        form.resetFields();
     };
 
     useEffect(() => {
@@ -180,10 +150,12 @@ export default function Expore({ searchParams }) {
                                     colorPrimaryActive: `linear-gradient(135deg, ${getActiveColors(colors1).join(', ')})`,
                                     lineWidth: 0,
                                 },
-                            },
+                            }
                         }}
                     >
-                        <Button type="primary" >Iniciar novo Contrato de Seguro</Button>
+                        <Anchor affix={false}>
+                            <Button type="primary" href='#insurance'>Iniciar novo Contrato de Seguro</Button>
+                        </Anchor>
                     </ConfigProvider>
                 </Flex>
 
@@ -360,170 +332,8 @@ export default function Expore({ searchParams }) {
                             Novo Contrato de Seguro
                         </h2>
                     </Flex>
-                    <Flex align="center" justify="center" style={{padding: 20}}>
-                        <Form
-                            {...formItemLayout}
-                            form={form}
-                            name="register"
-                            onFinish={onFinish}
-                            initialValues={{
-                                residence: ['zhejiang', 'hangzhou', 'xihu'],
-                                prefix: '86',
-                            }}
-                            scrollToFirstError
-                            style={{width: 600}}
-                            requiredMark={false}
-                            >
-                            <Form.Item
-                                name="farmer"
-                                label="Endereço do fazendeiro"
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Please input your E-mail!',
-                                    },
-                                ]}
-                            >
-                                <Input placeholder='Na rede Ethereum'/>
-                            </Form.Item>
-
-                            
-                            <Form.Item 
-                                label="Localização da fazenda"
-                                rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your password!',
-                                }
-                                ]}
-                                style={{
-                                    width: '100%'
-                                }}
-                            >
-                                <Space.Compact style={{width: '100%'}}>
-                                    <Form.Item
-                                        name={['sample', 'interval']}
-                                        noStyle
-                                        rules={[{ required: true, message: 'Street is required' }]}
-                                    >
-                                        <Input style={{ width: '50%' }} placeholder="Latitude" />
-                                    </Form.Item>
-                                    <Form.Item
-                                        name={['sample', 'interval']}
-                                        noStyle
-                                        rules={[{ required: true, message: 'Street is required' }]}
-                                    >
-                                        <Input style={{ width: '50%' }} placeholder="Longitude" />
-                                    </Form.Item>
-                                </Space.Compact>
-                            </Form.Item>
-
-                            <Form.Item
-                                name="reparationValue"
-                                label="Valor da indenização"
-                                rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your password!',
-                                },
-                                ]}
-                            >
-                                <Input prefix="Ξ" placeholder="Ether" />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="humidityLimit"
-                                label="Limite do índice"
-                                rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your password!',
-                                },
-                                ]}
-                            >
-                                <Input />
-                            </Form.Item>
-
-                            <Form.Item
-                                name="sampleMaxSize"
-                                label="Número de amostras"
-                                rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your password!',
-                                },
-                                ]}
-                            >
-                                <Input />
-                            </Form.Item>
-
-                            <Form.Item 
-                                label="Coletar a cada"
-                                rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your password!',
-                                }
-                                ]}
-                                style={{
-                                    width: '100%'
-                                }}
-                            >
-                                <Space.Compact style={{width: '100%'}}>
-                                    <Form.Item
-                                        name={['sample', 'interval']}
-                                        noStyle
-                                        rules={[{ required: true, message: 'Street is required' }]}
-                                    >
-                                        <Input placeholder="Numérico inteiro" />
-                                    </Form.Item>
-                                    
-                                    <Form.Item
-                                        name={['sample', 'scale']}
-                                        noStyle
-                                        rules={[{ required: true, message: 'Province is required' }]}
-                                    >
-                                        <Select placeholder="Escala temporal">
-                                            <Select.Option value="minutes">Minutos</Select.Option>
-                                            <Select.Option value="hours">Horas  </Select.Option>
-                                            <Select.Option value="days">Dias   </Select.Option>
-                                        </Select>
-                                    </Form.Item>
-                                </Space.Compact>
-                            </Form.Item>
-
-                            <Form.Item
-                                name="sampleMaxSize"
-                                label="Chainlink Functions"
-                                rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your password!',
-                                },
-                                ]}
-                            >
-                                <Input prefix="⬡" placeholder='LINK Token'/>
-                            </Form.Item>
-
-                            <Form.Item
-                                name="sampleMaxSize"
-                                label="Chainlink Automation"
-                                rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your password!',
-                                },
-                                ]}
-                            >
-                                <Input prefix="⬡" placeholder='LINK Token'/>
-                            </Form.Item>
-
-                            <Form.Item {...tailFormItemLayout}>
-                                <Button type="primary" htmlType="submit">
-                                    Registrar
-                                </Button>
-                            </Form.Item>
-                        </Form>
+                    <Flex align="center" justify="center" style={{padding: 20}} id="insurance">
+                        <InsuranceForm form={form} onFinish={onFinish} />
                     </Flex>
                 </div>
             </Space>
