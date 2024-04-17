@@ -116,8 +116,8 @@ contract Institution{
     /**
      * @notice Para sacar o balanço do contrato
      */
-    function withdraw() external owner {
-        (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
+    function withdraw(uint amount) external owner {
+        (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: amount}("");
         require(callStatus, "Withdraw failed.");
     }
 

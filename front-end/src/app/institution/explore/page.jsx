@@ -4,15 +4,16 @@ import { useRouter } from 'next/navigation'
 import { ethers }  from "ethers";
 import mountInstitution from "@/utils/Institution.sol/mountInstitution";
 import { useSignerContext } from "@/context";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { ArrowLeftOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { Button, Flex, Divider, Space, Row, Col, Input, Tooltip, ConfigProvider, Typography } from 'antd';
+import { Button, Flex, Divider, Space, Row, Col, Input, Tooltip, ConfigProvider, Typography, Spin } from 'antd';
 import { TinyColor } from '@ctrl/tinycolor';
 import Link from 'next/link';
 import styles from './page.module.css'
 import Image from 'next/image'
-const { Text } = Typography;
+import { fundInstitution, withdrawFromInstitution } from '@/app/functions/controlPanel'
 
+const { Text } = Typography;
 const colors1 = ['#6253E1', '#04BEFE'];
 const colors2 = ['#001628', '#027ea8']
 const getHoverColors = (colors) =>
@@ -21,11 +22,15 @@ const getActiveColors = (colors) =>
   colors.map((color) => new TinyColor(color).darken(5).toString());
 
 export default function Expore({ searchParams }) {
-    const { signer } = useSignerContext();
+    const { signer, openNotification } = useSignerContext();
     const [ institution, setInstitution ] = useState(null);
     const [ owner, setOwner ] = useState(null);
     const [ balance, setBalance ] = useState(null);
+    const [ buttonLoading, setButtonLoading ] = useState(false);
+    const [ spinStatus, setSpinStatus ] = useState(false);
     const router = useRouter();
+    const fundInput = useRef('');
+    const withdrawInput = useRef('');
 
     useEffect(() => {
         const _institution = mountInstitution(signer, searchParams.address);
@@ -42,14 +47,23 @@ export default function Expore({ searchParams }) {
         getOwner();
     }, [signer])
 
+    function sendFundInputValue() {
+        return fundInput.current.value;
+    }
+
     return (
         <>
-            <Space direction="vertical" size={16} style={{width: '100vw', visibility: balance ? 'visible' : 'hidden' }} >
+            <Space 
+                direction="vertical" 
+                size={16} 
+                style={{
+                    width: '100vw',
+                    visibility: balance ? 'visible' : 'hidden',
+                    backgroundColor:'#fff'
+                }}
+            >
                 <Flex gap="large" wrap="wrap" align="center" >
-                    <h1 style={{
-                        backgroundColor: 'white'
-
-                    }}>
+                    <h1 style={{backgroundColor: 'white'}}>
                         <span style={{
                             fontStyle: 'italic',
                             backgroundImage: `linear-gradient(135deg, ${colors2.join(', ')})`, 
@@ -57,7 +71,7 @@ export default function Expore({ searchParams }) {
                             color: 'transparent',
                             backgroundSize: '100%' 
                         }}>
-                        {searchParams.name}
+                            {searchParams.name}
                         </span>
                     </h1>
                     <div style={{
@@ -66,7 +80,8 @@ export default function Expore({ searchParams }) {
                         alignItems: "center"
                     }}>
                         <Space direction="horizontal" size={12} >
-                            <p style={{
+                            <Spin spinning={spinStatus} />
+                            <div style={{
                                 border: 'solid', 
                                 padding: 10, 
                                 borderRadius: 5,
@@ -75,9 +90,11 @@ export default function Expore({ searchParams }) {
                                 alignItems: 'center',
                             }}>
                                 <Image src="/ethereum.svg" width={15} height={15} /> 
-                                <span><span style={{color: 'grey'}}> Balanço </span>{balance ? balance : ''} ETH</span>
-                            </p>
-                            <p style={{
+                                <Text>
+                                    <span style={{color: 'grey'}}> Balanço </span>{balance ? balance : ''} ETH
+                                </Text>
+                            </div>
+                            <div style={{
                                 border: 'solid', 
                                 padding: 10, 
                                 borderRadius: 5,
@@ -88,9 +105,11 @@ export default function Expore({ searchParams }) {
                                     href={`https://sepolia.etherscan.io/address/${institution ? institution.address : ''}`}
                                     target='_blank'
                                 >
-                                    <Text copyable id={styles.etherScan} >{searchParams.address}</Text>
+                                    <Text copyable id={styles.etherScan}>
+                                        {searchParams.address}
+                                    </Text>
                                 </Link>
-                            </p>
+                            </div>
                         </Space>
                     </div>
                 </Flex>
@@ -102,17 +121,16 @@ export default function Expore({ searchParams }) {
                     <ConfigProvider
                         theme={{
                             components: {
-                            Button: {
-                                colorPrimary: `linear-gradient(135deg, ${colors1.join(', ')})`,
-                                colorPrimaryHover: `linear-gradient(135deg, ${getHoverColors(colors1).join(', ')})`,
-                                colorPrimaryActive: `linear-gradient(135deg, ${getActiveColors(colors1).join(', ')})`,
-                                lineWidth: 0,
+                                Button: {
+                                    colorPrimary: `linear-gradient(135deg, ${colors1.join(', ')})`,
+                                    colorPrimaryHover: `linear-gradient(135deg, ${getHoverColors(colors1).join(', ')})`,
+                                    colorPrimaryActive: `linear-gradient(135deg, ${getActiveColors(colors1).join(', ')})`,
+                                    lineWidth: 0,
+                                },
                             },
-                            },
-                    }}>
-                        <Button type="primary" >
-                        Iniciar novo Contrato de Seguro
-                        </Button>
+                        }}
+                    >
+                        <Button type="primary" >Iniciar novo Contrato de Seguro</Button>
                     </ConfigProvider>
                 </Flex>
                 
@@ -160,8 +178,23 @@ export default function Expore({ searchParams }) {
                                 Adicionar balanço à Instituição
                             </span>
                             <Space.Compact style={{ width: '100%' }}>
-                                <Input prefix="Ξ" placeholder="Ether" />
-                                <Button type="primary">Adicionar</Button>
+                                <Input ref={fundInput} prefix="Ξ" placeholder="Ether" />
+                                <Button 
+                                    loading={buttonLoading}
+                                    type="primary"
+                                    onClick={() => {
+                                        fundInstitution(
+                                            withdrawInput.current.input.value,
+                                            institution,
+                                            setButtonLoading,
+                                            setBalance,
+                                            setSpinStatus,
+                                            openNotification
+                                        )
+                                    }}
+                                >
+                                    Adicionar
+                                </Button>
                             </Space.Compact>
                         </Col>
                         <Col span={6} style={{
@@ -174,8 +207,22 @@ export default function Expore({ searchParams }) {
                                 Sacar balanço da Instituição
                             </span>
                             <Space.Compact style={{ width: '100%' }}>
-                                <Input prefix="Ξ" placeholder="Ether" />
-                                <Button type="primary">Sacar</Button>
+                                <Input id="withdraw" prefix="Ξ" placeholder="Ether" />
+                                <Button 
+                                    type="primary"
+                                    onClick={() => withdrawFromInstitution(
+                                        fundInput.current.input.value,
+                                        signer,
+                                        institution,
+                                        searchParams.address,
+                                        setButtonLoading,
+                                        setBalance,
+                                        setSpinStatus,
+                                        openNotification
+                                    )} 
+                                >
+                                    Sacar
+                                </Button>
                             </Space.Compact>
                         </Col>
                         <Col span={6} style={{ 

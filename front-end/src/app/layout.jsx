@@ -24,7 +24,7 @@ export default function RootLayout({ children }) {
       <Suspense fallback={<Loading />}>
       <AntdRegistry>
         <SignerWrapper>
-          <Layout style={{height:"100vh", background: "#001628"}}>
+          <Layout style={{minHeight:"100vh", background: "#001628", maxWidth: '100vw'}}>
             <Header
               style={{
                 display: 'flex',
@@ -37,25 +37,17 @@ export default function RootLayout({ children }) {
             <Content
               style={{
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: "center",
-                width: '100vw',
-                borderStyle: "solid"
+                borderBottom: 'solid',
+                background: "#fff",
+                height: '100%',
+                width: '100%',
+                padding: 40,
+                borderRadius: "16px 16px 0 0",
+                overflowY: 'auto',
+                overflowX: 'hidden'
               }}
             >
-              <div
-                style={{
-                  background: "#fff",
-                  height: '83vh',
-                  padding: 40,
-                  borderRadius: "16px 16px 0 0",
-                  borderStyle: "solid",
-                  display: "flex",
-                  width: '100vw',
-                }}
-              >
                 {children}
-              </div>
             </Content>
             <Footer
               style={{

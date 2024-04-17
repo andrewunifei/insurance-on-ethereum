@@ -120,7 +120,14 @@ export default function Institution() {
     }
     
     return (
-        <Space direction="vertical" size={16} style={{width: '100vw'}} >
+        <Space 
+            direction="vertical"
+            size={16}
+            style={{
+                width: '100vw',
+                backgroundColor:'#fff',
+            }}
+        >
             <RegisterInstitution 
                 open={drawerStatus}
                 setOpen={setDrawerStatus}
@@ -130,23 +137,23 @@ export default function Institution() {
                 <ConfigProvider
                     theme={{
                         components: {
-                        Button: {
-                            colorPrimary: `linear-gradient(135deg, ${colors1.join(', ')})`,
-                            colorPrimaryHover: `linear-gradient(135deg, ${getHoverColors(colors1).join(', ')})`,
-                            colorPrimaryActive: `linear-gradient(135deg, ${getActiveColors(colors1).join(', ')})`,
-                            lineWidth: 0,
-                        },
+                            Button: {
+                                colorPrimary: `linear-gradient(135deg, ${colors1.join(', ')})`,
+                                colorPrimaryHover: `linear-gradient(135deg, ${getHoverColors(colors1).join(', ')})`,
+                                colorPrimaryActive: `linear-gradient(135deg, ${getActiveColors(colors1).join(', ')})`,
+                                lineWidth: 0,
+                            },
                         },
                     }}>
                     <Button type="primary" onClick={handleCreate}>
                     Criar Instituição
                     </Button>
                 </ConfigProvider>
-                <p>
-                    {emAndamento}
-                </p>
+                <p>{emAndamento}</p>
             </Flex>
+
             <Divider style={{margin: "0", color: "black"}} />
+            
             <Flex wrap="wrap" gap="large" justify="flex-start" align="center" ref={container} >
                 <div id={"remove-me"}>
                     <Card 
