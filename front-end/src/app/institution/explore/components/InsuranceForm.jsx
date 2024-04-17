@@ -58,7 +58,7 @@ export default function InsuranceForm({form, onFinish}) {
                     },
                 ]}
             >
-                <Input placeholder='Na rede Ethereum'/>
+                <Input placeholder='Endereço na rede Ethereum'/>
             </Form.Item>
 
             

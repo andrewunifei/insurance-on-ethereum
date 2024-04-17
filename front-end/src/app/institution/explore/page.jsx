@@ -1,5 +1,7 @@
 "use client"
 
+// ** TODO ** Chainlink Functions Subscription ID no Front-end
+
 import { useRouter } from 'next/navigation'
 import { ethers }  from "ethers";
 import mountInstitution from "@/utils/Institution.sol/mountInstitution";
@@ -12,6 +14,7 @@ import styles from './page.module.css'
 import Image from 'next/image'
 import { fundInstitution, withdrawFromInstitution, whitelist } from '@/app/functions/controlPanel'
 import InsuranceForm from '@/app/institution/explore/components/InsuranceForm'
+//import handleInsuranceForm from '@/utils/Institution.sol/handleInsuranceForm';
 import { 
     Button, 
     Flex, 
@@ -53,9 +56,10 @@ export default function Expore({ searchParams }) {
 
     const [form] = Form.useForm();
 
-    const onFinish = (values) => {
-        console.log('Received values of form: ', values);
+    async function onFinish(params) {
+        console.log('Received params of form: ', params);
         form.resetFields();
+        // await handleInsuranceForm(signer, institution, params);
     };
 
     useEffect(() => {

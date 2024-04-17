@@ -122,7 +122,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
 
         it('Should FUND the Chainlink Functions subscription correctly', async () => {
-            const juelsAmount = String(ethers.utils.parseEther(String(10))); // 1 LINK
+            const juelsAmount = String(ethers.utils.parseEther(String(10)));
             let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
 
             if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
