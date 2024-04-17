@@ -26,7 +26,8 @@ export default function Expore({ searchParams }) {
     const [ institution, setInstitution ] = useState(null);
     const [ owner, setOwner ] = useState(null);
     const [ balance, setBalance ] = useState(null);
-    const [ buttonLoading, setButtonLoading ] = useState(false);
+    const [ fundButtonLoading, setFundButtonLoading ] = useState(false);
+    const [ withdrawButtonLoading, setWithdrawButtonLoading ] = useState(false);
     const [ spinStatus, setSpinStatus ] = useState(false);
     const router = useRouter();
     const fundInput = useRef('');
@@ -180,13 +181,15 @@ export default function Expore({ searchParams }) {
                             <Space.Compact style={{ width: '100%' }}>
                                 <Input ref={fundInput} prefix="Ξ" placeholder="Ether" />
                                 <Button 
-                                    loading={buttonLoading}
+                                    loading={fundButtonLoading}
                                     type="primary"
                                     onClick={() => {
                                         fundInstitution(
-                                            withdrawInput.current.input.value,
+                                            fundInput.current.input.value,
+                                            signer,
                                             institution,
-                                            setButtonLoading,
+                                            searchParams.address,
+                                            setFundButtonLoading,
                                             setBalance,
                                             setSpinStatus,
                                             openNotification
@@ -207,15 +210,14 @@ export default function Expore({ searchParams }) {
                                 Sacar balanço da Instituição
                             </span>
                             <Space.Compact style={{ width: '100%' }}>
-                                <Input id="withdraw" prefix="Ξ" placeholder="Ether" />
+                                <Input ref={withdrawInput} id="withdraw" prefix="Ξ" placeholder="Ether" />
                                 <Button 
+                                    loading={withdrawButtonLoading}
                                     type="primary"
                                     onClick={() => withdrawFromInstitution(
-                                        fundInput.current.input.value,
-                                        signer,
+                                        withdrawInput.current.input.value,
                                         institution,
-                                        searchParams.address,
-                                        setButtonLoading,
+                                        setWithdrawButtonLoading,
                                         setBalance,
                                         setSpinStatus,
                                         openNotification

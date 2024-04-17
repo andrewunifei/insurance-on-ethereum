@@ -41,19 +41,19 @@ export async function withdrawFromInstitution(
         setSpinStatus,
         openNotification 
     ){
-    setButtonLoading(true);
     const parsedAmount = ethers.utils.parseEther(String(amount)); // eth --> wei
+    setButtonLoading(true);
     const tx = await institution.withdraw(parsedAmount);
-    const receipt = await tx.wait();
     setButtonLoading(false);
     setSpinStatus(true);
+    const receipt = await tx.wait();
     const _balanceBigNumber = await institution.contractBalance();
     const _balance = ethers.utils.formatEther(_balanceBigNumber);
     setBalance(_balance);
     setSpinStatus(false);
     openNotification({
         message: 'Fundos retirados com sucesso!',
-        description: `${amount} ETH foi retirado do balanço da Instituição.`
+        description: `${amount} ETH foram retirados do balanço da Instituição.`
     });
     console.log(receipt);
 }
