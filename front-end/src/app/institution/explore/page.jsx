@@ -14,7 +14,7 @@ import styles from './page.module.css'
 import Image from 'next/image'
 import { fundInstitution, withdrawFromInstitution, whitelist } from '@/app/functions/controlPanel'
 import InsuranceForm from '@/app/institution/explore/components/InsuranceForm'
-//import handleInsuranceForm from '@/utils/Institution.sol/handleInsuranceForm';
+import handleInsuranceForm from '@/utils/Institution.sol/handleInsuranceForm';
 import { 
     Button, 
     Flex, 
@@ -59,7 +59,7 @@ export default function Expore({ searchParams }) {
     async function onFinish(params) {
         console.log('Received params of form: ', params);
         form.resetFields();
-        // await handleInsuranceForm(signer, institution, params);
+        await handleInsuranceForm(signer, institution, params);
     };
 
     useEffect(() => {
