@@ -45,8 +45,7 @@ export default function Institution() {
                 const _accounts = await _provider.send("eth_accounts", []); 
                 if(_accounts.length ==! 0) {
                     if(signer && insuranceAPI) {
-                        const _institutions = await insuranceAPI.getAllInstitution();;
-                        console.log(_institutions)
+                        const _institutions = await insuranceAPI.getAllInstitution();
                         let _cards = [];
                         for (let institutionAddress of _institutions) {
                             const institution = mountInstitution(signer, institutionAddress);
@@ -101,9 +100,6 @@ export default function Institution() {
                         setCards(_cards)
                         setInstitutions(_institutions);
                     }
-                }
-                else {
-                    console.log("Por favor, conecte-se");
                 }
             }
         }

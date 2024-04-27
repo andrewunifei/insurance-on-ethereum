@@ -32,7 +32,6 @@ export default function CustomMenu() {
     const pathnameFiltered = filter.exec(pathname)[0];
 
     React.useEffect(() => {
-        console.log(signer)
         if(signer) {
             setButtonState(true)
             setButtonInnerText("Você está conectado!")

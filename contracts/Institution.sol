@@ -14,6 +14,8 @@ contract Institution{
     mapping (address => bool) public whitelist;
     mapping (address => bool) public blacklist;
     mapping (address => AutomatedFunctionsConsumer[]) public contracts; // Antes era mapping address => address[]
+    mapping (uint8 => address[]) public farmers; // Usar essa variável dentro de um loop para buscar todos os contratos de seguro
+    mapping(address => bool) public farmerExists;
 
     event InsuranceContractCreated(address insuranceContractAddress);
 
@@ -102,7 +104,10 @@ contract Institution{
             _metricJS            
         );
         contracts[_farmer].push(c);
-
+        if(!farmerExists[_farmer]) {
+            farmers[0].push(_farmer);
+            farmerExists[_farmer] = true;
+        }
         emit InsuranceContractCreated(address(c));
     }
 
@@ -111,6 +116,14 @@ contract Institution{
      */
     function getAllInsuranceContracts(address _farmerAddress) view public returns (AutomatedFunctionsConsumer[] memory){
         return contracts[_farmerAddress];
+    }
+
+    /**
+     * 
+     * @notice retorna todos os endereços de fazendeiros com contrato ativo
+     */
+    function getAllFarmers() view public returns (address[] memory){
+        return farmers[0];
     }
 
     /**

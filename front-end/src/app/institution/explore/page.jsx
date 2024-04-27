@@ -15,6 +15,7 @@ import Image from 'next/image'
 import { fundInstitution, withdrawFromInstitution, whitelist } from '@/app/functions/controlPanel'
 import InsuranceForm from '@/app/institution/explore/components/InsuranceForm'
 import handleInsuranceForm from '@/utils/Institution.sol/handleInsuranceForm';
+import CurrentInsuranceContract from './components/CurrentInsuranceContract';
 import { 
     Button, 
     Flex, 
@@ -57,7 +58,6 @@ export default function Expore({ searchParams }) {
     const [form] = Form.useForm();
 
     async function onFinish(params) {
-        console.log('Received params of form: ', params);
         form.resetFields();
         await handleInsuranceForm(signer, institution, params);
     };
@@ -315,7 +315,7 @@ export default function Expore({ searchParams }) {
                         Contratos de Seguro (Em vigor)
                     </h2>
                     <div>
-                        Test
+                        <CurrentInsuranceContract signer={signer} institution={institution} />
                     </div>
                 </div>
                 

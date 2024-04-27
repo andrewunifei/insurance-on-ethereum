@@ -20,10 +20,6 @@ export default function RegisterInstitution({open, setOpen, setEmAndamento}) {
   const [ confirmLoading, setConfirmLoading ] = useState(false);
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    if(newInsuranceAddress) console.log(newInsuranceAddress);
-  }, [newInsuranceAddress]);
-
   function onClose() {
     setOpen(false)
   };
@@ -37,9 +33,7 @@ export default function RegisterInstitution({open, setOpen, setEmAndamento}) {
       }
       transformed.push([String(key), String(formObjectData[key])]);
     };
-
-    console.log(transformed);
-
+    
     register(transformed);
   }
 

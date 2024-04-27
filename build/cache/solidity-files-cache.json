@@ -685,8 +685,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/Institution.sol": {
-      "lastModificationDate": 1713323042002,
-      "contentHash": "796a86b1a323234e75496792df669fae",
+      "lastModificationDate": 1714092169792,
+      "contentHash": "ec3bab445173bf8d81580fbc3920aa6e",
       "sourceName": "contracts/Institution.sol",
       "solcConfig": {
         "version": "0.8.19",
