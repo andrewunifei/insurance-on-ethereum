@@ -15,11 +15,14 @@ export default function CurrentInsuranceContract({ institution, signer }) {
             if(institution && signer) {
                 async function mountContracts() {
                     try {
-                        // O erro ocorre porque não nada na lista
-                        const farmers = await institution.getAllFarmers(); // ERRO AQUI
+                        const farmers = await institution.getAllFarmers();
                         let cards;
                         const _flexSections = [];
-                        const displayKeys = ['Limite', 'Valor de reparação'];
+                        const displayKeys = [
+                            'Contrato',
+                            'Limite',
+                            'Valor de reparação'
+                        ];
                         let keyGenerated;
                         let count1 = 0;
                         let count2 = 0;
@@ -38,6 +41,7 @@ export default function CurrentInsuranceContract({ institution, signer }) {
                                 const bigNumberReparationValue = await insuranceContract.reparationValue();
                                 const humidityLimit = bigNumberHumidityLimit.toNumber();
                                 const reparationValue = ethers.utils.formatEther(bigNumberReparationValue);
+                                array.push(address.slice(0, 12) + '...');
                                 array.push(humidityLimit);
                                 array.push(reparationValue);
                                 const cardChildren = array.map((val, index) => (
@@ -95,7 +99,7 @@ export default function CurrentInsuranceContract({ institution, signer }) {
                                         <p>
                                             <span style={{
                                                 color: 'grey'
-                                            }}>Referete ao fazendeiro </span>
+                                            }}>{'Contratos referentes ao fazendeiro '}</span>
                                             <Link 
                                                 id={styles.etherScan}
                                                 href={`https://sepolia.etherscan.io/address/${farmer}`}
@@ -133,11 +137,6 @@ export default function CurrentInsuranceContract({ institution, signer }) {
             }
         }, [institution, signer])
         
-
-    return (
-        <>
-            {flexSections}
-        </>
-    )
+    return (<>{flexSections}</>)
 }
                     

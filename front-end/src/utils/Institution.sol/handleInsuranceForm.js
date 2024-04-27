@@ -1,9 +1,12 @@
 import createManager from '@/utils/Chainlink/functionsManager'
-import sepolia from '@/utils/Chainlink/blockchain'
-import metricJS from '../rules/metric';
-import { ethers } from 'ethers'
+import sepolia from '@/utils/blockchain'
+import { metricJS } from '../rules/metric';
+import { ethers } from 'ethers';
+import mountinsuranceContract from '../InsuranceContract.sol/mountInsuranceContract';
+import buildRequestParameters from '../InsuranceContract.sol/controller';
+import donParams from '../Chainlink/donParams';
 
-async function handleChainlinkFunctions(signer, functionsFund, insuranceContractAddress) {
+async function handleChainlinkFunctions(signer, functionsFund, insuranceContractAddress, config) {
         // Inscrição no Chainlink Functions
         const manager = await createManager(
             signer, 
@@ -14,16 +17,30 @@ async function handleChainlinkFunctions(signer, functionsFund, insuranceContract
     
         // Financiamento de Chainlink Functions
         const juelsAmount = String(ethers.utils.parseEther(String(functionsFund))); // LINK --> Juels (Ether --> wei)
-        const fundingReceipt = await manager.fundSubscription({
+        await manager.fundSubscription({
             subscriptionId,
             juelsAmount
         });
         
         // Adicionando o Contrato de Seguro a inscrição
-        const addedReceipt = await manager.addConsumer({
+        await manager.addConsumer({
             subscriptionId,
             consumerAddress: insuranceContractAddress
         });
+
+        // Altearndo a variável referente ao ID da inscrição Chainlink Functions
+        const insuranceContract = mountinsuranceContract(signer, insuranceContractAddress);
+        const txSetSubId = await insuranceContract.setSubscriptionId(subscriptionId);
+        await txSetSubId.wait();
+
+        // Adicionando ComputationJS como CBOR para o contrato de seguro
+        const payload = await buildRequestParameters(
+            signer, 
+            config,
+            donParams
+        )
+        const txSetRequestCBOR = await insuranceContract.setCBOR(payload.requestCBOR);
+        await txSetRequestCBOR.wait();
 
         return addedReceipt;
 }
@@ -31,6 +48,9 @@ async function handleChainlinkFunctions(signer, functionsFund, insuranceContract
 export default async function handleInsuranceForm(signer, institution, params) {
     const donId = 'fun-ethereum-sepolia-1';
     const deployer = await signer.getAddress();
+    const config = {
+        args: [String(params.latitude), String(params.longitude)],
+    };
 
     const tx = await institution.createInsuranceContract(
         String(deployer),
@@ -49,6 +69,6 @@ export default async function handleInsuranceForm(signer, institution, params) {
     )
     const insuranceReceipt = await tx.wait();
     const insuranceContractAddress = insuranceReceipt.events[0].args[0]
-    const addedReceipt = await handleChainlinkFunctions(signer, params.functionsFund, insuranceContractAddress);
+    const addedReceipt = await handleChainlinkFunctions(signer, params.functionsFund, insuranceContractAddress, config);
     console.log(addedReceipt)
 }
