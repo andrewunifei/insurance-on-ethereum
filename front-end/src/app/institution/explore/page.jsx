@@ -314,9 +314,17 @@ export default function Expore({ searchParams }) {
                     }}>
                         Contratos de Seguro (Em vigor)
                     </h2>
-                    <div>
+                    <Space 
+                        direction="vertical"
+                        size={16}
+                        style={{
+                            width: '100%',
+                            backgroundColor:'#fff',
+                            padding: 20
+                        }}
+                    >
                         <CurrentInsuranceContract signer={signer} institution={institution} />
-                    </div>
+                    </Space>
                 </div>
                 
                 {/* CONTRATO DE SEGURO */}

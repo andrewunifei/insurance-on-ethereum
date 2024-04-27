@@ -2,9 +2,11 @@
 
 import mountinsuranceContract from "@/utils/InsuranceContract.sol/mountInsuranceContract";
 import Link from 'next/link';
-import { Card, Divider, Flex } from 'antd';
+import { Card, Divider, Flex, Typography, Space } from 'antd';
+const { Text } = Typography;
 import { useEffect, useState } from "react";
 import { ethers }  from "ethers";
+import styles from '../page.module.css'
 
 export default function CurrentInsuranceContract({ institution, signer }) {
         const [ flexSections, setFlexSections ] = useState(null);
@@ -18,22 +20,29 @@ export default function CurrentInsuranceContract({ institution, signer }) {
                         let cards;
                         const _flexSections = [];
                         const displayKeys = ['Limite', 'Valor de reparação'];
+                        let keyGenerated;
+                        let count1 = 0;
+                        let count2 = 0;
                         for (let farmer of farmers) {
                             cards = [];
                             const insuranceContractAddresses = await institution.getAllInsuranceContracts(farmer);
+                            count1++;
                 
                             for (let address of insuranceContractAddresses) {
+                                count2++;
+                                keyGenerated = String(count1) + String(count2);
+                                console.log(keyGenerated);
                                 const array = [];
                                 const insuranceContract = mountinsuranceContract(signer, address)
                                 const bigNumberHumidityLimit = await insuranceContract.humidityLimit();
                                 const bigNumberReparationValue = await insuranceContract.reparationValue();
-                                const humidityLimit = ethers.utils.formatEther(bigNumberHumidityLimit);
+                                const humidityLimit = bigNumberHumidityLimit.toNumber();
                                 const reparationValue = ethers.utils.formatEther(bigNumberReparationValue);
                                 array.push(humidityLimit);
                                 array.push(reparationValue);
                                 const cardChildren = array.map((val, index) => (
                                     <p
-                                        key={val}
+                                        key={keyGenerated + val}
                                         id={val}
                                     >
                                         <span 
@@ -47,7 +56,7 @@ export default function CurrentInsuranceContract({ institution, signer }) {
                                 cards.push(
                                     (
                                         <Card 
-                                            key={address}
+                                            key={keyGenerated}
                                             id={address}
                                             loading={false}
                                             title={address}
@@ -75,11 +84,42 @@ export default function CurrentInsuranceContract({ institution, signer }) {
                             }
 
                             _flexSections.push(
-                                <>
-                                    <Flex wrap="wrap" gap="large" justify="flex-start" align="center">
-                                        {cards}
-                                    </Flex>
-                                    <Divider />
+                                <> 
+                                    <Space
+                                        direction="vertical"
+                                        size={18}
+                                        style={{
+                                            width: '100%'
+                                        }}
+                                    >
+                                        <p>
+                                            <span style={{
+                                                color: 'grey'
+                                            }}>Referete ao fazendeiro </span>
+                                            <Link 
+                                                id={styles.etherScan}
+                                                href={`https://sepolia.etherscan.io/address/${farmer}`}
+                                                target='_blank'
+                                            >
+                                                <Text 
+                                                    copyable={true}
+                                                    id={styles.etherScan}
+                                                >
+                                                    {farmer}
+                                                </Text>
+                                            </Link>
+                                        </p>
+                                        <Flex 
+                                            wrap="wrap" 
+                                            gap="large" 
+                                            justify="flex-start" 
+                                            align="center"
+                                            key={count1}
+                                        >
+                                            {cards}
+                                        </Flex>
+                                        <Divider />
+                                    </Space>
                                 </>
                             )
                         }
@@ -94,6 +134,10 @@ export default function CurrentInsuranceContract({ institution, signer }) {
         }, [institution, signer])
         
 
-    return (<>{flexSections}</>)
+    return (
+        <>
+            {flexSections}
+        </>
+    )
 }
                     
