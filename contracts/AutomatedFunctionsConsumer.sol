@@ -55,6 +55,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   uint8   private controlFlag;
 
   address public  farmer;
+  string public farmName;
 
   error UnexpectedRequestID(bytes32 requestId);
 
@@ -67,7 +68,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   uint256   public  reparationValue;
   uint256   public  humidityLimit;
   uint256   public  sampleMaxSize;
-  string[]  public  sampleStorage;
+  // string[]  public  sampleStorage;
+  mapping (uint8 => string[]) public sampleStorage;
   string    private metricJS; // Cálculo da computação do índice
 
   // Variável para armazenar a média das amostras
@@ -118,6 +120,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   constructor(
     address _deployer,
     address _farmer,
+    string memory _farmName,
     uint256 _humidityLimit,
     uint256 _sampleMaxSize,
     uint256 _reparationValue,
@@ -132,6 +135,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   ) FunctionsClient(router) ConfirmedOwner(_deployer) payable {
     deployer = _deployer;
     farmer = _farmer;
+    farmName = _farmName;
     humidityLimit = _humidityLimit; 
     sampleMaxSize = _sampleMaxSize;
     reparationValue = _reparationValue;
@@ -146,6 +150,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     controlFlag = 0;
   }
 
+  // ** SETTERS **
   /**
    * Preenche a variável armazenada para as configurações da requisição codificada em CBOR
    * @param _requestCBOR bytes com as configurações da requisição codificada em CBOR
@@ -155,12 +160,29 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   }
 
   /**
-   * Prrenche a variável armazenada para o id da subscrição em Chainlink Functions
+   * Preenche a variável armazenada para o id da subscrição em Chainlink Functions
    * @param _subscriptionId id da subscrição do Chainlink Functions 
    */
   function setSubscriptionId(uint64 _subscriptionId) external {
     subscriptionId = _subscriptionId;
   }
+  // *********************
+
+  // ** GETTERS **
+  /**
+   * Retorna todos os valores do array sampleStorage
+   */
+  function getAllSamples() view public returns (string[] memory) {
+    return sampleStorage[0];
+  }
+
+  /**
+   * Retorna todos os timestamps relacionados ao sampleStorage
+   */
+  function getAllSamplesTimestamps() view public returns (string[] memory) {
+    return sampleStorage[1];
+  }
+  // *********************
 
   // /**
   //  * @notice Função para aprovar a movimentação de LINK para fora desse contrato
@@ -227,7 +249,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     upkeepCounter = upkeepCounter + 1;
 
     // Se a quantidade de amostras não é o suficiente, coleta nova amostra:
-    if(sampleMaxSize > sampleStorage.length){
+    if(sampleMaxSize > sampleStorage[0].length){
       try i_router.sendRequest(
           subscriptionId, 
           requestCBOR,
@@ -256,7 +278,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
           FunctionsRequest.CodeLanguage.JavaScript, 
           metricJS
         );
-        req.setArgs(sampleStorage);
+        req.setArgs(sampleStorage[0]);
         bytes memory encodedCBOR = req.encodeCBOR();
 
         try i_router.sendRequest(
@@ -314,7 +336,8 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     if(controlFlag == 0) {
       uint256 num = uint256(bytes32(response));
       string memory responseAsString = Strings.toString(num);
-      sampleStorage.push(responseAsString);
+      sampleStorage[0].push(responseAsString);
+      sampleStorage[1].push(Strings.toString(block.timestamp));
       emit convertedResponse(responseAsString);
       // emit OCRResponse(requestId, response, err);
     }

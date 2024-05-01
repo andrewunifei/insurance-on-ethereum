@@ -111,6 +111,7 @@ contract Institution{
         emit InsuranceContractCreated(address(c));
     }
 
+    // ** GETTERS **
     /**
      * @notice retorna todos os contratos associados a um fazendeiro
      */
@@ -125,6 +126,7 @@ contract Institution{
     function getAllFarmers() view public returns (address[] memory){
         return farmers[0];
     }
+    // *********************
 
     /**
      * @notice Para sacar o balanço do contrato

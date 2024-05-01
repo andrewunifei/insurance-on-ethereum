@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { ethers }  from "ethers";
 import styles from '../page.module.css'
 
-export default function CurrentInsuranceContract({ institution, signer }) {
+export default function CurrentInsuranceContract({ institution, signer, setReady }) {
         const [ flexSections, setFlexSections ] = useState(null);
 
         useEffect(() => {
@@ -67,10 +67,10 @@ export default function CurrentInsuranceContract({ institution, signer }) {
                                             extra={
                                                 <Link 
                                                     href={{
-                                                        pathname: "/institution/explore",
-                                                        query: {
-                                                            address: address
-                                                        }
+                                                        pathname: "/institution/insurance",
+                                                        // query: {
+                                                        //     address: address
+                                                        // }
                                                     }}
                                                 >
                                                     Explorar
@@ -128,6 +128,7 @@ export default function CurrentInsuranceContract({ institution, signer }) {
                             )
                         }
                         setFlexSections(_flexSections);
+                        setReady(true);
                     }
                     catch(e) {
                         console.log(e);

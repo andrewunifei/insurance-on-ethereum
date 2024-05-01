@@ -61,6 +61,19 @@ export default function InsuranceForm({form, onFinish}) {
                 <Input placeholder='Endereço na rede Ethereum'/>
             </Form.Item>
 
+            <Form.Item
+                name="farmName"
+                label="Nome da fazenda"
+                rules={[
+                    {
+                        required: true,
+                        message: 'Informe o nome da fazenda.',
+                    },
+                ]}
+            >
+                <Input/>
+            </Form.Item>
+
             
             <Form.Item 
                 label="Localização da fazenda"
