@@ -16,6 +16,7 @@ import { fundInstitution, withdrawFromInstitution, whitelist } from '@/app/funct
 import InsuranceForm from '@/app/institution/explore/components/InsuranceForm'
 import handleInsuranceForm from '@/utils/Institution.sol/handleInsuranceForm';
 import CurrentInsuranceContract from './components/CurrentInsuranceContract';
+import SignaturesList from './components/SignaturesList';
 import { 
     Button, 
     Flex, 
@@ -47,13 +48,13 @@ export default function Expore({ searchParams }) {
     const [ spinStatus, setSpinStatus ] = useState(false);
     const [ ready, setReady ] = useState(false);
 
-    // Insurancecontract Signtures States
-    const [ contractCreated, setContractCreated ] = useState(false);
-    const [ subscriptionCreated, setsubscriptionCreated ] = useState(false);
-    const [ subscriptionFunded, setsubscriptionFunded ] = useState(false);
-    const [ consumerAdded, setConsumerAdded ] = useState(false);
-    const [ subscriptionIdSetted, setSubscriptionIdSetted ] = useState(false);
-    const [ cborSetted, setCborSetted ] = useState(false);
+    // Insurancecontract Signatures States
+    const [ contractCreated, setContractCreated ] = useState('inactive');
+    const [ subscriptionCreated, setSubscriptionCreated ] = useState('inactive');
+    const [ subscriptionFunded, setSubscriptionFunded ] = useState('inactive');
+    const [ consumerAdded, setConsumerAdded ] = useState('inactive');
+    const [ subscriptionIdSetted, setSubscriptionIdSetted ] = useState('inactive');
+    const [ cborSetted, setCborSetted ] = useState('inactive');
     // ************************************
 
     const [ fundButtonLoading, setFundButtonLoading ] = useState(false);
@@ -69,7 +70,18 @@ export default function Expore({ searchParams }) {
 
     async function onFinish(params) {
         form.resetFields();
-        await handleInsuranceForm(signer, institution, params);
+        await handleInsuranceForm(
+            signer, 
+            institution,
+            params,
+            {
+                setContractCreated,
+                setSubscriptionCreated,
+                setSubscriptionFunded,
+                setConsumerAdded,
+                setSubscriptionIdSetted
+            }
+        );
     };
 
     useEffect(() => {
@@ -369,9 +381,13 @@ export default function Expore({ searchParams }) {
                             <InsuranceForm form={form} onFinish={onFinish} />
                         </Col>
                         <Col span={12}>
-                            <p>
-                                As configurações do Contrato de Seguro exigem 5 assinaturas na Blockchain.
-                            </p>
+                            <SignaturesList states={{
+                                contractCreated,
+                                subscriptionCreated,
+                                subscriptionFunded,
+                                consumerAdded,
+                                subscriptionIdSetted
+                            }}/>
                         </Col>
                     </Row>
                 </div>

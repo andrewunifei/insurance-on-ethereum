@@ -16,37 +16,37 @@ async function handleChainlinkFunctions(signer, functionsFund, insuranceContract
             sepolia.chainlinkRouterAddress
         );
 
-        // Inscrição no Chainlink Functions
+        // ASSINATURA 2: Inscrição em Chainlink Functions
         const subscriptionId = await manager.createSubscription();
     
-        // Financiamento de Chainlink Functions
+        // ASSINATURA 3: Financiamento de Chainlink Functions
         const juelsAmount = String(ethers.utils.parseEther(String(functionsFund))); // LINK --> Juels (Ether --> wei)
         await manager.fundSubscription({
             subscriptionId,
             juelsAmount
         });
         
-        // Adicionando o Contrato de Seguro a inscrição
+        // ASSINATURA 4: Adicionar o Contrato de Seguro Agrícola a inscrição.
         await manager.addConsumer({
             subscriptionId,
             consumerAddress: insuranceContractAddress
         });
 
-        // USE PROXY HOSPEDADO NO HEROKU 
-        // Altearndo a variável referente ao ID da inscrição Chainlink Functions
-        // const insuranceContract = mountinsuranceContract(signer, insuranceContractAddress);
-        // const txSetSubId = await insuranceContract.setSubscriptionId(subscriptionId);
-        // await txSetSubId.wait();
-        // *****************************
+        // ASSINATURA 5: Armazenar no Contrato de Seguro Agrícola o ID da inscrição.
+        const insuranceContract = mountinsuranceContract(signer, insuranceContractAddress);
+        const txSetSubId = await insuranceContract.setSubscriptionId(subscriptionId);
+        await txSetSubId.wait();
 
-        // Adicionando ComputationJS como CBOR para o contrato de seguro
-        const payload = await buildRequestParameters(
-            signer, 
-            config,
-            donParams
-        )
-        const txSetRequestCBOR = await insuranceContract.setCBOR(payload.requestCBOR);
-        await txSetRequestCBOR.wait();
+        // USE PROXY HOSPEDADO NO HEROKU 
+        // // Adicionando ComputationJS como CBOR para o contrato de seguro
+        // const payload = await buildRequestParameters(
+        //     signer, 
+        //     config,
+        //     donParams
+        // )
+        // const txSetRequestCBOR = await insuranceContract.setCBOR(payload.requestCBOR);
+        // await txSetRequestCBOR.wait();
+        // *****************************
 
         return true;
     }
@@ -64,13 +64,15 @@ async function handleChainlinkAutomation(signer, automationFund, insuranceContra
     await tx.wait();
 }
 
-export default async function handleInsuranceForm(signer, institution, params) {
+export default async function handleInsuranceForm(signer, institution, params, statesSetters) {
     const donId = 'fun-ethereum-sepolia-1';
     const deployer = await signer.getAddress();
     const config = {
         args: [String(params.latitude), String(params.longitude)],
     };
 
+    statesSetters.setContractCreated('pending');
+    // ASSINATURA 1: Criação de um novo Contrato na blockchain
     const tx = await institution.createInsuranceContract(
         String(deployer),
         String(params.farmer),
@@ -88,7 +90,10 @@ export default async function handleInsuranceForm(signer, institution, params) {
         metricJS
     )
     const insuranceReceipt = await tx.wait();
+    if(insuranceReceipt) {
+        statesSetters.setContractCreated('signed');
+    }
     const insuranceContractAddress = insuranceReceipt.events[0].args[0]
-    const chainlinkFunctionsStatus = await handleChainlinkFunctions(signer, params.functionsFund, insuranceContractAddress, config);
-    const chainlinkAutomationStatus = await handleChainlinkAutomation(signer, params.automationFund, insuranceContractAddress);
+    const chainlinkFunctionsStatus = await handleChainlinkFunctions(signer, params.functionsFund, insuranceContractAddress, config, statesSetters);
+    const chainlinkAutomationStatus = await handleChainlinkAutomation(signer, params.automationFund, insuranceContractAddress, statesSetters);
 }
