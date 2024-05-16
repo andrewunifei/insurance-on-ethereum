@@ -7,12 +7,14 @@ import buildRequestParameters from '../InsuranceContract.sol/controller';
 import donParams from '../Chainlink/donParams';
 
 async function handleChainlinkFunctions(signer, functionsFund, insuranceContractAddress, config) {
-        // Inscrição no Chainlink Functions
+        // Objeto para interação com Chainlink Functions
         const manager = await createManager(
             signer, 
             sepolia.chainlinkLinkTokenAddress,
             sepolia.chainlinkRouterAddress
         );
+
+        // Inscrição no Chainlink Functions
         const subscriptionId = await manager.createSubscription();
     
         // Financiamento de Chainlink Functions
@@ -28,10 +30,12 @@ async function handleChainlinkFunctions(signer, functionsFund, insuranceContract
             consumerAddress: insuranceContractAddress
         });
 
+        // USE PROXY HOSPEDADO NO HEROKU 
         // Altearndo a variável referente ao ID da inscrição Chainlink Functions
-        const insuranceContract = mountinsuranceContract(signer, insuranceContractAddress);
-        const txSetSubId = await insuranceContract.setSubscriptionId(subscriptionId);
-        await txSetSubId.wait();
+        // const insuranceContract = mountinsuranceContract(signer, insuranceContractAddress);
+        // const txSetSubId = await insuranceContract.setSubscriptionId(subscriptionId);
+        // await txSetSubId.wait();
+        // *****************************
 
         // Adicionando ComputationJS como CBOR para o contrato de seguro
         const payload = await buildRequestParameters(
@@ -55,6 +59,7 @@ export default async function handleInsuranceForm(signer, institution, params) {
     const tx = await institution.createInsuranceContract(
         String(deployer),
         String(params.farmer),
+        String(params.farmName),
         Number(params.humidityLimit),
         Number(params.sampleMaxSize),
         ethers.utils.parseEther(String(params.reparationValue)),

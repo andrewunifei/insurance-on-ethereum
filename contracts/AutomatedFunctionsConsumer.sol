@@ -28,9 +28,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
 
   // Configuração Chainlink Functions
   bytes   public  requestCBOR; // Concise Binary Object Representation para transferência de dados
-  bytes32 public  latestRequestId;
-  bytes   public  latestResponse;
-  bytes   public  latestError;
   uint64  public  subscriptionId;
   uint32  public  fulfillGasLimit;
   uint256 public  updateInterval;
@@ -48,10 +45,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   uint256 public  upkeepCounter;
   uint256 public  responseCounter;
   bytes32 public  s_lastRequestId;
-  bytes   public  s_lastResponse;
-  bytes   public  s_lastError;
   uint256 public  s_requestCounter;
-  uint256 public  s_responseCounter;
   uint8   private controlFlag;
 
   address public  farmer;
@@ -328,11 +322,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
    * @param err Erro do código fonte ou do pipeline de execução da requisição
    */
   function fulfillRequest(bytes32 requestId, bytes memory response, bytes memory err) internal override {
-    // latestResponse = response;
-    // latestError = err;
-    // responseCounter = responseCounter + 1;
-    // string memory responseAsString = string(response); 
-
     if(controlFlag == 0) {
       uint256 num = uint256(bytes32(response));
       string memory responseAsString = Strings.toString(num);

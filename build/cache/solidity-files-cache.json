@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/AutomatedFunctionsConsumer.sol": {
-      "lastModificationDate": 1712166085062,
-      "contentHash": "efd406bebb674593e6182380d3368558",
+      "lastModificationDate": 1714671666312,
+      "contentHash": "c993e747ff0c6c1d54287b68c7824d8e",
       "sourceName": "contracts/AutomatedFunctionsConsumer.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -47,6 +47,42 @@
         "UpkeepInterface"
       ]
     },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/AutomationUtils.sol": {
+      "lastModificationDate": 1711370917020,
+      "contentHash": "03e29d82ff9991c336966bd6e3adcae3",
+      "sourceName": "contracts/AutomationUtils.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "IAutomationRegistryConsumer"
+      ]
+    },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/Upkeep.sol": {
       "lastModificationDate": 1710871810076,
       "contentHash": "6f6ebcbb6f72f7f892c0cf4696795479",
@@ -87,10 +123,10 @@
         "Upkeep"
       ]
     },
-    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/hardhat/console.sol": {
-      "lastModificationDate": 1705061104007,
-      "contentHash": "4ff3cd2f6272c9a6516e9ee4f2b967d3",
-      "sourceName": "hardhat/console.sol",
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@openzeppelin/contracts/utils/Strings.sol": {
+      "lastModificationDate": 1705061103412,
+      "contentHash": "62142442bed149f965c5ed971fae4182",
+      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
       "solcConfig": {
         "version": "0.8.19",
         "settings": {
@@ -117,52 +153,14 @@
       },
       "imports": [],
       "versionPragmas": [
-        ">= 0.4.22 <0.9.0"
-      ],
-      "artifacts": [
-        "console"
-      ]
-    },
-    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol": {
-      "lastModificationDate": 1704221023604,
-      "contentHash": "16d64572b0310127fc8a771e63be6d20",
-      "sourceName": "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 1000
-          },
-          "viaIR": true,
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./ConfirmedOwnerWithProposal.sol"
-      ],
-      "versionPragmas": [
         "^0.8.0"
       ],
       "artifacts": [
-        "ConfirmedOwner"
+        "Strings"
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol": {
-      "lastModificationDate": 1704221023556,
+      "lastModificationDate": 1705061104229,
       "contentHash": "c962c53a75d722542c83859d848edd5b",
       "sourceName": "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol",
       "solcConfig": {
@@ -200,8 +198,82 @@
         "AutomationCompatible"
       ]
     },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol": {
+      "lastModificationDate": 1705061104672,
+      "contentHash": "d10c0d716a0f43bb442c14effc9bd39f",
+      "sourceName": "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "LinkTokenInterface"
+      ]
+    },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol": {
+      "lastModificationDate": 1705061104391,
+      "contentHash": "16d64572b0310127fc8a771e63be6d20",
+      "sourceName": "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./ConfirmedOwnerWithProposal.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "ConfirmedOwner"
+      ]
+    },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol": {
-      "lastModificationDate": 1704221023641,
+      "lastModificationDate": 1706025524763,
       "contentHash": "03c4620e369a0fa92a95a17988313bdb",
       "sourceName": "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol",
       "solcConfig": {
@@ -241,7 +313,7 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol": {
-      "lastModificationDate": 1704221023648,
+      "lastModificationDate": 1705061104569,
       "contentHash": "110e30b4e27f737239bcc2c8e2716ef0",
       "sourceName": "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol",
       "solcConfig": {
@@ -278,10 +350,10 @@
         "FunctionsRequest"
       ]
     },
-    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol": {
-      "lastModificationDate": 1704221023689,
-      "contentHash": "d10c0d716a0f43bb442c14effc9bd39f",
-      "sourceName": "@chainlink/contracts/src/v0.8/shared/interfaces/LinkTokenInterface.sol",
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/automation/AutomationBase.sol": {
+      "lastModificationDate": 1705061104228,
+      "contentHash": "80067f44d8bddd615599f8d73b9726a5",
+      "sourceName": "@chainlink/contracts/src/v0.8/automation/AutomationBase.sol",
       "solcConfig": {
         "version": "0.8.19",
         "settings": {
@@ -311,11 +383,47 @@
         "^0.8.0"
       ],
       "artifacts": [
-        "LinkTokenInterface"
+        "AutomationBase"
+      ]
+    },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol": {
+      "lastModificationDate": 1705061104232,
+      "contentHash": "c52969cee392918edbf23f914e01c0dc",
+      "sourceName": "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "AutomationCompatibleInterface"
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwnerWithProposal.sol": {
-      "lastModificationDate": 1704221023605,
+      "lastModificationDate": 1705061104393,
       "contentHash": "56723eba6ecc747fee92c5ab5b0bbf7f",
       "sourceName": "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwnerWithProposal.sol",
       "solcConfig": {
@@ -353,7 +461,7 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/shared/interfaces/IOwnable.sol": {
-      "lastModificationDate": 1704221023669,
+      "lastModificationDate": 1705061104643,
       "contentHash": "b3ae9b7345205a0a65f3e0f89c176d88",
       "sourceName": "@chainlink/contracts/src/v0.8/shared/interfaces/IOwnable.sol",
       "solcConfig": {
@@ -388,80 +496,8 @@
         "IOwnable"
       ]
     },
-    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/automation/AutomationBase.sol": {
-      "lastModificationDate": 1704221023555,
-      "contentHash": "80067f44d8bddd615599f8d73b9726a5",
-      "sourceName": "@chainlink/contracts/src/v0.8/automation/AutomationBase.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 1000
-          },
-          "viaIR": true,
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "AutomationBase"
-      ]
-    },
-    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol": {
-      "lastModificationDate": 1704221023557,
-      "contentHash": "c52969cee392918edbf23f914e01c0dc",
-      "sourceName": "@chainlink/contracts/src/v0.8/automation/interfaces/AutomationCompatibleInterface.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 1000
-          },
-          "viaIR": true,
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "AutomationCompatibleInterface"
-      ]
-    },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsRouter.sol": {
-      "lastModificationDate": 1704221023666,
+      "lastModificationDate": 1705061104637,
       "contentHash": "e02e28dbe30aacda992e51136ceccf1b",
       "sourceName": "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsRouter.sol",
       "solcConfig": {
@@ -499,7 +535,7 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsClient.sol": {
-      "lastModificationDate": 1704221023665,
+      "lastModificationDate": 1705061104635,
       "contentHash": "2a200f8d13068f38d2e43aba82a42762",
       "sourceName": "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsClient.sol",
       "solcConfig": {
@@ -535,7 +571,7 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/vendor/solidity-cborutils/v2.0.0/CBOR.sol": {
-      "lastModificationDate": 1704221023594,
+      "lastModificationDate": 1705061104357,
       "contentHash": "a496b670d630b3529a54986cd1148896",
       "sourceName": "@chainlink/contracts/src/v0.8/vendor/solidity-cborutils/v2.0.0/CBOR.sol",
       "solcConfig": {
@@ -573,7 +609,7 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/vendor/@ensdomains/buffer/v0.1.0/Buffer.sol": {
-      "lastModificationDate": 1704221023589,
+      "lastModificationDate": 1705061104335,
       "contentHash": "f56822d17e35b3259cbdb1318c866e20",
       "sourceName": "@chainlink/contracts/src/v0.8/vendor/@ensdomains/buffer/v0.1.0/Buffer.sol",
       "solcConfig": {
@@ -609,7 +645,7 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsResponse.sol": {
-      "lastModificationDate": 1704221023649,
+      "lastModificationDate": 1705061104570,
       "contentHash": "dd8ae638767bbde45e92a675d9463b1b",
       "sourceName": "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsResponse.sol",
       "solcConfig": {
@@ -647,7 +683,7 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsSubscriptions.sol": {
-      "lastModificationDate": 1704221023666,
+      "lastModificationDate": 1705061104637,
       "contentHash": "d1774fcec528d9252300b914e898c0aa",
       "sourceName": "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/interfaces/IFunctionsSubscriptions.sol",
       "solcConfig": {
@@ -685,8 +721,8 @@
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/Institution.sol": {
-      "lastModificationDate": 1714092169792,
-      "contentHash": "ec3bab445173bf8d81580fbc3920aa6e",
+      "lastModificationDate": 1714670909960,
+      "contentHash": "1b8ca18955b4c756651e737d660019b0",
       "sourceName": "contracts/Institution.sol",
       "solcConfig": {
         "version": "0.8.19",
@@ -721,6 +757,42 @@
       ],
       "artifacts": [
         "Institution"
+      ]
+    },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/hardhat/console.sol": {
+      "lastModificationDate": 1705061104007,
+      "contentHash": "4ff3cd2f6272c9a6516e9ee4f2b967d3",
+      "sourceName": "hardhat/console.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">= 0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "console"
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/InsuranceAPI.sol": {
@@ -759,6 +831,45 @@
       ],
       "artifacts": [
         "InsuranceAPI"
+      ]
+    },
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockInstitution.sol": {
+      "lastModificationDate": 1710260160441,
+      "contentHash": "d6e1a26ad3f23c717cc18e67344a8b40",
+      "sourceName": "contracts/mock/mockInstitution.sol",
+      "solcConfig": {
+        "version": "0.8.19",
+        "settings": {
+          "optimizer": {
+            "enabled": true,
+            "runs": 1000
+          },
+          "viaIR": true,
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./mockAutomatedFunctionsConsumer.sol",
+        "hardhat/console.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.7"
+      ],
+      "artifacts": [
+        "Institution"
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockAutomatedFunctionsConsumer.sol": {
@@ -803,10 +914,10 @@
         "IFunctionsRouter"
       ]
     },
-    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockInstitution.sol": {
-      "lastModificationDate": 1710260160441,
-      "contentHash": "d6e1a26ad3f23c717cc18e67344a8b40",
-      "sourceName": "contracts/mock/mockInstitution.sol",
+    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockChainlink/mockFunctionsClient.sol": {
+      "lastModificationDate": 1709138194602,
+      "contentHash": "cfc61fb0842e966c61878ba410193eb7",
+      "sourceName": "contracts/mock/mockChainlink/mockFunctionsClient.sol",
       "solcConfig": {
         "version": "0.8.19",
         "settings": {
@@ -832,14 +943,13 @@
         }
       },
       "imports": [
-        "./mockAutomatedFunctionsConsumer.sol",
         "hardhat/console.sol"
       ],
       "versionPragmas": [
-        "^0.8.7"
+        "^0.8.19"
       ],
       "artifacts": [
-        "Institution"
+        "FunctionsClient"
       ]
     },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockInsuranceAPI.sol": {
@@ -880,82 +990,8 @@
         "InsuranceAPI"
       ]
     },
-    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/AutomationUtils.sol": {
-      "lastModificationDate": 1711370917020,
-      "contentHash": "03e29d82ff9991c336966bd6e3adcae3",
-      "sourceName": "contracts/AutomationUtils.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 1000
-          },
-          "viaIR": true,
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.7"
-      ],
-      "artifacts": [
-        "IAutomationRegistryConsumer"
-      ]
-    },
-    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/mock/mockChainlink/mockFunctionsClient.sol": {
-      "lastModificationDate": 1709138194602,
-      "contentHash": "cfc61fb0842e966c61878ba410193eb7",
-      "sourceName": "contracts/mock/mockChainlink/mockFunctionsClient.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 1000
-          },
-          "viaIR": true,
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "hardhat/console.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.19"
-      ],
-      "artifacts": [
-        "FunctionsClient"
-      ]
-    },
     "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/contracts/lab/Laboratory.sol": {
-      "lastModificationDate": 1706098702044,
+      "lastModificationDate": 1707338816301,
       "contentHash": "975be7535915df02ec8bbd34f7cd9807",
       "sourceName": "contracts/lab/Laboratory.sol",
       "solcConfig": {
@@ -990,42 +1026,6 @@
       ],
       "artifacts": [
         "Laboratory"
-      ]
-    },
-    "/Users/andrew/Documents/Estudos/UNIFEI/0. TCC/2. Implementação/insurance-on-ethereum/node_modules/@openzeppelin/contracts/utils/Strings.sol": {
-      "lastModificationDate": 1705061103412,
-      "contentHash": "62142442bed149f965c5ed971fae4182",
-      "sourceName": "@openzeppelin/contracts/utils/Strings.sol",
-      "solcConfig": {
-        "version": "0.8.19",
-        "settings": {
-          "optimizer": {
-            "enabled": true,
-            "runs": 1000
-          },
-          "viaIR": true,
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Strings"
       ]
     }
   }

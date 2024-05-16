@@ -1,5 +1,5 @@
 import * as ethers from 'ethers'
-import blockchain from '../blockchain.js'
+import sepolia from '@/utils/blockchain'
 import {
     SecretsManager,
     buildRequestCBOR,
@@ -19,7 +19,7 @@ async function setDonHostedSecrets(signer, parameters) {
     const secretsManager = new SecretsManager(
         {
             signer,
-            functionsRouterAddress: blockchain.sepolia.chainlinkRouterAddress,
+            functionsRouterAddress: sepolia.chainlinkRouterAddress,
             donId
         }
     );

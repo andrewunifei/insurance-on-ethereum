@@ -47,6 +47,15 @@ export default function Expore({ searchParams }) {
     const [ spinStatus, setSpinStatus ] = useState(false);
     const [ ready, setReady ] = useState(false);
 
+    // Insurancecontract Signtures States
+    const [ contractCreated, setContractCreated ] = useState(false);
+    const [ subscriptionCreated, setsubscriptionCreated ] = useState(false);
+    const [ subscriptionFunded, setsubscriptionFunded ] = useState(false);
+    const [ consumerAdded, setConsumerAdded ] = useState(false);
+    const [ subscriptionIdSetted, setSubscriptionIdSetted ] = useState(false);
+    const [ cborSetted, setCborSetted ] = useState(false);
+    // ************************************
+
     const [ fundButtonLoading, setFundButtonLoading ] = useState(false);
     const [ withdrawButtonLoading, setWithdrawButtonLoading ] = useState(false);
     const [ whitelistBtnLoading, setWhitelistBtnLoading ] = useState(false);
@@ -302,6 +311,7 @@ export default function Expore({ searchParams }) {
                     </Row>
                 </div>
 
+                {/* CONTRATO EM VIGOR */}
                 <div style={{
                     border: 'solid',
                     borderRadius: 5,
@@ -346,9 +356,24 @@ export default function Expore({ searchParams }) {
                             Novo Contrato de Seguro
                         </h2>
                     </Flex>
-                    <Flex align="center" justify="center" style={{padding: 20}} id="insurance">
-                        <InsuranceForm form={form} onFinish={onFinish} />
-                    </Flex>
+                    {/* <Flex align="flex-start" justify="flex-start" style={{padding: 20}} id="insurance"> 
+                            <InsuranceForm form={form} onFinish={onFinish} />
+                            <div style={{border: 'solid'}}>
+                                <p>
+                                    Testing
+                                </p>
+                            </div>
+                    </Flex> */}
+                    <Row style={{padding: 20}}>
+                        <Col span={12}>
+                            <InsuranceForm form={form} onFinish={onFinish} />
+                        </Col>
+                        <Col span={12}>
+                            <p>
+                                As configurações do Contrato de Seguro exigem 5 assinaturas na Blockchain.
+                            </p>
+                        </Col>
+                    </Row>
                 </div>
             </Space>
         </>

@@ -71,6 +71,7 @@ contract Institution{
     function createInsuranceContract(
         address _deployer,
         address _farmer,
+        string memory _farmName,
         uint256 _humidityLimit,
         uint256 _sampleMaxSize,
         uint256 _reparationValue, // Essa variável espera um valor em wei
@@ -91,6 +92,7 @@ contract Institution{
         }(
             _deployer,
             _farmer,
+            _farmName,
             _humidityLimit,
             _sampleMaxSize,
             _reparationValue,
