@@ -3,10 +3,12 @@ import sepolia from '@/utils/blockchain'
 import { metricJS } from '../rules/metric';
 import { ethers } from 'ethers';
 import mountinsuranceContract from '../InsuranceContract.sol/mountInsuranceContract';
+import mountLINK from '../Chainlink/mountLINK';
 import buildRequestParameters from '../InsuranceContract.sol/controller';
 import donParams from '../Chainlink/donParams';
 
 async function handleChainlinkFunctions(signer, functionsFund, insuranceContractAddress, config) {
+    try {
         // Objeto para interação com Chainlink Functions
         const manager = await createManager(
             signer, 
@@ -46,7 +48,20 @@ async function handleChainlinkFunctions(signer, functionsFund, insuranceContract
         const txSetRequestCBOR = await insuranceContract.setCBOR(payload.requestCBOR);
         await txSetRequestCBOR.wait();
 
-        return addedReceipt;
+        return true;
+    }
+    catch(e) {
+        console.log(e);
+        return false;
+    }
+}
+
+async function handleChainlinkAutomation(signer, automationFund, insuranceContractAddress) {
+     // Adicionado LINK ao contrato para financiar Chainlink Functions
+    const LINK = mountLINK(signer);
+    const juelsAmount = String(ethers.utils.parseEther(String(automationFund))); // LINK --> Juels (Ether --> wei)
+    const tx = await LINK.transfer(insuranceContractAddress, juelsAmount);
+    await tx.wait();
 }
 
 export default async function handleInsuranceForm(signer, institution, params) {
@@ -74,6 +89,6 @@ export default async function handleInsuranceForm(signer, institution, params) {
     )
     const insuranceReceipt = await tx.wait();
     const insuranceContractAddress = insuranceReceipt.events[0].args[0]
-    const addedReceipt = await handleChainlinkFunctions(signer, params.functionsFund, insuranceContractAddress, config);
-    console.log(addedReceipt)
+    const chainlinkFunctionsStatus = await handleChainlinkFunctions(signer, params.functionsFund, insuranceContractAddress, config);
+    const chainlinkAutomationStatus = await handleChainlinkAutomation(signer, params.automationFund, insuranceContractAddress);
 }
