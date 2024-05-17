@@ -55,11 +55,17 @@ export default function Expore({ searchParams }) {
     const [ consumerAdded, setConsumerAdded ] = useState('inactive');
     const [ subscriptionIdSetted, setSubscriptionIdSetted ] = useState('inactive');
     const [ cborSetted, setCborSetted ] = useState('inactive');
+    const [ automationFunded, setAutomationFunded ] = useState('inactive');
+    const [ upkeepCreation, setUpkeepCreation ] = useState('inactive');
+    const [ upkeepRegistration, setUpkeepRegistration ] = useState('inactive');
+    
+    
     // ************************************
 
     const [ fundButtonLoading, setFundButtonLoading ] = useState(false);
     const [ withdrawButtonLoading, setWithdrawButtonLoading ] = useState(false);
     const [ whitelistBtnLoading, setWhitelistBtnLoading ] = useState(false);
+    const [ registerButtonLoading, setRegisterButtonLoading ] = useState(false);
 
     const router = useRouter();
     const fundInput = useRef('');
@@ -69,6 +75,7 @@ export default function Expore({ searchParams }) {
     const [form] = Form.useForm();
 
     async function onFinish(params) {
+        setRegisterButtonLoading(true);
         form.resetFields();
         await handleInsuranceForm(
             signer, 
@@ -79,9 +86,14 @@ export default function Expore({ searchParams }) {
                 setSubscriptionCreated,
                 setSubscriptionFunded,
                 setConsumerAdded,
-                setSubscriptionIdSetted
+                setSubscriptionIdSetted,
+                setCborSetted,
+                setAutomationFunded,
+                setUpkeepCreation,
+                setUpkeepRegistration
             }
         );
+        setRegisterButtonLoading(false)
     };
 
     useEffect(() => {
@@ -378,7 +390,7 @@ export default function Expore({ searchParams }) {
                     </Flex> */}
                     <Row style={{padding: 20}}>
                         <Col span={12}>
-                            <InsuranceForm form={form} onFinish={onFinish} />
+                            <InsuranceForm form={form} onFinish={onFinish} registerButtonLoading={registerButtonLoading} />
                         </Col>
                         <Col span={12}>
                             <SignaturesList states={{
@@ -386,7 +398,11 @@ export default function Expore({ searchParams }) {
                                 subscriptionCreated,
                                 subscriptionFunded,
                                 consumerAdded,
-                                subscriptionIdSetted
+                                subscriptionIdSetted,
+                                cborSetted,
+                                automationFunded,
+                                upkeepCreation,
+                                upkeepRegistration
                             }}/>
                         </Col>
                     </Row>

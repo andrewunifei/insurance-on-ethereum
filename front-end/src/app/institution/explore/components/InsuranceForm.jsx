@@ -1,7 +1,7 @@
 import { Form, Space, Select, Input, Button } from 'antd';
 import { QuestionCircleOutlined } from '@ant-design/icons';
 
-export default function InsuranceForm({form, onFinish}) {
+export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
     const formItemLayout = {
         labelCol: {
           xs: {
@@ -209,7 +209,7 @@ export default function InsuranceForm({form, onFinish}) {
             </Form.Item>
 
             <Form.Item {...tailFormItemLayout}>
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" loading={registerButtonLoading}>
                     Registrar
                 </Button>
             </Form.Item>
