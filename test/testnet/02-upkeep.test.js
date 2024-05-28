@@ -40,7 +40,7 @@ describe('(CHAINLINK) Upkeep', async () => {
             checkData:      ethers.utils.hexlify([]),
             triggerConfig:  ethers.utils.hexlify([]),
             offchainConfig: ethers.utils.hexlify([]),
-            amount:         ethers.utils.parseEther(String(10)) // LINK --> Juels
+            amount:         ethers.utils.parseEther(String(2)) // LINK --> Juels
         };
 
         insuranceContract = new ethers.Contract(
@@ -57,11 +57,11 @@ describe('(CHAINLINK) Upkeep', async () => {
         LINK = LINKFactory.attach(blockchain.sepolia.chainlinkLinkTokenAddress);
     });
 
-    it('Should create an upkeep through Insurance Contract successfully and fund it with 10 LINK', async () => {
+    it('Should create an upkeep through Insurance Contract successfully and fund it with 2 LINK', async () => {
         const pathToFile = path.resolve('deployed/pipeline-test-upkeep.txt');
         const exists = fsSync.existsSync(pathToFile);
         if(!exists) {
-            const LINKAmount = ethers.utils.parseEther(String(10));
+            const LINKAmount = ethers.utils.parseEther(String(2));
             const LINKBalance = await LINK.balanceOf(insuranceContract.address);
             expect(String(LINKBalance) === String(LINKAmount)).to.be.true;
             if(String(LINKBalance) === String(LINKAmount)){

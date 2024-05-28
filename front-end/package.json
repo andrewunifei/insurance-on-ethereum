@@ -13,6 +13,8 @@
     "@chainlink/functions-toolkit": "^0.2.8",
     "@ctrl/tinycolor": "^4.1.0",
     "@metamask/detect-provider": "^2.0.0",
+    "ecdh": "^0.2.0",
+    "encrypt-rsa": "^3.0.1",
     "ethers": "^5.7.2",
     "next": "14.1.4",
     "react": "^18",

@@ -34,26 +34,4 @@ contract InsuranceAPI {
     function getAllInstitution() public view returns (Institution[] memory) {
         return institutions[msg.sender];
     }
-
-    // function donate() public payable {
-    //     donators[msg.sender] += msg.value;
-    //     donatorsAddresses.push(msg.sender);
-    // }
-
-    // function getAllDonators() public view returns (address[] memory){
-    //     return donatorsAddresses;
-    // }
-
-    // receive() external payable {
-    //     donate();
-    // }
-
-    // fallback() external payable {
-    //     donate();
-    // }
-
-    // function withdraw() external owner {
-    //     (bool callStatus, /* bytes memory data */) = payable(im_owner).call{value: address(this).balance}("");
-    //     require(callStatus, "Withdraw failed.");
-    // }
 }

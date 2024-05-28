@@ -43,10 +43,8 @@ function getAPI(APIAddress, signer, APIArtifact){
  * @param {Object} name Nome da instituição
  * @returns {ContractTransactionReceipt}
  */
-async function createInstitution(API, name) {
-    const tx = await API.createInstitution(
-        name
-    )
+async function createInstitution(API, institutionInfo) {
+    const tx = await API.createInstitution(institutionInfo)
 
     console.log(`Institution creation: waiting 1 block for transaction ${tx.hash} to be confirmed...`)
     const receipt = await tx.wait(1)

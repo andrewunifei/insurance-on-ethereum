@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { Button, Col, Tag, Drawer, Form, Input, Row, Select, Space, message } from 'antd';
 import { useSignerContext } from "@/context";
+import handleRegistration from './handleRegistration';
 
 const { Option } = Select;
 
@@ -45,9 +46,7 @@ export default function RegisterInstitution({open, setOpen, setEmAndamento}) {
         message: 'Criação de Instituição',
         description: 'Foi enviada uma solicitação para a blockchain.'
       });
-      const tx = await insuranceAPI.createInstitution(institutionInfo);
-      const receipt = await tx.wait(1);
-      const _newInstitutionAddress = receipt.events[0].args[0];
+      const _newInstitutionAddress = await handleRegistration(institutionInfo);
       setEmAndamento('');
       setConfirmLoading(false);
       openNotification({

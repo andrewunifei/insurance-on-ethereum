@@ -34,6 +34,8 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
         },
     };
 
+    const requiredStatus = true;
+
     return (
         <Form
             {...formItemLayout}
@@ -53,7 +55,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                 label="Endereço do fazendeiro"
                 rules={[
                     {
-                        required: true,
+                        required: requiredStatus,
                         message: 'Informe o endereço do fazendeiro.',
                     },
                 ]}
@@ -66,7 +68,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                 label="Nome da fazenda"
                 rules={[
                     {
-                        required: true,
+                        required: requiredStatus,
                         message: 'Informe o nome da fazenda.',
                     },
                 ]}
@@ -79,7 +81,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                 label="Localização da fazenda"
                 rules={[
                     {
-                        required: true,
+                        required: requiredStatus,
                         message: 'Informe a localização da fazenda.',
                     }
                 ]}
@@ -91,14 +93,14 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                     <Form.Item
                         name="latitude"
                         noStyle
-                        // rules={[{ required: true, message: 'Informe a latitude.' }]}
+                        // rules={[{ required: requiredStatus, message: 'Informe a latitude.' }]}
                     >
                         <Input style={{ width: '50%' }} placeholder="Latitude" />
                     </Form.Item>
                     <Form.Item
                         name="longitude"
                         noStyle
-                        // rules={[{ required: true, message: 'Informe a longitude.' }]}
+                        // rules={[{ required: requiredStatus, message: 'Informe a longitude.' }]}
                     >
                         <Input style={{ width: '50%' }} placeholder="Longitude" />
                     </Form.Item>
@@ -110,7 +112,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                 label="Valor da indenização"
                 rules={[
                 {
-                    required: true,
+                    required: requiredStatus,
                     message: 'Informa o valor da indenização.',
                 },
                 ]}
@@ -124,7 +126,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                 tooltip={{title: 'O valor de comparação da métrica para o pagamento da indenização.', icon: <QuestionCircleOutlined />}}
                 rules={[
                 {
-                    required: true,
+                    required: requiredStatus,
                     message: 'Informe o limite do índice.',
                 },
                 ]}
@@ -137,7 +139,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                 label="Número de amostras"
                 rules={[
                 {
-                    required: true,
+                    required: requiredStatus,
                     message: 'Informe o número de amostras.',
                 },
                 ]}
@@ -149,7 +151,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                 label="Coletar a cada"
                 rules={[
                 {
-                    required: true,
+                    required: requiredStatus,
                     message: 'Informe o intervalo.',
                 }
                 ]}
@@ -161,7 +163,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                     <Form.Item
                         name='intervalNumber'
                         noStyle
-                        // rules={[{ required: true, message: 'Informe o valor numérico.' }]}
+                        // rules={[{ required: requiredStatus, message: 'Informe o valor numérico.' }]}
                     >
                         <Input placeholder="Numérico inteiro" />
                     </Form.Item>
@@ -169,7 +171,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                     <Form.Item
                         name='intervalScale'
                         noStyle
-                        // rules={[{ required: true, message: 'Informe a escala temporal.' }]}
+                        // rules={[{ required: requiredStatus, message: 'Informe a escala temporal.' }]}
                     >
                         <Select placeholder="Escala temporal">
                             <Select.Option value="minutes">Minutos</Select.Option>
@@ -186,7 +188,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                 tooltip={{ title: 'https://chain.link/functions', icon: <QuestionCircleOutlined />}}
                 rules={[
                 {
-                    required: true,
+                    required: requiredStatus,
                     message: 'É necessário informar o valor do financiamento.',
                 },
                 ]}
@@ -200,7 +202,7 @@ export default function InsuranceForm({form, onFinish, registerButtonLoading}) {
                 tooltip={{ title: 'https://chain.link/automation', icon: <QuestionCircleOutlined /> }}
                 rules={[
                 {
-                    required: true,
+                    required: requiredStatus,
                     message: 'É necessário informar o valor do financiamento.',
                 },
                 ]}

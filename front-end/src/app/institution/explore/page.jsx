@@ -58,8 +58,7 @@ export default function Expore({ searchParams }) {
     const [ automationFunded, setAutomationFunded ] = useState('inactive');
     const [ upkeepCreation, setUpkeepCreation ] = useState('inactive');
     const [ upkeepRegistration, setUpkeepRegistration ] = useState('inactive');
-    
-    
+    const [ incomingData, setIncomingData ] = useState('');
     // ************************************
 
     const [ fundButtonLoading, setFundButtonLoading ] = useState(false);
@@ -75,11 +74,11 @@ export default function Expore({ searchParams }) {
     const [form] = Form.useForm();
 
     async function onFinish(params) {
-        setRegisterButtonLoading(true);
+        //setRegisterButtonLoading(true);
         form.resetFields();
         await handleInsuranceForm(
             signer, 
-            institution,
+            searchParams.address,
             params,
             {
                 setContractCreated,
@@ -99,7 +98,7 @@ export default function Expore({ searchParams }) {
     useEffect(() => {
         const _institution = mountInstitution(signer, searchParams.address);
         setInstitution(_institution);
-        async function getOwner() {
+        async function get() {
             if(signer) {
                 const _owner = await _institution.im_owner();
                 const _balanceBigNumber = await _institution.contractBalance();
@@ -107,8 +106,12 @@ export default function Expore({ searchParams }) {
                 setOwner(_owner);
                 setBalance(_balance);
             }
+            // const response = await fetch('http://localhost:8080/');
+            // const parsed = await response.json();
+            // setIncomingData(parsed);
+            // console.log(parsed)
         };
-        getOwner();
+        get();
     }, [signer])
 
     return (
@@ -402,7 +405,8 @@ export default function Expore({ searchParams }) {
                                 cborSetted,
                                 automationFunded,
                                 upkeepCreation,
-                                upkeepRegistration
+                                upkeepRegistration,
+                                incomingData
                             }}/>
                         </Col>
                     </Row>

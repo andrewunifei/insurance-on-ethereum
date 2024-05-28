@@ -7,6 +7,5 @@ args.forEach(function(item, index) {
     count++;
 });
 avg = total / count;
-dataStructure.push(parseInt(avg))
-
+dataStructure.push(parseInt(avg));
 return Functions.encodeUint256(dataStructure[0]);

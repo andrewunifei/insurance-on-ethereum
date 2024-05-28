@@ -23,10 +23,6 @@ describe('(TESTNET) Deployment Pipeline', async () => {
     let manager;
     let subscriptionId;
 
-    // Parâmetros
-    const institutionName = 'Capital Expansion LTDA';
-    const reparationValue = 0.001;
-
     before(async () => {
         const payload = await blockchain.interaction(
             process.env.SEPOLIA_ACCOUNT_PRIVATE_KEY,
@@ -45,24 +41,24 @@ describe('(TESTNET) Deployment Pipeline', async () => {
 
         it('Should deploy an Institution through the API to Sepolia Testnet successfully', async () => {
             const pathToFile = path.resolve('deployed/pipeline-test-institution.txt');
-            const payload = await helpers.fetchInstitution(signer, API, institutionName, pathToFile);
+            const payload = await helpers.fetchInstitution(signer, API, dataParameters.institutionInfo, pathToFile);
             institution = payload.institution;
             expect(institution.address.length).to.equal(42);
         });
     });
 
     describe('Institution', async () => {
-        it('Should register informations about the Institution correctly', async () => {
-            const verification = await institution.info('Code');
-            if(verification !== '123456789') {
-                const tx = await institution.registerInfo(dataParameters.institutionInfo); // Array de array 
-                await tx.wait();
-                for (let pair of dataParameters.institutionInfo) {
-                    await institution.info(pair[0])
-                        .then(value => expect(value).to.equal(pair[1]))
-                };
-            }
-        });
+        // it('Should register informations about the Institution correctly', async () => {
+        //     const verification = await institution.info('Code');
+        //     if(verification !== '123456789') {
+        //         const tx = await institution.registerInfo(dataParameters.institutionInfo); // Array de array 
+        //         await tx.wait();
+        //         for (let pair of dataParameters.institutionInfo) {
+        //             await institution.info(pair[0])
+        //                 .then(value => expect(value).to.equal(pair[1]))
+        //         };
+        //     }
+        // });
 
         it('Should whitelist the farmer address successfully', async () => {
             let addrWhiteListed = await institution.whitelist(dataParameters.farmerAddr);
@@ -76,7 +72,8 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
 
         it('Should send Ether to the Institution correctly', async () => {
-            const weiReparationValue = ethers.utils.parseEther(String(reparationValue))
+            console.log(dataParameters.reparationValue)
+            const weiReparationValue = ethers.utils.parseEther(String(dataParameters.reparationValue))
             const pathToFile = path.resolve('deployed/pipeline-test-insuranceContract.txt');
             const exists = fsSync.existsSync(pathToFile);
             if(!exists) {
@@ -84,7 +81,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
 
                 // ARRUMAR ISSO: MESMO PROBLEMA COM A TRANSFERENCIA DE LINK
                 if(String(institutionBalance) !== String(weiReparationValue)){
-                    await institutionManager.fundInstitution(signer, institution, reparationValue);
+                    await institutionManager.fundInstitution(signer, institution, dataParameters.reparationValue);
                     institutionBalance = await institution.contractBalance();
                 };
                 expect(institutionBalance).to.equal(weiReparationValue);
@@ -122,7 +119,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
 
         it('Should FUND the Chainlink Functions subscription correctly', async () => {
-            const juelsAmount = String(ethers.utils.parseEther(String(10)));
+            const juelsAmount = String(ethers.utils.parseEther(String(2)));
             let subscriptionInfo = await manager.getSubscriptionInfo(subscriptionId);
 
             if(subscriptionInfo.balance <= BigInt(ethers.utils.parseEther(String(0.01))._hex)) {
@@ -186,7 +183,7 @@ describe('(TESTNET) Deployment Pipeline', async () => {
         });
 
         it('Should be properly funded with 10 LINK to be able to fund upkeep', async () => {
-            const LINKAmount = ethers.utils.parseEther(String(10)); // eth --> wei
+            const LINKAmount = ethers.utils.parseEther(String(2)); // eth --> wei
             let LINKBalance = await LINK.balanceOf(insuranceContract.address);
             if(LINKBalance.lt(LINKAmount)) {
                 const diff = LINKAmount.sub(LINKBalance);

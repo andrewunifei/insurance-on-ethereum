@@ -24,6 +24,7 @@ export default function SignaturesList({states}) {
                 <span>{states.automationFunded === 'inactive' ? <MinusCircleTwoTone twoToneColor="#a1a1a1"/> : (states.automationFunded === 'pending' ? <ExclamationCircleTwoTone twoToneColor="#ff861c"/> : <CheckCircleTwoTone twoToneColor="#52c41a" />)} Assinatura 7: Financiamento de Chainlink Automation.</span>
                 <span>{states.upkeepCreation === 'inactive' ? <MinusCircleTwoTone twoToneColor="#a1a1a1"/> : (states.upkeepCreation === 'pending' ? <ExclamationCircleTwoTone twoToneColor="#ff861c"/> : <CheckCircleTwoTone twoToneColor="#52c41a" />)} Assinatura 8: Configuração de Chainlink Automation 1 de 2.</span>
                 <span>{states.upkeepRegistration === 'inactive' ? <MinusCircleTwoTone twoToneColor="#a1a1a1"/> : (states.upkeepRegistration === 'pending' ? <ExclamationCircleTwoTone twoToneColor="#ff861c"/> : <CheckCircleTwoTone twoToneColor="#52c41a" />)} Assinatura 9: Configuração de Chainlink Automation 2 de 2.</span>
+                <span>{states.incomingData.message}</span>
             </Space>
         </Space>
     )

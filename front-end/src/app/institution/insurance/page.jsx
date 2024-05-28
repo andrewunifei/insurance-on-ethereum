@@ -1,12 +1,38 @@
 "use client"
 
+import mountinsuranceContract from "@/utils/InsuranceContract.sol/mountInsuranceContract";
+import { useSignerContext } from "@/context";
 import { Space, Flex, Button, Card } from "antd"
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'
+import { useEffect, useState, useRef } from "react";
 import { ArrowLeftOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 
-export default function Insurance() {
+export default function Insurance({ searchParams }) {
     const router = useRouter();
+    const { signer } = useSignerContext();
+
+    const [ insuranceContract, setInsuranceContract ] = useState(null);
+
+    useEffect(() => {
+        const contractAddress = searchParams.address;
+        const _insuranceContract = mountinsuranceContract(signer, contractAddress);
+        setInsuranceContract(_insuranceContract);
+        async function load() {
+            const sampleMaxSize = await _insuranceContract.sampleMaxSize();
+            const samples = await _insuranceContract.getAllSamples();
+            const sampleTimestamps = await _insuranceContract.getAllSamplesTimestamps(); 
+            const myDate1 = new Date(sampleTimestamps[0] * 1000);
+            const myDate2 = new Date(sampleTimestamps[1] * 1000);
+
+            console.log(sampleMaxSize);
+            console.log(samples);
+            console.log(myDate1.toLocaleString());
+            console.log(myDate2.toLocaleString());
+            console.log(sampleTimestamps);
+        };
+        load();
+    }, [signer])
 
     return (
         <>

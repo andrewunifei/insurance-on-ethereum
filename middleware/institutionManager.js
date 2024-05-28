@@ -9,6 +9,7 @@ async function createInsuranceContract(institution, params) {
     const tx = await institution.createInsuranceContract(
         params.signer,
         params.farmer,
+        params.farmName,
         params.humidityLimit,
         params.sampleMaxSize,
         params.reparationValue,
