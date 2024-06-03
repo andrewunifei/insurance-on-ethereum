@@ -16,7 +16,7 @@ const customizeRequiredMark = (label, { required }) => (
 );
 
 export default function RegisterInstitution({open, setOpen, setEmAndamento}) {
-  const { insuranceAPI, openNotification } = useSignerContext();
+  const { openNotification } = useSignerContext();
   const [ newInsuranceAddress, setNewInsuranceAddress ] = useState(null);
   const [ confirmLoading, setConfirmLoading ] = useState(false);
   const [form] = Form.useForm();

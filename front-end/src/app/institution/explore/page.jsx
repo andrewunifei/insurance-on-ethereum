@@ -89,7 +89,7 @@ export default function Expore({ searchParams }) {
                 setCborSetted,
                 setAutomationFunded,
                 setUpkeepCreation,
-                setUpkeepRegistration
+                setUpkeepRegistration,
             }
         );
         setRegisterButtonLoading(false)
@@ -106,10 +106,6 @@ export default function Expore({ searchParams }) {
                 setOwner(_owner);
                 setBalance(_balance);
             }
-            // const response = await fetch('http://localhost:8080/');
-            // const parsed = await response.json();
-            // setIncomingData(parsed);
-            // console.log(parsed)
         };
         get();
     }, [signer])

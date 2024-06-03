@@ -17,16 +17,16 @@ const { signer } = await blockchain.interaction(
 
 const config = {
     computationPath:'rules/computation.js',
-    //args: ["44.34", "10.99"],
-    args: ["-45.45", "-44.34"],
+    args: ["44.34", "10.99"],
+    //args: ["-45.45", "-44.34"],
 };
 
 const donParams = {
     secrets: { apiKey: process.env.OPEN_WEATHER_API_KEY },
     donId: 'fun-ethereum-sepolia-1',
-    slotId: 0,
-    minutesUntilExpiration: 1440, // 1 dia
-    // minutesUntilExpiration: 60,
+    slotId: 1,
+    // minutesUntilExpiration: 1440, // 1 dia
+    minutesUntilExpiration: 60,
     gatewayUrls: [
         "https://01.functions-gateway.testnet.chain.link/",
         "https://02.functions-gateway.testnet.chain.link/"
@@ -55,7 +55,7 @@ const insuranceParams = {
     humidityLimit:      20, // Limite de umidade
     sampleMaxSize:      4, // Número de amostras a ser coletado
     reparationValue:    ethers.utils.parseEther(String(reparationValue)), // Valor da indenização
-    interval:           3600, // Intervalo entre a busca por amostra
+    interval:           120, // Intervalo entre a busca por amostra
     router:             blockchain.sepolia.chainlinkRouterAddress,
     registryAddress:    blockchain.sepolia.chainlinkRegistryAddress,
     linkTokenAddress:   blockchain.sepolia.chainlinkLinkTokenAddress,

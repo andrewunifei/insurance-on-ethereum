@@ -31,6 +31,8 @@ function fromHex(hexString) {
 async function setDonHostedSecrets(signer, parameters, secrets) {
     const { donId, slotId, minutesUntilExpiration, gatewayUrls } = parameters;
 
+    console.log(`INTERVAL NUMBER: ${minutesUntilExpiration}`);
+
     // Request
     console.log("Initializing setting of DON Hosted Secrets...\n");
 
@@ -104,8 +106,6 @@ async function buildRequestParameters(signer, config, donParams) {
         }
     );
 
-    console.log(requestCBOR);
-    console.log('****** OK ******');
     return requestCBOR;
 }
 

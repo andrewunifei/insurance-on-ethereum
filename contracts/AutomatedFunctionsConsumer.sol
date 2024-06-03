@@ -31,6 +31,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   uint64  public  subscriptionId;
   uint32  public  fulfillGasLimit;
   uint256 public  updateInterval;
+  uint8 public addressPaid;
 
   // Configuração Chainlink Automation
   IAutomationRegistryConsumer public immutable registry;
@@ -42,7 +43,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
   // uint32  public  gasLimit;
   bytes32 public  donID;
   uint256 public  lastUpkeepTimeStamp;
-  uint256 public  upkeepCounter;
   uint256 public  responseCounter;
   bytes32 public  s_lastRequestId;
   uint256 public  s_requestCounter;
@@ -90,7 +90,6 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
 
   event avgCalculated(uint256 num);
   event convertedResponse(string converted);
-  event addressPaid(address paid);
   event upkeepCanceled(uint256 upkeepId);
 
   /**
@@ -142,6 +141,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     donID = _donID;
     metricJS = _metricJS;
     controlFlag = 0;
+    addressPaid= 0;
   }
 
   // ** SETTERS **
@@ -240,10 +240,9 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     // (bool upkeepNeeded, ) = checkUpkeep("");
     // require(upkeepNeeded, "Time interval not met");
     lastUpkeepTimeStamp = block.timestamp;
-    upkeepCounter = upkeepCounter + 1;
 
     // Se a quantidade de amostras não é o suficiente, coleta nova amostra:
-    if(sampleMaxSize > sampleStorage[0].length){
+    if((sampleMaxSize - 1) > sampleStorage[0].length){
       try i_router.sendRequest(
           subscriptionId, 
           requestCBOR,
@@ -304,13 +303,13 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
       // Transfere para a conta do agricultor
       (bool sent, /* bytes memory data */) = payable(farmer).call{value: address(this).balance}("");
       require(sent, "Erro ao pagar a indenizacao");
-      emit addressPaid(farmer);
+      addressPaid = 1; // Farmer
     }
     else{
       // Transfere para a conta da instituição
       (bool sent, /* bytes memory data */) = payable(deployer).call{value: address(this).balance}("");
       require(sent, "Erro ao retornar os fundos para a instituicao");
-      emit addressPaid(deployer);
+      addressPaid = 2; // Instituição
     }
   }
 

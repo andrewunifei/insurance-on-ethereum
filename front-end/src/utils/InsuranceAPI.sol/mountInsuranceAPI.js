@@ -2,7 +2,7 @@ import { ethers }  from "ethers";
 import insuranceAPIArtifacts from '@/utils/InsuranceAPI.sol/InsuranceAPI.json';
 
 export default function mountInsuranceAPI(signer) {
-    const APIAddress = '0xD75325093B86659A9F66C061bDA7779CCb2a4997';
+    const APIAddress = '0x76213988cc810be92C4F1dc9be3A52c2686a6181';
     const APIFactory = new ethers.ContractFactory(
         insuranceAPIArtifacts.abi,
         insuranceAPIArtifacts.bytecode,

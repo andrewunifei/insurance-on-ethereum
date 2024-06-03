@@ -3,6 +3,7 @@ import blockchain from "../blockchain.js";
 
 async function createInsurance(institution, params) {
     try {
+        console.log(params);
         // ASSINATURA 1: Criação de um novo Contrato na blockchain
         const tx = await institution.createInsuranceContract(
             String(params.deployer),

@@ -34,7 +34,7 @@ describe('(CHAINLINK) Upkeep', async () => {
             name:           'automation-of-project-test-1',
             encryptedEmail: ethers.utils.hexlify([]),
             upkeepContract: insuranceContractAddress, // insuranceContractAddress
-            gasLimit:       1000000,
+            gasLimit:       300000,
             adminAddress:   signer.address, // Deployer
             triggerType:    0,
             checkData:      ethers.utils.hexlify([]),

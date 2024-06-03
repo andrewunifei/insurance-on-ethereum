@@ -105,8 +105,6 @@ async function handleChainlinkFunctions(
             const requestCBOR = await buildRequestParameters(signer, config, donParams);
             const txSetRequestCBOR = await insuranceContract.setCBOR(requestCBOR);
             await txSetRequestCBOR.wait();
-            const cbor = await insuranceContract.requestCBOR();
-            console.log(`cbor: ${cbor}`);
 
             // SEND WEBSOCKET NOTIFICATION TO CHANGE
             // statesSetters.setCborSetted('signed');
@@ -116,7 +114,6 @@ async function handleChainlinkFunctions(
         }
         // *****************************
 
-        console.log('** 2 OK **');
         return true;
     }
     catch(e) {
@@ -130,7 +127,7 @@ function getUpkeepParams(admin, insuranceContractAddress, juels) {
         name:           'automation-functions-consumer',
         encryptedEmail: ethers.utils.hexlify([]),
         upkeepContract: insuranceContractAddress,
-        gasLimit:       1000000,
+        gasLimit:       300000,
         adminAddress:   admin,
         triggerType:    0,
         checkData:      ethers.utils.hexlify([]),
@@ -149,9 +146,7 @@ async function handleChainlinkAutomation(
     insuranceContractAddress
 ) {
     try {
-        console.log('entrei')
         const admin = await signer.getAddress();
-        console.log(admin);
         const juelsAmount = ethers.utils.parseEther(String(automationFund)); // LINK --> Juels (Ether --> wei)
         const upkeepParams = getUpkeepParams(admin, insuranceContractAddress, juelsAmount)
         const LINK = mountLINK(signer);
@@ -177,7 +172,6 @@ async function handleChainlinkAutomation(
         // SEND WEBSOCKET NOTIFICATION TO CHANGE
         // statesSetters.setUpkeepRegistration('signed');
 
-        console.log('ok')
         return true;
     }
     catch(e) {
