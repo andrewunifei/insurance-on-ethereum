@@ -15,10 +15,6 @@ export default function CustomMenu() {
     const pathname = usePathname()
     const items = [
         {
-            key: '/',
-            label: <Link href='/'>Início</Link>,
-        },
-        {
             key: '/institution',
             label: <Link href='/institution'>Área da Instituição</Link>
         },

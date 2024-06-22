@@ -16,7 +16,6 @@ import { fundInstitution, withdrawFromInstitution, whitelist } from '@/app/funct
 import InsuranceForm from '@/app/institution/explore/components/InsuranceForm'
 import handleInsuranceForm from '@/utils/Institution.sol/handleInsuranceForm';
 import CurrentInsuranceContract from './components/CurrentInsuranceContract';
-import SignaturesList from './components/SignaturesList';
 import { 
     Button, 
     Flex, 
@@ -46,20 +45,8 @@ export default function Expore({ searchParams }) {
     const [ owner, setOwner ] = useState(null);
     const [ balance, setBalance ] = useState(null);
     const [ spinStatus, setSpinStatus ] = useState(false);
+    const [ contractSpin, setContractSpin] = useState(false);
     const [ ready, setReady ] = useState(false);
-
-    // Insurancecontract Signatures States
-    const [ contractCreated, setContractCreated ] = useState('inactive');
-    const [ subscriptionCreated, setSubscriptionCreated ] = useState('inactive');
-    const [ subscriptionFunded, setSubscriptionFunded ] = useState('inactive');
-    const [ consumerAdded, setConsumerAdded ] = useState('inactive');
-    const [ subscriptionIdSetted, setSubscriptionIdSetted ] = useState('inactive');
-    const [ cborSetted, setCborSetted ] = useState('inactive');
-    const [ automationFunded, setAutomationFunded ] = useState('inactive');
-    const [ upkeepCreation, setUpkeepCreation ] = useState('inactive');
-    const [ upkeepRegistration, setUpkeepRegistration ] = useState('inactive');
-    const [ incomingData, setIncomingData ] = useState('');
-    // ************************************
 
     const [ fundButtonLoading, setFundButtonLoading ] = useState(false);
     const [ withdrawButtonLoading, setWithdrawButtonLoading ] = useState(false);
@@ -78,21 +65,12 @@ export default function Expore({ searchParams }) {
         form.resetFields();
         await handleInsuranceForm(
             signer, 
+            setContractSpin,
+            openNotification,
             searchParams.address,
-            params,
-            {
-                setContractCreated,
-                setSubscriptionCreated,
-                setSubscriptionFunded,
-                setConsumerAdded,
-                setSubscriptionIdSetted,
-                setCborSetted,
-                setAutomationFunded,
-                setUpkeepCreation,
-                setUpkeepRegistration,
-            }
+            params
         );
-        setRegisterButtonLoading(false)
+        setRegisterButtonLoading(true);
     };
 
     useEffect(() => {
@@ -368,7 +346,7 @@ export default function Expore({ searchParams }) {
                     background: '#f8f8f8'
                 }}>
                     {/* light yellow #fcfaf5' */}
-                    <Flex gap="large" align="center" style={{
+                    <Flex gap="large" align="center" justify="space-between" style={{
                         borderBottom: 'solid',
                         borderBottomWidth: 1,
                         borderBottomStyle: 'dotted',
@@ -378,34 +356,11 @@ export default function Expore({ searchParams }) {
                         <h2 style={{color: '#000'}}>
                             Novo Contrato de Seguro
                         </h2>
+                        <Spin spinning={contractSpin}></Spin>
                     </Flex>
-                    {/* <Flex align="flex-start" justify="flex-start" style={{padding: 20}} id="insurance"> 
+                    <Flex align="flex-start" justify="center" style={{padding: 20}} id="insurance"> 
                             <InsuranceForm form={form} onFinish={onFinish} />
-                            <div style={{border: 'solid'}}>
-                                <p>
-                                    Testing
-                                </p>
-                            </div>
-                    </Flex> */}
-                    <Row style={{padding: 20}}>
-                        <Col span={12}>
-                            <InsuranceForm form={form} onFinish={onFinish} registerButtonLoading={registerButtonLoading} />
-                        </Col>
-                        <Col span={12}>
-                            <SignaturesList states={{
-                                contractCreated,
-                                subscriptionCreated,
-                                subscriptionFunded,
-                                consumerAdded,
-                                subscriptionIdSetted,
-                                cborSetted,
-                                automationFunded,
-                                upkeepCreation,
-                                upkeepRegistration,
-                                incomingData
-                            }}/>
-                        </Col>
-                    </Row>
+                    </Flex>
                 </div>
             </Space>
         </>

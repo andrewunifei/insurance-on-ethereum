@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 app.post('/insurance', async (req, res) => {
     const status = await handleInsurance(req.body);
     let result;
-    status ? result = {message: 'ok'} : result = {message: 'failed'};
+    status.status ? result = {message: 'ok', insuranceContractAddress: status.contractAddress } : result = {message: 'failed'};
     res.json(result);
     console.log('Insurance Contract registration completed. Status sent.');
 })

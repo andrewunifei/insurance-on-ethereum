@@ -6,6 +6,7 @@ import "./Institution.sol";
 contract InsuranceAPI {
     mapping (address => Institution[]) public institutions;
     address public immutable im_owner;
+    uint256 public institution_count;
 
     event InstitutionCreated(address institutionAddress);
 
@@ -26,6 +27,8 @@ contract InsuranceAPI {
     function createInstitution(string[2][] memory _infoArray) external {
         Institution i = new Institution(msg.sender, _infoArray);
         institutions[msg.sender].push(i);
+        institutions[address(0)].push(i);
+        institution_count++;
         // usedAddresses.push(msg.sender);
 
         emit InstitutionCreated(address(i));

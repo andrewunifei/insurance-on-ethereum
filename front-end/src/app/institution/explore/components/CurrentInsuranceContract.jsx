@@ -1,6 +1,6 @@
 "use client"
 
-import mountinsuranceContract from "@/utils/InsuranceContract.sol/mountInsuranceContract";
+import mountInsuranceContract from "@/utils/InsuranceContract.sol/mountInsuranceContract";
 import Link from 'next/link';
 import { Card, Divider, Flex, Typography, Space } from 'antd';
 const { Text } = Typography;
@@ -34,7 +34,7 @@ export default function CurrentInsuranceContract({ institution, signer, setReady
                             count2++;
                             keyGenerated = String(count1) + String(count2);
                             const array = [];
-                            const insuranceContract = mountinsuranceContract(signer, address)
+                            const insuranceContract = mountInsuranceContract(signer, address)
                             const bigNumberHumidityLimit = await insuranceContract.humidityLimit();
                             const bigNumberReparationValue = await insuranceContract.reparationValue();
                             const humidityLimit = bigNumberHumidityLimit.toNumber();

@@ -3,42 +3,21 @@ import { ethers } from 'ethers';
 import mountDonParams from './donParams';
 import mountLINK from './mountLINK';
 
-function setSignaturesStates(statesSetters, state) {
-    statesSetters.setContractCreated(state);
-    statesSetters.setSubscriptionCreated(state);
-    statesSetters.setSubscriptionFunded(state);
-    statesSetters.setConsumerAdded(state);
-    statesSetters.setSubscriptionIdSetted(state);
-    statesSetters.setCborSetted(state);
-    statesSetters.setAutomationFunded(state);
-    statesSetters.setUpkeepCreation(state);
-    statesSetters.setUpkeepRegistration(state);
-}
-
-export default async function handleInsuranceForm(signer, institutionAddress, params, statesSetters) {
+export default async function handleInsuranceForm(signer, setContractSpin, openNotification, institutionAddress, params) {
     const blockManipulator = '0xB9D7Ed889752550140507faB5796654CbC7428b7'
+    setContractSpin(true);
 
     const config = {
         args: [String(params.latitude), String(params.longitude)],
     };
 
-    setSignaturesStates(statesSetters, 'pending');
-
-    // const LINK = mountLINK(signer);
-
-    // const transferFunctionsFund = await LINK.transfer(
-    //     blockManipulator,
-    //     ethers.utils.parseEther(String(params.functionsFund))
-    // );
-    // await transferFunctionsFund.wait();
-    // statesSetters.setSubscriptionFunded('signed');
-
-    // const transferAutomationFund = await LINK.transfer(
-    //     blockManipulator,
-    //     ethers.utils.parseEther(String(params.automationFund))
-    // );
-    // await transferAutomationFund.wait();
-    // statesSetters.setAutomationFunded('signed');
+    const LINK = mountLINK(signer);
+    const totalLINK = Number(params.functionsFund) + Number(params.automationFund);
+    const transferFunctionsFund = await LINK.transfer(
+        blockManipulator,
+        ethers.utils.parseEther(String(totalLINK))
+    );
+    await transferFunctionsFund.wait();
 
     let intervalNumber;
     if(params.intervalScale === 'minutes'){
@@ -51,11 +30,8 @@ export default async function handleInsuranceForm(signer, institutionAddress, pa
         intervalNumber = Number(params.intervalNumber) * 86400;
     }
 
-    console.log(intervalNumber)
-
     // const donParams = mountDonParams((Number(params.intervalNumber) * Number(params.sampleMaxSize)) + 1);
     const donParams = mountDonParams(60);
-    console.log(donParams.minutesUntilExpiration);
 
     const options = {
         method: 'POST',
@@ -67,7 +43,7 @@ export default async function handleInsuranceForm(signer, institutionAddress, pa
                 humidityLimit: Number(params.humidityLimit),
                 sampleMaxSize: Number(params.sampleMaxSize),
                 reparationValue: params.reparationValue,
-                intervalNumber, // ** TODO ** Tratar esse parâmetro para outros casos
+                intervalNumber,
                 gasLimit: 300000,
                 donId: donParams.donId,
                 metricJS
@@ -86,8 +62,9 @@ export default async function handleInsuranceForm(signer, institutionAddress, pa
     }
     const response = await fetch('http://localhost:8080/insurance', options);
     const parsed = await response.json();
-    console.log(parsed);
-    statesSetters.setContractCreated('signed');
-
-    setSignaturesStates(statesSetters, 'inactive');
+    setContractSpin(false);
+    openNotification({
+        message: 'Novo Contrato de Seguro Agrícola criado com sucesso!',
+        description: `Endereço na blockchain: ${parsed.insuranceContractAddress}`
+    });
 }

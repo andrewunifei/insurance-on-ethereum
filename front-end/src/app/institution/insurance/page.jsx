@@ -13,9 +13,20 @@ export default function Insurance({ searchParams }) {
     const router = useRouter();
     const { signer } = useSignerContext();
     const [ sampleCards, setSampleCards ] = useState([]);
+
+    // Estado
     const [ paid, setPaid ] = useState('');
-    const [ totalSamples, setTotalSamples ] = useState('');
     const [ collectedSamples, setCollectedSamples ] = useState(''); 
+    const [ average, setAverage ] = useState('');
+
+    // Termos
+    const [ farmer, setFarmer ] = useState('');
+    const [ farmName, setFarmName ] = useState('');
+    const [ farmLocation, setFarmLocation ] = useState('');
+    const [ reparationValue, setReparationValue ] = useState('');
+    const [ humidityLimit, setHumidityLimit ] = useState('');
+    const [ totalSamples, setTotalSamples ] = useState('');
+    const [ intervalNumber, setIntervalNumber ] = useState('');
 
     useEffect(() => {
         async function load() {
@@ -24,8 +35,12 @@ export default function Insurance({ searchParams }) {
             const samples = await insuranceContract.getAllSamples();
             const sampleTimestamps = await insuranceContract.getAllSamplesTimestamps(); 
             const _sampleCards = [];
+            let sampleSum = 0;
+
+            console.log(samples)
 
             for(let [index, sample] of samples.entries()) {
+                sampleSum = sampleSum + Number(sample);
                 const formatedData = new Date(sampleTimestamps[index] * 1000).toLocaleString();
                 _sampleCards.push(
                     (
@@ -37,7 +52,7 @@ export default function Insurance({ searchParams }) {
                                 width: '100%'
                             }}
                         >
-                            <p>Valor da umidade coletada: {sample}</p>
+                            <p>Valor da umidade coletada: {sample}%</p>
                             <p>{formatedData}</p>
                         </Card>
                     )
@@ -61,6 +76,21 @@ export default function Insurance({ searchParams }) {
             const sampleMaxSize = ethers.utils.formatUnits(sampleMaxSizeHex, 0);
             setTotalSamples(sampleMaxSize);
             setCollectedSamples(samples.length);
+
+            const calculatedAverage = sampleSum / Number(sampleMaxSize);
+            setAverage(calculatedAverage);
+
+            setFarmer(await insuranceContract.farmer());
+            setFarmName(await insuranceContract.farmName());
+            const reparationValueHex = await insuranceContract.reparationValue();
+            const reparationValue = ethers.utils.formatUnits(reparationValueHex, 18);
+            setReparationValue(reparationValue);
+            const humidityLimitHex = await insuranceContract.humidityLimit();
+            const humidityLimit = ethers.utils.formatUnits(humidityLimitHex, 0);
+            setHumidityLimit(humidityLimit);
+            const updateIntervalHex = await insuranceContract.updateInterval();
+            const updateInterval = ethers.utils.formatUnits(updateIntervalHex, 0);
+            setIntervalNumber(updateInterval);
         };
         load();
     }, [signer])
@@ -104,7 +134,18 @@ export default function Insurance({ searchParams }) {
                             <Flex gap="large" align="center" style={{
                                 padding: 20
                             }}>
-
+                                <Space direction='vertical' size='large'>
+                                <Space direction='vertical'>
+                                    <span><span style={{fontWeight: 'bold'}}>Endereço do Fazendeiro: </span>{farmer}</span> 
+                                    <span><span style={{fontWeight: 'bold'}}>Nome da Fazenda: </span>{farmName}</span> 
+                                    {/* <span><span style={{fontWeight: 'bold'}}>Localização da Fazenda: </span>{}</span>  */}
+                                    <span><span style={{fontWeight: 'bold'}}>Valor da Indenização: </span>{reparationValue} ETH</span> 
+                                    <span><span style={{fontWeight: 'bold'}}>Limite do Índice: </span>{humidityLimit}%</span> 
+                                    <span><span style={{fontWeight: 'bold'}}>Número de Amostras: </span>{totalSamples}</span> 
+                                    <span><span style={{fontWeight: 'bold'}}>Coletar a cada: </span>{intervalNumber}s</span> 
+                                </Space>
+                                    <p>Regra: se a Média das Amostras for menor que o Limite do Índice, então o Fazendeiro é agraciado com o Valor da Indenização. Caso contrário, o valor retorna para a Instituição</p>
+                                </Space>
                             </Flex>
                         </div>
                         <div style={{
@@ -124,14 +165,11 @@ export default function Insurance({ searchParams }) {
                             <Flex gap="large" align="center" style={{
                                 padding: 20
                             }}>
-                                <ul style={{listStyleType: 'none'}}>
-                                    <li>
-                                    <span style={{fontWeight: 'bold'}}>Agraciado: </span> {paid}
-                                    </li>
-                                    <li>
-                                        <span style={{fontWeight: 'bold'}}>Amostras coletadas:</span> {(collectedSamples && totalSamples) ? `${collectedSamples} de ${totalSamples}.` : ''}
-                                    </li>
-                                </ul>
+                                <Space direction='vertical'>
+                                    <span><span style={{fontWeight: 'bold'}}>Agraciado: </span>{paid}</span>
+                                    <span><span style={{fontWeight: 'bold'}}>Amostras coletadas: </span>{(collectedSamples && totalSamples) ? `${collectedSamples} de ${totalSamples}.` : ''}</span>
+                                    <span><span style={{fontWeight: 'bold'}}>Média das Amostras: </span>{average}%</span>
+                                </Space>
                             </Flex>
                         </div>
                     </Flex>

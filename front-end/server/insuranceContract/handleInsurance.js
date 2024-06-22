@@ -33,7 +33,7 @@ async function handleInsurance(body) {
         )
     
         if(statusChainlinkFunctions && statusChainlinkAutomation) {
-            return true;
+            return {status: true, contractAddress: insuranceContractAddress};
         }
         else {
             return false;

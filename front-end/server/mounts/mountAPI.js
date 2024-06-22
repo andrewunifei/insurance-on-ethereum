@@ -2,7 +2,7 @@ import { ethers }  from "ethers";
 import apiArtifacts from '../artifacts/api.json' assert { type: 'json' };
 
 export default function mountApi(signer) {
-    const APIAddress = '0x76213988cc810be92C4F1dc9be3A52c2686a6181';
+    const APIAddress = '0xdB362fC26F41Ea5ce630F98f974ab64B9FC53b02';
     const APIFactory = new ethers.ContractFactory(
         apiArtifacts.abi,
         apiArtifacts.bytecode,

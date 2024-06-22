@@ -242,7 +242,7 @@ contract AutomatedFunctionsConsumer is FunctionsClient, ConfirmedOwner, Automati
     lastUpkeepTimeStamp = block.timestamp;
 
     // Se a quantidade de amostras não é o suficiente, coleta nova amostra:
-    if((sampleMaxSize - 1) > sampleStorage[0].length){
+    if(sampleMaxSize > sampleStorage[0].length){
       try i_router.sendRequest(
           subscriptionId, 
           requestCBOR,

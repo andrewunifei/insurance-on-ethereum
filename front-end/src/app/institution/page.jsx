@@ -46,7 +46,6 @@ export default function Institution() {
                 if(_accounts.length ==! 0) {
                     if(signer && insuranceAPI) {
                         const _institutions = await insuranceAPI.getAllInstitution();
-                        console.log(_institutions);
                         let _cards = [];
                         for (let institutionAddress of _institutions) {
                             const institution = mountInstitution(signer, institutionAddress);
